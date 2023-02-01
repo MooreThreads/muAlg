@@ -2133,7 +2133,7 @@ public:
 };
 
 /**
- * \example example_block_scan.cu
+ * \example example_block_scan.mu
  */
 
 }               // CUB namespace

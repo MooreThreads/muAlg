@@ -37,8 +37,8 @@
 #include <limits>
 #include <cfloat>
 
-#if (__CUDACC_VER_MAJOR__ >= 9 || CUDA_VERSION >= 9000) && !__NVCOMPILER_CUDA__
-    #include <cuda_fp16.h>
+#if (__CUDACC_VER_MAJOR__ >= 9 || MUSA_VERSION >= 9000) && !__NVCOMPILER_CUDA__
+    #include <musa_fp16.h>
 #endif
 
 #include "util_macro.cuh"
@@ -1063,7 +1063,7 @@ struct FpLimits<double>
 };
 
 
-#if (__CUDACC_VER_MAJOR__ >= 9 || CUDA_VERSION >= 9000) && !__NVCOMPILER_CUDA__
+#if (__CUDACC_VER_MAJOR__ >= 9 || MUSA_VERSION >= 9000) && !__NVCOMPILER_CUDA__
 template <>
 struct FpLimits<__half>
 {
@@ -1143,7 +1143,7 @@ template <> struct NumericTraits<unsigned long long> :  BaseTraits<UNSIGNED_INTE
 
 template <> struct NumericTraits<float> :               BaseTraits<FLOATING_POINT, true, false, unsigned int, float> {};
 template <> struct NumericTraits<double> :              BaseTraits<FLOATING_POINT, true, false, unsigned long long, double> {};
-#if (__CUDACC_VER_MAJOR__ >= 9 || CUDA_VERSION >= 9000) && !__NVCOMPILER_CUDA__
+#if (__CUDACC_VER_MAJOR__ >= 9 || MUSA_VERSION >= 9000) && !__NVCOMPILER_CUDA__
     template <> struct NumericTraits<__half> :          BaseTraits<FLOATING_POINT, true, false, unsigned short, __half> {};
 #endif
 

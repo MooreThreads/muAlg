@@ -599,7 +599,7 @@ public:
 };
 
 /**
- * \example example_block_reduce.cu
+ * \example example_block_reduce.mu
  */
 
 }               // CUB namespace

@@ -123,7 +123,8 @@ __device__ __forceinline__ unsigned int BFE(
     Int2Type<BYTE_LEN>      /*byte_len*/)
 {
     unsigned int bits;
-    asm ("bfe.u32 %0, %1, %2, %3;" : "=r"(bits) : "r"((unsigned int) source), "r"(bit_start), "r"(num_bits));
+    // asm ("bfe.u32 %0, %1, %2, %3;" : "=r"(bits) : "r"((unsigned int) source), "r"(bit_start), "r"(num_bits));
+    bits = __bfe_u32((unsigned int)source, bit_start, num_bits);
     return bits;
 }
 
@@ -308,13 +309,15 @@ __device__  __forceinline__ int WARP_BALLOT(int predicate, unsigned int member_m
 __device__ __forceinline__ 
 unsigned int SHFL_UP_SYNC(unsigned int word, int src_offset, int flags, unsigned int member_mask)
 {
-#ifdef CUB_USE_COOPERATIVE_GROUPS
-    asm volatile("shfl.sync.up.b32 %0, %1, %2, %3, %4;"
-        : "=r"(word) : "r"(word), "r"(src_offset), "r"(flags), "r"(member_mask));
-#else
-    asm volatile("shfl.up.b32 %0, %1, %2, %3;"
-        : "=r"(word) : "r"(word), "r"(src_offset), "r"(flags));
-#endif
+// #ifdef CUB_USE_COOPERATIVE_GROUPS
+//     asm volatile("shfl.sync.up.b32 %0, %1, %2, %3, %4;"
+//         : "=r"(word) : "r"(word), "r"(src_offset), "r"(flags), "r"(member_mask));
+// #else
+//     asm volatile("shfl.up.b32 %0, %1, %2, %3;"
+//         : "=r"(word) : "r"(word), "r"(src_offset), "r"(flags));
+// #endif
+    int width = 32 - (flags >> 8);
+    word = __shfl_up_sync(member_mask, word, src_offset, width);
     return word;
 }
 
@@ -324,13 +327,15 @@ unsigned int SHFL_UP_SYNC(unsigned int word, int src_offset, int flags, unsigned
 __device__ __forceinline__ 
 unsigned int SHFL_DOWN_SYNC(unsigned int word, int src_offset, int flags, unsigned int member_mask)
 {
-#ifdef CUB_USE_COOPERATIVE_GROUPS
-    asm volatile("shfl.sync.down.b32 %0, %1, %2, %3, %4;"
-        : "=r"(word) : "r"(word), "r"(src_offset), "r"(flags), "r"(member_mask));
-#else
-    asm volatile("shfl.down.b32 %0, %1, %2, %3;"
-        : "=r"(word) : "r"(word), "r"(src_offset), "r"(flags));
-#endif
+// #ifdef CUB_USE_COOPERATIVE_GROUPS
+//     asm volatile("shfl.sync.down.b32 %0, %1, %2, %3, %4;"
+//         : "=r"(word) : "r"(word), "r"(src_offset), "r"(flags), "r"(member_mask));
+// #else
+//     asm volatile("shfl.down.b32 %0, %1, %2, %3;"
+//         : "=r"(word) : "r"(word), "r"(src_offset), "r"(flags));
+// #endif
+    int width = 32 - (flags >> 8);
+    word = __shfl_down_sync(member_mask, word, src_offset, width);
     return word;
 }
 
@@ -340,13 +345,15 @@ unsigned int SHFL_DOWN_SYNC(unsigned int word, int src_offset, int flags, unsign
 __device__ __forceinline__ 
 unsigned int SHFL_IDX_SYNC(unsigned int word, int src_lane, int flags, unsigned int member_mask)
 {
-#ifdef CUB_USE_COOPERATIVE_GROUPS
-    asm volatile("shfl.sync.idx.b32 %0, %1, %2, %3, %4;"
-        : "=r"(word) : "r"(word), "r"(src_lane), "r"(flags), "r"(member_mask));
-#else
-    asm volatile("shfl.idx.b32 %0, %1, %2, %3;"
-        : "=r"(word) : "r"(word), "r"(src_lane), "r"(flags));
-#endif
+// #ifdef CUB_USE_COOPERATIVE_GROUPS
+//     asm volatile("shfl.sync.idx.b32 %0, %1, %2, %3, %4;"
+//         : "=r"(word) : "r"(word), "r"(src_lane), "r"(flags), "r"(member_mask));
+// #else
+//     asm volatile("shfl.idx.b32 %0, %1, %2, %3;"
+//         : "=r"(word) : "r"(word), "r"(src_lane), "r"(flags));
+// #endif
+    int width = 32 - (flags >> 8);
+    word = __shfl_sync(member_mask, word, src_lane, width);
     return word;
 }
 
@@ -390,7 +397,9 @@ __device__ __forceinline__ float FFMA_RZ(float a, float b, float c)
  * \brief Terminates the calling thread
  */
 __device__ __forceinline__ void ThreadExit() {
-    asm volatile("exit;");
+    // asm volatile("exit;");
+    __mtgpu_exit();
+    return;
 }    
 
 
@@ -419,7 +428,8 @@ __device__ __forceinline__ int RowMajorTid(int block_dim_x, int block_dim_y, int
 __device__ __forceinline__ unsigned int LaneId()
 {
     unsigned int ret;
-    asm ("mov.u32 %0, %%laneid;" : "=r"(ret) );
+    // asm ("mov.u32 %0, %%laneid;" : "=r"(ret) );
+    ret = __get_laneid() & 0x1f;
     return ret;
 }
 
@@ -440,7 +450,8 @@ __device__ __forceinline__ unsigned int WarpId()
 __device__ __forceinline__ unsigned int LaneMaskLt()
 {
     unsigned int ret;
-    asm ("mov.u32 %0, %%lanemask_lt;" : "=r"(ret) );
+    // asm ("mov.u32 %0, %%lanemask_lt;" : "=r"(ret) );
+    ret = __get_lanemask_lt();
     return ret;
 }
 
@@ -450,7 +461,8 @@ __device__ __forceinline__ unsigned int LaneMaskLt()
 __device__ __forceinline__ unsigned int LaneMaskLe()
 {
     unsigned int ret;
-    asm ("mov.u32 %0, %%lanemask_le;" : "=r"(ret) );
+    // asm ("mov.u32 %0, %%lanemask_le;" : "=r"(ret) );
+    ret = __get_lanemask_le();
     return ret;
 }
 
@@ -460,7 +472,8 @@ __device__ __forceinline__ unsigned int LaneMaskLe()
 __device__ __forceinline__ unsigned int LaneMaskGt()
 {
     unsigned int ret;
-    asm ("mov.u32 %0, %%lanemask_gt;" : "=r"(ret) );
+    // asm ("mov.u32 %0, %%lanemask_gt;" : "=r"(ret) );
+    ret = __get_lanemask_gt();
     return ret;
 }
 
@@ -470,7 +483,8 @@ __device__ __forceinline__ unsigned int LaneMaskGt()
 __device__ __forceinline__ unsigned int LaneMaskGe()
 {
     unsigned int ret;
-    asm ("mov.u32 %0, %%lanemask_ge;" : "=r"(ret) );
+    // asm ("mov.u32 %0, %%lanemask_ge;" : "=r"(ret) );
+    ret = __get_lanemask_ge();
     return ret;
 }
 
@@ -709,30 +723,28 @@ inline __device__ unsigned int MatchAny(unsigned int label)
     {
         unsigned int mask;
         unsigned int current_bit = 1 << BIT;
-        asm ("{\n"
-            "    .reg .pred p;\n"
-            "    and.b32 %0, %1, %2;"
-            "    setp.eq.u32 p, %0, %2;\n"
-#ifdef CUB_USE_COOPERATIVE_GROUPS
-            "    vote.ballot.sync.b32 %0, p, 0xffffffff;\n"
-#else
-            "    vote.ballot.b32 %0, p;\n"
-#endif
-            "    @!p not.b32 %0, %0;\n"
-            "}\n" : "=r"(mask) : "r"(label), "r"(current_bit));
-
+//         asm ("{\n"
+//             "    .reg .pred p;\n"
+//             "    and.b32 %0, %1, %2;"
+//             "    setp.eq.u32 p, %0, %2;\n"
+// #ifdef CUB_USE_COOPERATIVE_GROUPS
+//             "    vote.ballot.sync.b32 %0, p, 0xffffffff;\n"
+// #else
+//             "    vote.ballot.b32 %0, p;\n"
+// #endif
+//             "    @!p not.b32 %0, %0;\n"
+//             "}\n" : "=r"(mask) : "r"(label), "r"(current_bit));
+        mask = label & current_bit;
+        bool p = mask == current_bit;
+        mask = __ballot_sync(0xffffffff, p);
+        if (!p) {
+          mask = ~mask;
+        }
         // Remove peers who differ
         retval = (BIT == 0) ? mask : retval & mask;
     }
 
     return retval;
-
-//  // VOLTA match
-//    unsigned int retval;
-//    asm ("{\n"
-//         "    match.any.sync.b32 %0, %1, 0xffffffff;\n"
-//         "}\n" : "=r"(retval) : "r"(label));
-//    return retval;
 
 }
 
