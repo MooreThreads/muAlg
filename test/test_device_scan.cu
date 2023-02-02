@@ -95,12 +95,12 @@ struct WrapperFunctor
  */
 template <typename IsPrimitiveT, typename InputIteratorT, typename OutputIteratorT, typename ScanOpT, typename InitialValueT, typename OffsetT>
 CUB_RUNTIME_FUNCTION __forceinline__
-cudaError_t Dispatch(
+musaError_t Dispatch(
     Int2Type<CUB>       /*dispatch_to*/,
     IsPrimitiveT        /*is_primitive*/,
     int                 timing_timing_iterations,
     size_t              */*d_temp_storage_bytes*/,
-    cudaError_t         */*d_cdp_error*/,
+    musaError_t         */*d_cdp_error*/,
 
     void*               d_temp_storage,
     size_t&             temp_storage_bytes,
@@ -109,10 +109,10 @@ cudaError_t Dispatch(
     ScanOpT             scan_op,
     InitialValueT       initial_value,
     OffsetT             num_items,
-    cudaStream_t        stream,
+    musaStream_t        stream,
     bool                debug_synchronous)
 {
-    cudaError_t error = cudaSuccess;
+    musaError_t error = musaSuccess;
     for (int i = 0; i < timing_timing_iterations; ++i)
     {
         error = DeviceScan::ExclusiveScan(d_temp_storage, temp_storage_bytes, d_in, d_out, scan_op, initial_value, num_items, stream, debug_synchronous);
@@ -126,12 +126,12 @@ cudaError_t Dispatch(
  */
 template <typename InputIteratorT, typename OutputIteratorT, typename InitialValueT, typename OffsetT>
 CUB_RUNTIME_FUNCTION __forceinline__
-cudaError_t Dispatch(
+musaError_t Dispatch(
     Int2Type<CUB>       /*dispatch_to*/,
     Int2Type<true>      /*is_primitive*/,
     int                 timing_timing_iterations,
     size_t              */*d_temp_storage_bytes*/,
-    cudaError_t         */*d_cdp_error*/,
+    musaError_t         */*d_cdp_error*/,
 
     void*               d_temp_storage,
     size_t&             temp_storage_bytes,
@@ -140,10 +140,10 @@ cudaError_t Dispatch(
     Sum                 /*scan_op*/,
     InitialValueT       /*initial_value*/,
     OffsetT             num_items,
-    cudaStream_t        stream,
+    musaStream_t        stream,
     bool                debug_synchronous)
 {
-    cudaError_t error = cudaSuccess;
+    musaError_t error = musaSuccess;
     for (int i = 0; i < timing_timing_iterations; ++i)
     {
         error = DeviceScan::ExclusiveSum(d_temp_storage, temp_storage_bytes, d_in, d_out, num_items, stream, debug_synchronous);
@@ -157,12 +157,12 @@ cudaError_t Dispatch(
  */
 template <typename IsPrimitiveT, typename InputIteratorT, typename OutputIteratorT, typename ScanOpT, typename OffsetT>
 CUB_RUNTIME_FUNCTION __forceinline__
-cudaError_t Dispatch(
+musaError_t Dispatch(
     Int2Type<CUB>       /*dispatch_to*/,
     IsPrimitiveT        /*is_primitive*/,
     int                 timing_timing_iterations,
     size_t              */*d_temp_storage_bytes*/,
-    cudaError_t         */*d_cdp_error*/,
+    musaError_t         */*d_cdp_error*/,
 
     void*               d_temp_storage,
     size_t&             temp_storage_bytes,
@@ -171,10 +171,10 @@ cudaError_t Dispatch(
     ScanOpT             scan_op,
     NullType            /*initial_value*/,
     OffsetT             num_items,
-    cudaStream_t        stream,
+    musaStream_t        stream,
     bool                debug_synchronous)
 {
-    cudaError_t error = cudaSuccess;
+    musaError_t error = musaSuccess;
     for (int i = 0; i < timing_timing_iterations; ++i)
     {
         error = DeviceScan::InclusiveScan(d_temp_storage, temp_storage_bytes, d_in, d_out, scan_op, num_items, stream, debug_synchronous);
@@ -188,12 +188,12 @@ cudaError_t Dispatch(
  */
 template <typename InputIteratorT, typename OutputIteratorT, typename OffsetT>
 CUB_RUNTIME_FUNCTION __forceinline__
-cudaError_t Dispatch(
+musaError_t Dispatch(
     Int2Type<CUB>       /*dispatch_to*/,
     Int2Type<true>      /*is_primitive*/,
     int                 timing_timing_iterations,
     size_t              */*d_temp_storage_bytes*/,
-    cudaError_t         */*d_cdp_error*/,
+    musaError_t         */*d_cdp_error*/,
 
     void*               d_temp_storage,
     size_t&             temp_storage_bytes,
@@ -202,10 +202,10 @@ cudaError_t Dispatch(
     Sum                 /*scan_op*/,
     NullType            /*initial_value*/,
     OffsetT             num_items,
-    cudaStream_t        stream,
+    musaStream_t        stream,
     bool                debug_synchronous)
 {
-    cudaError_t error = cudaSuccess;
+    musaError_t error = musaSuccess;
     for (int i = 0; i < timing_timing_iterations; ++i)
     {
         error = DeviceScan::InclusiveSum(d_temp_storage, temp_storage_bytes, d_in, d_out, num_items, stream, debug_synchronous);
@@ -221,12 +221,12 @@ cudaError_t Dispatch(
  * Dispatch to exclusive scan entrypoint
  */
 template <typename IsPrimitiveT, typename InputIteratorT, typename OutputIteratorT, typename ScanOpT, typename InitialValueT, typename OffsetT>
-cudaError_t Dispatch(
+musaError_t Dispatch(
     Int2Type<THRUST>    /*dispatch_to*/,
     IsPrimitiveT        /*is_primitive*/,
     int                 timing_timing_iterations,
     size_t              */*d_temp_storage_bytes*/,
-    cudaError_t         */*d_cdp_error*/,
+    musaError_t         */*d_cdp_error*/,
 
     void*               d_temp_storage,
     size_t&             temp_storage_bytes,
@@ -235,7 +235,7 @@ cudaError_t Dispatch(
     ScanOpT             scan_op,
     InitialValueT       initial_value,
     OffsetT             num_items,
-    cudaStream_t        /*stream*/,
+    musaStream_t        /*stream*/,
     bool                /*debug_synchronous*/)
 {
     // The input value type
@@ -260,7 +260,7 @@ cudaError_t Dispatch(
         }
     }
 
-    return cudaSuccess;
+    return musaSuccess;
 }
 
 
@@ -268,12 +268,12 @@ cudaError_t Dispatch(
  * Dispatch to exclusive sum entrypoint
  */
 template <typename InputIteratorT, typename OutputIteratorT, typename InitialValueT, typename OffsetT>
-cudaError_t Dispatch(
+musaError_t Dispatch(
     Int2Type<THRUST>    /*dispatch_to*/,
     Int2Type<true>      /*is_primitive*/,
     int                 timing_timing_iterations,
     size_t              */*d_temp_storage_bytes*/,
-    cudaError_t         */*d_cdp_error*/,
+    musaError_t         */*d_cdp_error*/,
 
     void*               d_temp_storage,
     size_t&             temp_storage_bytes,
@@ -282,7 +282,7 @@ cudaError_t Dispatch(
     Sum                 /*scan_op*/,
     InitialValueT       /*initial_value*/,
     OffsetT             num_items,
-    cudaStream_t        /*stream*/,
+    musaStream_t        /*stream*/,
     bool                /*debug_synchronous*/)
 {
     // The input value type
@@ -307,7 +307,7 @@ cudaError_t Dispatch(
         }
     }
 
-    return cudaSuccess;
+    return musaSuccess;
 }
 
 
@@ -315,12 +315,12 @@ cudaError_t Dispatch(
  * Dispatch to inclusive scan entrypoint
  */
 template <typename IsPrimitiveT, typename InputIteratorT, typename OutputIteratorT, typename ScanOpT, typename OffsetT>
-cudaError_t Dispatch(
+musaError_t Dispatch(
     Int2Type<THRUST>    /*dispatch_to*/,
     IsPrimitiveT        /*is_primitive*/,
     int                 timing_timing_iterations,
     size_t              */*d_temp_storage_bytes*/,
-    cudaError_t         */*d_cdp_error*/,
+    musaError_t         */*d_cdp_error*/,
 
     void*               d_temp_storage,
     size_t&             temp_storage_bytes,
@@ -329,7 +329,7 @@ cudaError_t Dispatch(
     ScanOpT             scan_op,
     NullType            /*initial_value*/,
     OffsetT             num_items,
-    cudaStream_t        /*stream*/,
+    musaStream_t        /*stream*/,
     bool                /*debug_synchronous*/)
 {
     // The input value type
@@ -354,7 +354,7 @@ cudaError_t Dispatch(
         }
     }
 
-    return cudaSuccess;
+    return musaSuccess;
 }
 
 
@@ -362,12 +362,12 @@ cudaError_t Dispatch(
  * Dispatch to inclusive sum entrypoint
  */
 template <typename InputIteratorT, typename OutputIteratorT, typename OffsetT>
-cudaError_t Dispatch(
+musaError_t Dispatch(
     Int2Type<THRUST>    /*dispatch_to*/,
     Int2Type<true>      /*is_primitive*/,
     int                 timing_timing_iterations,
     size_t              */*d_temp_storage_bytes*/,
-    cudaError_t         */*d_cdp_error*/,
+    musaError_t         */*d_cdp_error*/,
 
     void*               d_temp_storage,
     size_t&             temp_storage_bytes,
@@ -376,7 +376,7 @@ cudaError_t Dispatch(
     Sum                 /*scan_op*/,
     NullType            /*initial_value*/,
     OffsetT             num_items,
-    cudaStream_t        /*stream*/,
+    musaStream_t        /*stream*/,
     bool                /*debug_synchronous*/)
 {
     // The input value type
@@ -401,7 +401,7 @@ cudaError_t Dispatch(
         }
     }
 
-    return cudaSuccess;
+    return musaSuccess;
 }
 
 
@@ -418,7 +418,7 @@ __global__ void CnpDispatchKernel(
     IsPrimitiveT        is_primitive,
     int                 timing_timing_iterations,
     size_t              *d_temp_storage_bytes,
-    cudaError_t         *d_cdp_error,
+    musaError_t         *d_cdp_error,
 
     void*               d_temp_storage,
     size_t              temp_storage_bytes,
@@ -442,7 +442,7 @@ __global__ void CnpDispatchKernel(
     (void)initial_value;
     (void)num_items;
     (void)debug_synchronous;
-    *d_cdp_error = cudaErrorNotSupported;
+    *d_cdp_error = musaErrorNotSupported;
 #else
     *d_cdp_error = Dispatch(
         Int2Type<CUB>(),
@@ -469,12 +469,12 @@ __global__ void CnpDispatchKernel(
  * Dispatch to CDP kernel
  */
 template <typename IsPrimitiveT, typename InputIteratorT, typename OutputIteratorT, typename ScanOpT, typename InitialValueT, typename OffsetT>
-cudaError_t Dispatch(
+musaError_t Dispatch(
     Int2Type<CDP>       dispatch_to,
     IsPrimitiveT        is_primitive,
     int                 timing_timing_iterations,
     size_t              *d_temp_storage_bytes,
-    cudaError_t         *d_cdp_error,
+    musaError_t         *d_cdp_error,
 
     void*               d_temp_storage,
     size_t&             temp_storage_bytes,
@@ -483,7 +483,7 @@ cudaError_t Dispatch(
     ScanOpT             scan_op,
     InitialValueT       initial_value,
     OffsetT             num_items,
-    cudaStream_t        stream,
+    musaStream_t        stream,
     bool                debug_synchronous)
 {
     // Invoke kernel to invoke device-side dispatch
@@ -502,11 +502,11 @@ cudaError_t Dispatch(
         debug_synchronous);
 
     // Copy out temp_storage_bytes
-    CubDebugExit(cudaMemcpy(&temp_storage_bytes, d_temp_storage_bytes, sizeof(size_t) * 1, cudaMemcpyDeviceToHost));
+    CubDebugExit(musaMemcpy(&temp_storage_bytes, d_temp_storage_bytes, sizeof(size_t) * 1, musaMemcpyDeviceToHost));
 
     // Copy out error
-    cudaError_t retval;
-    CubDebugExit(cudaMemcpy(&retval, d_cdp_error, sizeof(cudaError_t) * 1, cudaMemcpyDeviceToHost));
+    musaError_t retval;
+    CubDebugExit(musaMemcpy(&retval, d_cdp_error, sizeof(musaError_t) * 1, musaMemcpyDeviceToHost));
     return retval;
 }
 
@@ -629,9 +629,9 @@ void Test(
 
     // Allocate CDP device arrays
     size_t          *d_temp_storage_bytes = NULL;
-    cudaError_t     *d_cdp_error = NULL;
+    musaError_t     *d_cdp_error = NULL;
     CubDebugExit(g_allocator.DeviceAllocate((void**)&d_temp_storage_bytes,  sizeof(size_t) * 1));
-    CubDebugExit(g_allocator.DeviceAllocate((void**)&d_cdp_error,   sizeof(cudaError_t) * 1));
+    CubDebugExit(g_allocator.DeviceAllocate((void**)&d_cdp_error,   sizeof(musaError_t) * 1));
 
     // Allocate temporary storage
     void            *d_temp_storage = NULL;
@@ -654,7 +654,7 @@ void Test(
     CubDebugExit(g_allocator.DeviceAllocate(&d_temp_storage, temp_storage_bytes));
 
     // Clear device output array
-    CubDebugExit(cudaMemset(d_out, 0, sizeof(OutputT) * num_items));
+    CubDebugExit(musaMemset(d_out, 0, sizeof(OutputT) * num_items));
 
     // Run warmup/correctness iteration
     CubDebugExit(Dispatch(
@@ -776,7 +776,7 @@ void TestPointer(
     CubDebugExit(g_allocator.DeviceAllocate((void**)&d_in, sizeof(InputT) * num_items));
 
     // Initialize device input
-    CubDebugExit(cudaMemcpy(d_in, h_in, sizeof(InputT) * num_items, cudaMemcpyHostToDevice));
+    CubDebugExit(musaMemcpy(d_in, h_in, sizeof(InputT) * num_items, musaMemcpyHostToDevice));
 
     // Run Test
     Test<BACKEND>(d_in, h_reference, num_items, scan_op, initial_value);
@@ -989,7 +989,7 @@ int main(int argc, char** argv)
 
     // Get device ordinal
     int device_ordinal;
-    CubDebugExit(cudaGetDevice(&device_ordinal));
+    CubDebugExit(musaGetDevice(&device_ordinal));
 
     // Get device SM version
     int sm_version = 0;

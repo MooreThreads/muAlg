@@ -33,7 +33,7 @@
  * of int keys.
  *
  * To compile using the command line:
- *   nvcc -arch=sm_XX example_device_select_unique.cu -I../.. -lcudart -O3
+ *   nvcc -arch=sm_XX example_device_select_unique.mu -I../.. -lcudart -O3
  *
  ******************************************************************************/
 
@@ -180,7 +180,7 @@ int main(int argc, char** argv)
     CubDebugExit(g_allocator.DeviceAllocate((void**)&d_in, sizeof(int) * num_items));
 
     // Initialize device input
-    CubDebugExit(cudaMemcpy(d_in, h_in, sizeof(int) * num_items, cudaMemcpyHostToDevice));
+    CubDebugExit(musaMemcpy(d_in, h_in, sizeof(int) * num_items, musaMemcpyHostToDevice));
 
     // Allocate device output array and num selected
     int     *d_out            = NULL;

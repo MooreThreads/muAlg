@@ -90,8 +90,8 @@ __device__ __forceinline__ unsigned int SHR_ADD(
     unsigned int addend)
 {
     unsigned int ret;
-    asm ("vshr.u32.u32.u32.clamp.add %0, %1, %2, %3;" :
-        "=r"(ret) : "r"(x), "r"(shift), "r"(addend));
+    // asm ("vshr.u32.u32.u32.clamp.add %0, %1, %2, %3;" :
+    //     "=r"(ret) : "r"(x), "r"(shift), "r"(addend));
     return ret;
 }
 
@@ -105,8 +105,8 @@ __device__ __forceinline__ unsigned int SHL_ADD(
     unsigned int addend)
 {
     unsigned int ret;
-    asm ("vshl.u32.u32.u32.clamp.add %0, %1, %2, %3;" :
-        "=r"(ret) : "r"(x), "r"(shift), "r"(addend));
+    // asm ("vshl.u32.u32.u32.clamp.add %0, %1, %2, %3;" :
+    //     "=r"(ret) : "r"(x), "r"(shift), "r"(addend));
     return ret;
 }
 
@@ -168,8 +168,8 @@ __device__ __forceinline__ void BFI(
     unsigned int bit_start,
     unsigned int num_bits)
 {
-    asm ("bfi.b32 %0, %1, %2, %3, %4;" :
-        "=r"(ret) : "r"(y), "r"(x), "r"(bit_start), "r"(num_bits));
+    // asm ("bfi.b32 %0, %1, %2, %3, %4;" :
+    //     "=r"(ret) : "r"(y), "r"(x), "r"(bit_start), "r"(num_bits));
 }
 
 
@@ -178,7 +178,7 @@ __device__ __forceinline__ void BFI(
  */
 __device__ __forceinline__ unsigned int IADD3(unsigned int x, unsigned int y, unsigned int z)
 {
-    asm ("vadd.u32.u32.u32.add %0, %1, %2, %3;" : "=r"(x) : "r"(x), "r"(y), "r"(z));
+    // asm ("vadd.u32.u32.u32.add %0, %1, %2, %3;" : "=r"(x) : "r"(x), "r"(y), "r"(z));
     return x;
 }
 
@@ -212,7 +212,7 @@ __device__ __forceinline__ unsigned int IADD3(unsigned int x, unsigned int y, un
 __device__ __forceinline__ int PRMT(unsigned int a, unsigned int b, unsigned int index)
 {
     int ret;
-    asm ("prmt.b32 %0, %1, %2, %3;" : "=r"(ret) : "r"(a), "r"(b), "r"(index));
+    // asm ("prmt.b32 %0, %1, %2, %3;" : "=r"(ret) : "r"(a), "r"(b), "r"(index));
     return ret;
 }
 
@@ -223,7 +223,7 @@ __device__ __forceinline__ int PRMT(unsigned int a, unsigned int b, unsigned int
  */
 __device__ __forceinline__ void BAR(int count)
 {
-    asm volatile("bar.sync 1, %0;" : : "r"(count));
+    // asm volatile("bar.sync 1, %0;" : : "r"(count));
 }
 
 /**
@@ -376,7 +376,7 @@ unsigned int SHFL_IDX_SYNC(unsigned int word, int src_lane, unsigned int member_
 __device__ __forceinline__ float FMUL_RZ(float a, float b)
 {
     float d;
-    asm ("mul.rz.f32 %0, %1, %2;" : "=f"(d) : "f"(a), "f"(b));
+    // asm ("mul.rz.f32 %0, %1, %2;" : "=f"(d) : "f"(a), "f"(b));
     return d;
 }
 
@@ -387,7 +387,7 @@ __device__ __forceinline__ float FMUL_RZ(float a, float b)
 __device__ __forceinline__ float FFMA_RZ(float a, float b, float c)
 {
     float d;
-    asm ("fma.rz.f32 %0, %1, %2, %3;" : "=f"(d) : "f"(a), "f"(b), "f"(c));
+    // asm ("fma.rz.f32 %0, %1, %2, %3;" : "=f"(d) : "f"(a), "f"(b), "f"(c));
     return d;
 }
 
@@ -407,7 +407,7 @@ __device__ __forceinline__ void ThreadExit() {
  * \brief  Abort execution and generate an interrupt to the host CPU
  */
 __device__ __forceinline__ void ThreadTrap() {
-    asm volatile("trap;");
+    // asm volatile("trap;");
 }
 
 
@@ -440,7 +440,7 @@ __device__ __forceinline__ unsigned int LaneId()
 __device__ __forceinline__ unsigned int WarpId()
 {
     unsigned int ret;
-    asm ("mov.u32 %0, %%warpid;" : "=r"(ret) );
+    // asm ("mov.u32 %0, %%warpid;" : "=r"(ret) );
     return ret;
 }
 

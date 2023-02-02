@@ -159,8 +159,8 @@ struct IterateThreadLoad<MAX, MAX>
             "=r"(retval.y),                                                                 \
             "=r"(retval.z),                                                                 \
             "=r"(retval.w) :                                                                \
-            _CUB_ASM_PTR_(ptr));  */                                                          \
-        return retval;                                                                      \
+            _CUB_ASM_PTR_(ptr));                                                            \
+      */  return retval;                                                                      \
     }                                                                                       \
     template<>                                                                              \
     __device__ __forceinline__ ulonglong2 ThreadLoad<cub_modifier, ulonglong2 const *>(ulonglong2 const *ptr)    \
@@ -169,8 +169,8 @@ struct IterateThreadLoad<MAX, MAX>
       /*  asm volatile ("ld."#ptx_modifier".v2.u64 {%0, %1}, [%2];" :                         \
             "=l"(retval.x),                                                                 \
             "=l"(retval.y) :                                                                \
-            _CUB_ASM_PTR_(ptr));    */                                                        \
-        return retval;                                                                      \
+            _CUB_ASM_PTR_(ptr));                                                            \
+      */  return retval;                                                                      \
     }
 
 /**
@@ -186,8 +186,8 @@ struct IterateThreadLoad<MAX, MAX>
             "=h"(retval.y),                                                                 \
             "=h"(retval.z),                                                                 \
             "=h"(retval.w) :                                                                \
-            _CUB_ASM_PTR_(ptr));  */                                                          \
-        return retval;                                                                      \
+            _CUB_ASM_PTR_(ptr));                                                            \
+      */  return retval;                                                                      \
     }                                                                                       \
     template<>                                                                              \
     __device__ __forceinline__ uint2 ThreadLoad<cub_modifier, uint2 const *>(uint2 const *ptr)                   \
@@ -196,8 +196,8 @@ struct IterateThreadLoad<MAX, MAX>
       /*  asm volatile ("ld."#ptx_modifier".v2.u32 {%0, %1}, [%2];" :                         \
             "=r"(retval.x),                                                                 \
             "=r"(retval.y) :                                                                \
-            _CUB_ASM_PTR_(ptr));    */                                                        \
-        return retval;                                                                      \
+            _CUB_ASM_PTR_(ptr));                                                            \
+      */  return retval;                                                                      \
     }                                                                                       \
     template<>                                                                              \
     __device__ __forceinline__ unsigned long long ThreadLoad<cub_modifier, unsigned long long const *>(unsigned long long const *ptr)    \
@@ -205,8 +205,8 @@ struct IterateThreadLoad<MAX, MAX>
         unsigned long long retval;                                                          \
       /*  asm volatile ("ld."#ptx_modifier".u64 %0, [%1];" :                                  \
             "=l"(retval) :                                                                  \
-            _CUB_ASM_PTR_(ptr));*/                                                            \
-        return retval;                                                                      \
+            _CUB_ASM_PTR_(ptr));                                                            \
+      */  return retval;                                                                      \
     }
 
 /**
@@ -219,7 +219,8 @@ struct IterateThreadLoad<MAX, MAX>
         unsigned int retval;                                                                \
       /*  asm volatile ("ld."#ptx_modifier".u32 %0, [%1];" :                                  \
             "=r"(retval) :                                                                  \
-            _CUB_ASM_PTR_(ptr)); */ retval = __ldg(ptr);                                    \
+            _CUB_ASM_PTR_(ptr));                                                            \
+      */  retval = __ldg(ptr);                                                                \
         return retval;                                                                      \
     }
 
@@ -234,8 +235,8 @@ struct IterateThreadLoad<MAX, MAX>
         unsigned short retval;                                                              \
       /*  asm volatile ("ld."#ptx_modifier".u16 %0, [%1];" :                                  \
             "=h"(retval) :                                                                  \
-            _CUB_ASM_PTR_(ptr));   */                                                         \
-        return retval;                                                                      \
+            _CUB_ASM_PTR_(ptr));                                                            \
+      */  return retval;                                                                      \
     }
 
 
@@ -254,8 +255,8 @@ struct IterateThreadLoad<MAX, MAX>
         "    cvt.u16.u8 %0, datum;"                                                         \
         "}" :                                                                               \
             "=h"(retval) :                                                                  \
-            _CUB_ASM_PTR_(ptr));  */                                                          \
-        return (unsigned char) retval;                                                      \
+            _CUB_ASM_PTR_(ptr));                                                            \
+      */  return (unsigned char) retval;                                                      \
     }
 
 

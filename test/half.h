@@ -34,7 +34,7 @@
  */
 
 #include <stdint.h>
-#include <cuda_fp16.h>
+#include <musa_fp16.h>
 #include <iosfwd>
 
 #include <cub/util_type.cuh>
