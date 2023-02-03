@@ -121,7 +121,7 @@ struct BFEDigitExtractor : BaseDigitExtractor<KeyT>
 
     __device__ __forceinline__ uint32_t Digit(UnsignedBits key)
     {
-      return BFE(BaseDigitExtractor<KeyT>::ProcessFloatMinusZero(key),
+      return BFE(this->ProcessFloatMinusZero(key),
                  bit_start, num_bits);
     }
 };
@@ -141,7 +141,7 @@ struct ShiftDigitExtractor : BaseDigitExtractor<KeyT>
 
     __device__ __forceinline__ uint32_t Digit(UnsignedBits key)
     {
-      return uint32_t(BaseDigitExtractor<KeyT>::ProcessFloatMinusZero(key) >>
+      return uint32_t(this->ProcessFloatMinusZero(key) >>
                       UnsignedBits(bit_start)) &
              mask;
     }
