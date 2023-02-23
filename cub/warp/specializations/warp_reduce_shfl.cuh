@@ -254,13 +254,6 @@ struct WarpReduceShfl
 //             : "=l"(output) : "l"(input), "r"(offset), "r"(shfl_c));
 // #endif
 
-        int width = 32 - (shfl_c >> 8);
-        bool pred = false;
-        output = __shfl_down_sync(member_mask, input, offset, width, &pred);
-        if (pred) {
-          output += input;
-        }
-        return output;
     }
 
 

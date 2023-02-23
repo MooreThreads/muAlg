@@ -77,10 +77,6 @@ function(cub_check_for_test_variants src)
     set(HAS_MINIMAL_VARIANT True PARENT_SCOPE)
   endif()
 
-  set(NO_VARIANTS False PARENT_SCOPE)
-  if (NOT (HAS_BENCHMARK_VARIANT OR HAS_MINIMAL_VARIANT))
-    set(NO_VARIANTS True PARENT_SCOPE)
-  endif()
 endfunction()
 
 foreach (test_src IN LISTS test_srcs)
@@ -93,6 +89,10 @@ foreach (test_src IN LISTS test_srcs)
   # and/or MINIMAL_TEST are defined. Detect these and build variants for each
   # configuration:
   cub_check_for_test_variants("${test_src}")
+  set(NO_VARIANTS False)
+  if (NOT (HAS_BENCHMARK_VARIANT OR HAS_MINIMAL_VARIANT))
+    set(NO_VARIANTS True)
+  endif()
 
   foreach(cub_target IN LISTS CUB_TARGETS)
     if (NO_VARIANTS)

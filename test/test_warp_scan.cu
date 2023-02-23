@@ -567,7 +567,7 @@ void Test(GenMode gen_mode)
     if (gen_mode != RANDOM) {
         // Only test numerically stable inputs
         Test<LOGICAL_WARP_THREADS>(gen_mode, Sum(), make_float2(17, 21));
-        if (ptx_version > 100)
+        // if (ptx_version > 100)
             Test<LOGICAL_WARP_THREADS>(gen_mode, Sum(), make_double2(17, 21));
     }
 
@@ -580,7 +580,7 @@ void Test(GenMode gen_mode)
     if (gen_mode != RANDOM) {
         // Only test numerically stable inputs
         Test<LOGICAL_WARP_THREADS>(gen_mode, Sum(), make_float4(17, 21, 32, 85));
-        if (ptx_version > 100)
+        // if (ptx_version > 100)
             Test<LOGICAL_WARP_THREADS>(gen_mode, Sum(), make_double4(17, 21, 32, 85));
     }
 

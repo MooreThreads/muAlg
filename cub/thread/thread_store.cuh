@@ -162,16 +162,16 @@ struct IterateThreadStore<MAX, MAX>
             "r"(val.x),                                                                     \
             "r"(val.y),                                                                     \
             "r"(val.z),                                                                     \
-            "r"(val.w));                                                                    \
-    */}                                                                                       \
+            "r"(val.w));  */  *ptr = val;                                                                \
+    }                                                                                       \
     template<>                                                                              \
     __device__ __forceinline__ void ThreadStore<cub_modifier, ulonglong2*, ulonglong2>(ulonglong2* ptr, ulonglong2 val)     \
     {                                                                                       \
       /*  asm volatile ("st."#ptx_modifier".v2.u64 [%0], {%1, %2};" : :                       \
             _CUB_ASM_PTR_(ptr),                                                             \
             "l"(val.x),                                                                     \
-            "l"(val.y));                                                                    \
-    */}
+            "l"(val.y));  */  *ptr = val;                                                                \
+    }
 
 
 /**
@@ -186,23 +186,23 @@ struct IterateThreadStore<MAX, MAX>
             "h"(val.x),                                                                     \
             "h"(val.y),                                                                     \
             "h"(val.z),                                                                     \
-            "h"(val.w));                                                                    \
-    */}                                                                                       \
+            "h"(val.w));  */  *ptr = val;                                                                \
+    }                                                                                       \
     template<>                                                                              \
     __device__ __forceinline__ void ThreadStore<cub_modifier, uint2*, uint2>(uint2* ptr, uint2 val)                         \
     {                                                                                       \
       /*  asm volatile ("st."#ptx_modifier".v2.u32 [%0], {%1, %2};" : :                       \
             _CUB_ASM_PTR_(ptr),                                                             \
             "r"(val.x),                                                                     \
-            "r"(val.y));                                                                    \
-    */}                                                                                       \
+            "r"(val.y));  */  *ptr = val;                                                                \
+    }                                                                                       \
     template<>                                                                              \
     __device__ __forceinline__ void ThreadStore<cub_modifier, unsigned long long*, unsigned long long>(unsigned long long* ptr, unsigned long long val)     \
     {                                                                                       \
       /*  asm volatile ("st."#ptx_modifier".u64 [%0], %1;" : :                                \
              _CUB_ASM_PTR_(ptr),                                                            \
-             "l"(val));                                                                     \
-    */}
+             "l"(val));  */  *ptr = val;                                                                 \
+    }
 
 /**
  * Define a unsigned int (4B) ThreadStore specialization for the given Cache load modifier
@@ -213,9 +213,9 @@ struct IterateThreadStore<MAX, MAX>
     {                                                                                       \
       /*  asm volatile ("st."#ptx_modifier".u32 [%0], %1;" : :                                \
             _CUB_ASM_PTR_(ptr),                                                             \
-            "r"(val));                                                                      \
-    */}
-
+            "r"(val));  */  *ptr = val;                                                                  \
+    }
+    
 
 /**
  * Define a unsigned short (2B) ThreadStore specialization for the given Cache load modifier
@@ -226,8 +226,8 @@ struct IterateThreadStore<MAX, MAX>
     {                                                                                       \
       /*  asm volatile ("st."#ptx_modifier".u16 [%0], %1;" : :                                \
             _CUB_ASM_PTR_(ptr),                                                             \
-            "h"(val));                                                                      \
-    */}
+            "h"(val));  */  *ptr = val;                                                                  \
+    }
 
 
 /**
@@ -244,8 +244,8 @@ struct IterateThreadStore<MAX, MAX>
         "   st."#ptx_modifier".u8 [%0], datum;"                                             \
         "}" : :                                                                             \
             _CUB_ASM_PTR_(ptr),                                                             \
-            "h"((unsigned short) val));                                                     \
-    */}
+            "h"((unsigned short) val));  */  *ptr = val;                                                 \
+    }
 
 /**
  * Define powers-of-two ThreadStore specializations for the given Cache load modifier

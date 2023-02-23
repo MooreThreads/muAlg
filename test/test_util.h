@@ -776,7 +776,7 @@ std::ostream& operator<<(std::ostream& os, const cub::KeyValuePair<Key, Value> &
         const T &a,                                         \
         const T &b)                                         \
     {                                                       \
-        if (a.x > b.x) return true; else if (b.x > a.x) return false;   \
+        if (a.x > b.x) return true; else if (a.x < b.x) return false;   \
         return a.y > b.y;                                               \
     }                                                       \
     /* Min */                                               \
@@ -784,7 +784,7 @@ std::ostream& operator<<(std::ostream& os, const cub::KeyValuePair<Key, Value> &
         const T &a,                                         \
         const T &b)                                         \
     {                                                       \
-        if (a.x < b.x) return true; else if (b.x < a.x) return false;   \
+        if (a.x < b.x) return true; else if (a.x > b.x) return false;   \
         return a.y < b.y;                                               \
     }                                                       \
     /* Summation (non-reference addends for VS2003 -O3 warpscan workaround */                                         \
@@ -870,8 +870,8 @@ std::ostream& operator<<(std::ostream& os, const cub::KeyValuePair<Key, Value> &
         const T &a,                                         \
         const T &b)                                         \
     {                                                       \
-        if (a.x > b.x) return true; else if (b.x > a.x) return false;   \
-        if (a.y > b.y) return true; else if (b.y > a.y) return false;   \
+        if (a.x > b.x) return true; else if (a.x < b.x) return false;   \
+        if (a.y > b.y) return true; else if (a.y < b.y) return false;   \
         return a.z > b.z;                                               \
     }                                                       \
     /* Min */                                               \
@@ -879,8 +879,8 @@ std::ostream& operator<<(std::ostream& os, const cub::KeyValuePair<Key, Value> &
         const T &a,                                         \
         const T &b)                                         \
     {                                                       \
-        if (a.x < b.x) return true; else if (b.x < a.x) return false;   \
-        if (a.y < b.y) return true; else if (b.y < a.y) return false;   \
+        if (a.x < b.x) return true; else if (a.x > b.x) return false;   \
+        if (a.y < b.y) return true; else if (a.y > b.y) return false;   \
         return a.z < b.z;                                               \
     }                                                       \
     /* Summation (non-reference addends for VS2003 -O3 warpscan workaround */                                         \
@@ -972,9 +972,9 @@ std::ostream& operator<<(std::ostream& os, const cub::KeyValuePair<Key, Value> &
         const T &a,                                         \
         const T &b)                                         \
     {                                                       \
-        if (a.x > b.x) return true; else if (b.x > a.x) return false;   \
-        if (a.y > b.y) return true; else if (b.y > a.y) return false;   \
-        if (a.z > b.z) return true; else if (b.z > a.z) return false;   \
+        if (a.x > b.x) return true; else if (a.x < b.x) return false;   \
+        if (a.y > b.y) return true; else if (a.y < b.y) return false;   \
+        if (a.z > b.z) return true; else if (a.z < b.z) return false;   \
         return a.w > b.w;                                               \
     }                                                       \
     /* Min */                                               \
@@ -982,9 +982,9 @@ std::ostream& operator<<(std::ostream& os, const cub::KeyValuePair<Key, Value> &
         const T &a,                                         \
         const T &b)                                         \
     {                                                       \
-        if (a.x < b.x) return true; else if (b.x < a.x) return false;   \
-        if (a.y < b.y) return true; else if (b.y < a.y) return false;   \
-        if (a.z < b.z) return true; else if (b.z < a.z) return false;   \
+        if (a.x < b.x) return true; else if (a.x > b.x) return false;   \
+        if (a.y < b.y) return true; else if (a.y > b.y) return false;   \
+        if (a.z < b.z) return true; else if (a.z > b.z) return false;   \
         return a.w < b.w;                                               \
     }                                                       \
     /* Summation (non-reference addends for VS2003 -O3 warpscan workaround */                                         \

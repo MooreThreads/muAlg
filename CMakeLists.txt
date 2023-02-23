@@ -50,7 +50,7 @@ endif()
 
 option(CUB_ENABLE_HEADER_TESTING "Test that all public headers compile." ON)
 option(CUB_ENABLE_TESTING "Build CUB testing suite." ON)
-option(CUB_ENABLE_THOROUGH_TESTING "Build CUB thorough test variants." OFF)
+option(CUB_ENABLE_THOROUGH_TESTING "Build CUB thorough test variants." ON)
 option(CUB_ENABLE_BENCHMARK_TESTING  "Build CUB benchmark test variants." OFF)
 option(CUB_ENABLE_MINIMAL_TESTING "Build CUB minimal test variants." ON)
 option(CUB_ENABLE_EXAMPLES "Build CUB examples." ON)
