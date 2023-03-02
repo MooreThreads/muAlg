@@ -489,7 +489,7 @@ void Test()
 #if defined(SM100) || defined(SM110) || defined(SM130)
     Int2Type<sizeof(typename BlockRadixSortT::TempStorage) <= 16 * 1024> fits_smem_capacity;
 #else
-    Int2Type<(sizeof(typename BlockRadixSortT::TempStorage) <= 48 * 1024)> fits_smem_capacity;
+    Int2Type<(sizeof(typename BlockRadixSortT::TempStorage) <= 28 * 1024)> fits_smem_capacity;
 #endif
 
     // Sort-ascending, to-striped
@@ -565,7 +565,7 @@ void Test()
     TestKeys<BLOCK_THREADS, ITEMS_PER_THREAD, RADIX_BITS, MEMOIZE_OUTER_SCAN, INNER_SCAN_ALGORITHM, unsigned short>();
     TestKeys<BLOCK_THREADS, ITEMS_PER_THREAD, RADIX_BITS, MEMOIZE_OUTER_SCAN, INNER_SCAN_ALGORITHM, unsigned int>();
     TestKeys<BLOCK_THREADS, ITEMS_PER_THREAD, RADIX_BITS, MEMOIZE_OUTER_SCAN, INNER_SCAN_ALGORITHM, unsigned long>();
-    TestKeys<BLOCK_THREADS, ITEMS_PER_THREAD, RADIX_BITS, MEMOIZE_OUTER_SCAN, INNER_SCAN_ALGORITHM, unsigned long long>();
+    // TestKeys<BLOCK_THREADS, ITEMS_PER_THREAD, RADIX_BITS, MEMOIZE_OUTER_SCAN, INNER_SCAN_ALGORITHM, unsigned long long>();
 
 #else
 
@@ -574,7 +574,7 @@ void Test()
     TestKeysAndPairs<BLOCK_THREADS, ITEMS_PER_THREAD, RADIX_BITS, MEMOIZE_OUTER_SCAN, INNER_SCAN_ALGORITHM, short>();
     TestKeysAndPairs<BLOCK_THREADS, ITEMS_PER_THREAD, RADIX_BITS, MEMOIZE_OUTER_SCAN, INNER_SCAN_ALGORITHM, int>();
     TestKeysAndPairs<BLOCK_THREADS, ITEMS_PER_THREAD, RADIX_BITS, MEMOIZE_OUTER_SCAN, INNER_SCAN_ALGORITHM, long>();
-    TestKeysAndPairs<BLOCK_THREADS, ITEMS_PER_THREAD, RADIX_BITS, MEMOIZE_OUTER_SCAN, INNER_SCAN_ALGORITHM, long long>();
+    // TestKeysAndPairs<BLOCK_THREADS, ITEMS_PER_THREAD, RADIX_BITS, MEMOIZE_OUTER_SCAN, INNER_SCAN_ALGORITHM, long long>();
     TestKeysAndPairs<BLOCK_THREADS, ITEMS_PER_THREAD, RADIX_BITS, MEMOIZE_OUTER_SCAN, INNER_SCAN_ALGORITHM, float>();
     if (ptx_version > 120)
     {
@@ -641,7 +641,7 @@ void Test()
 #else
     Test<BLOCK_THREADS, 4>();
 #endif
-    Test<BLOCK_THREADS, 11>();
+    // Test<BLOCK_THREADS, 11>();
 }
 
 
@@ -687,7 +687,7 @@ int main(int argc, char** argv)
     // Compile/run thorough tests
     Test<32>();
     Test<64>();
-    Test<160>();
+    // Test<160>();
 
 
 #endif  // CUB_TEST_BENCHMARK

@@ -191,7 +191,7 @@ struct DeviceScanPolicy
     };
 
     /// MaxPolicy
-    typedef Policy600 MaxPolicy;
+    typedef Policy350 MaxPolicy;
 };
 
 

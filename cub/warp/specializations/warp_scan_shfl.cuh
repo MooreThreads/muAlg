@@ -115,6 +115,7 @@ struct WarpScanShfl
             lane_id = lane_id % LOGICAL_WARP_THREADS;
             member_mask = member_mask << (warp_id * LOGICAL_WARP_THREADS);
         }
+        // printf("WarpScanShfl");
     }
 
 
@@ -154,6 +155,7 @@ struct WarpScanShfl
 //             "}"
 //             : "=r"(output) : "r"(input), "r"(offset), "r"(shfl_c), "r"(input));
 // #endif
+        // printf("int InclusiveScanStep\n");
         int width = 32 - (shfl_c >> 8);
         bool pred = false;
         output = __shfl_up_sync(member_mask, input, offset, width, &pred);
@@ -195,6 +197,7 @@ struct WarpScanShfl
 //             "}"
 //             : "=r"(output) : "r"(input), "r"(offset), "r"(shfl_c), "r"(input));
 // #endif
+        // printf("unsigned int InclusiveScanStep\n");
         int width = 32 - (shfl_c >> 8);
         bool pred = false;
         output = __shfl_up_sync(member_mask, input, offset, width, &pred);
@@ -237,6 +240,7 @@ struct WarpScanShfl
 //             "}"
 //             : "=f"(output) : "f"(input), "r"(offset), "r"(shfl_c), "f"(input));
 // #endif
+        // printf("float InclusiveScanStep\n");
         int width = 32 - (shfl_c >> 8);
         bool pred = false;
         output = __shfl_up_sync(member_mask, input, offset, width, &pred);
@@ -418,9 +422,12 @@ struct WarpScanShfl
         int             offset)             ///< [in] Up-offset to pull from
     {
         _T temp = ShuffleUp<LOGICAL_WARP_THREADS>(input, offset, first_lane, member_mask);
-
+        // printf("input%d, %u, %u, %u, %u\n", threadIdx.x, input.x, input.y, input.x, input.y);
+        // printf("temp%d, %u, %u, %u, %u\n", threadIdx.x, temp.x, temp.y, temp.x, temp.y);
         // Perform scan op if from a valid peer
         _T output = scan_op(temp, input);
+        // printf("output%d, %u, %u, %u, %u\n", threadIdx.x, output.x, output.y, output.x, output.y);
+        // printf("T(%d):%ld, %ld, %ld\n", sizeof(_T), temp, input, output);
         if (static_cast<int>(lane_id) < first_lane + offset)
             output = input;
 

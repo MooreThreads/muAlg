@@ -1112,18 +1112,18 @@ struct TestFoo
     // Less than operator
     __host__ __device__ __forceinline__ bool operator <(const TestFoo &b) const
     {
-        if (x < b.x) return true; else if (b.x < x) return false;
-        if (y < b.y) return true; else if (b.y < y) return false;
-        if (z < b.z) return true; else if (b.z < z) return false;
+        if (x < b.x) return true; else if (x > b.x) return false;
+        if (y < b.y) return true; else if (y > b.y) return false;
+        if (z < b.z) return true; else if (z > b.z) return false;
         return w < b.w;
     }
 
     // Greater than operator
     __host__ __device__ __forceinline__ bool operator >(const TestFoo &b) const
     {
-        if (x > b.x) return true; else if (b.x > x) return false;
-        if (y > b.y) return true; else if (b.y > y) return false;
-        if (z > b.z) return true; else if (b.z > z) return false;
+        if (x > b.x) return true; else if (x < b.x) return false;
+        if (y > b.y) return true; else if (y < b.y) return false;
+        if (z > b.z) return true; else if (z < b.z) return false;
         return w > b.w;
     }
 
@@ -1234,14 +1234,14 @@ struct TestBar
     // Less than operator
     __host__ __device__ __forceinline__ bool operator <(const TestBar &b) const
     {
-        if (x < b.x) return true; else if (b.x < x) return false;
+        if (x < b.x) return true; else if (x > b.x) return false;
         return y < b.y;
     }
 
     // Greater than operator
     __host__ __device__ __forceinline__ bool operator >(const TestBar &b) const
     {
-        if (x > b.x) return true; else if (b.x > x) return false;
+        if (x > b.x) return true; else if (x < b.x) return false;
         return y > b.y;
     }
 

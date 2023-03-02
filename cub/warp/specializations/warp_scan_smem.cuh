@@ -112,8 +112,9 @@ struct WarpScanSmem
         member_mask((0xffffffff >> (32 - LOGICAL_WARP_THREADS)) << ((IS_ARCH_WARP || !IS_POW_OF_TWO ) ?
             0 : // arch-width and non-power-of-two subwarps cannot be tiled with the arch-warp
             ((LaneId() / LOGICAL_WARP_THREADS) * LOGICAL_WARP_THREADS)))
-    {}
-
+    {
+      // printf("WarpScanSmem");
+    }
 
     /******************************************************************************
      * Utility methods
@@ -140,7 +141,9 @@ struct WarpScanSmem
         if (HAS_IDENTITY || (lane_id >= OFFSET))
         {
             T addend = (T) ThreadLoad<LOAD_VOLATILE>(&temp_storage[HALF_WARP_THREADS + lane_id - OFFSET]);
+      // printf("addend%d, %llu, %llu, %llu, %llu\n", threadIdx.x, addend.x, addend.y, addend.z, addend.w);      
             partial = scan_op(addend, partial);
+            // printf("partial%d, %llu, %llu, %llu, %llu\n", threadIdx.x, partial.x, partial.y, partial.z, partial.w);
         }
         WARP_SYNC(member_mask);
 

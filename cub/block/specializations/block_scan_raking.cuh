@@ -237,7 +237,9 @@ struct BlockScanRaking
     :
         temp_storage(temp_storage.Alias()),
         linear_tid(RowMajorTid(BLOCK_DIM_X, BLOCK_DIM_Y, BLOCK_DIM_Z))
-    {}
+    {
+      // printf("BlockScanRaking\n");
+    }
 
 
     //---------------------------------------------------------------------
@@ -251,6 +253,7 @@ struct BlockScanRaking
         T               &exclusive_output,                        ///< [out] Calling thread's output item (may be aliased to \p input)
         ScanOp          scan_op)                        ///< [in] Binary scan operator
     {
+        // printf("br.ex.i.o.sop\n");
         if (WARP_SYNCHRONOUS)
         {
             // Short-circuit directly to warp-synchronous scan
@@ -293,6 +296,7 @@ struct BlockScanRaking
         const T         &initial_value,     ///< [in] Initial value to seed the exclusive scan
         ScanOp          scan_op)            ///< [in] Binary scan operator
     {
+      // printf("br.ex.i.o.ini.sop\n");
         if (WARP_SYNCHRONOUS)
         {
             // Short-circuit directly to warp-synchronous scan
@@ -336,6 +340,7 @@ struct BlockScanRaking
         ScanOp          scan_op,                        ///< [in] Binary scan operator
         T               &block_aggregate)               ///< [out] Threadblock-wide aggregate reduction of input items
     {
+      // printf("br.ex.i.o.sop.agg\n");
         if (WARP_SYNCHRONOUS)
         {
             // Short-circuit directly to warp-synchronous scan
@@ -388,6 +393,7 @@ struct BlockScanRaking
         ScanOp          scan_op,            ///< [in] Binary scan operator
         T               &block_aggregate)   ///< [out] Threadblock-wide aggregate reduction of input items
     {
+      // printf("br.ex.i.o.ini.sop.agg\n");
         if (WARP_SYNCHRONOUS)
         {
             // Short-circuit directly to warp-synchronous scan
@@ -413,7 +419,7 @@ struct BlockScanRaking
 
                 // Exclusive raking downsweep scan
                 ExclusiveDownsweep(scan_op, exclusive_partial);
-
+                // printf("block_aggregate:%d\n", block_aggregate);
                 // Broadcast aggregate to other threads
                 if (linear_tid == 0)
                     temp_storage.block_aggregate = block_aggregate;
@@ -440,6 +446,7 @@ struct BlockScanRaking
         ScanOp                  scan_op,                        ///< [in] Binary scan operator
         BlockPrefixCallbackOp   &block_prefix_callback_op)      ///< [in-out] <b>[<em>warp</em><sub>0</sub> only]</b> Call-back functor for specifying a thread block-wide prefix to be applied to all inputs.
     {
+      // printf("br.ex.i.o.sop.preop\n");
         if (WARP_SYNCHRONOUS)
         {
             // Short-circuit directly to warp-synchronous scan
@@ -474,9 +481,10 @@ struct BlockScanRaking
                 // Warp-synchronous scan
                 T exclusive_partial, block_aggregate;
                 warp_scan.ExclusiveScan(upsweep_partial, exclusive_partial, scan_op, block_aggregate);
-
+                // printf("block_aggregate block:%d\n", block_aggregate);
                 // Obtain block-wide prefix in lane0, then broadcast to other lanes
                 T block_prefix = block_prefix_callback_op(block_aggregate);
+                // printf("%d\n", block_prefix);
                 block_prefix = warp_scan.Broadcast(block_prefix, 0);
 
                 // Update prefix with warpscan exclusive partial

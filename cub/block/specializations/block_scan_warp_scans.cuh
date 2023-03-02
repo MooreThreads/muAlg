@@ -114,7 +114,9 @@ struct BlockScanWarpScans
         linear_tid(RowMajorTid(BLOCK_DIM_X, BLOCK_DIM_Y, BLOCK_DIM_Z)),
         warp_id((WARPS == 1) ? 0 : linear_tid / WARP_THREADS),
         lane_id(LaneId())
-    {}
+    {
+      // printf("BlockScanWarpScans\n");
+    }
 
 
     //---------------------------------------------------------------------
@@ -240,7 +242,7 @@ struct BlockScanWarpScans
         // Compute warp scan in each warp.  The exclusive output from each lane0 is invalid.
         T inclusive_output;
         WarpScanT(temp_storage.warp_scan[warp_id]).Scan(input, inclusive_output, exclusive_output, scan_op);
-
+        // printf("%d, %llu, %llu, %llu, %llu\n", warp_id, inclusive_output.x, inclusive_output.y, inclusive_output.z, inclusive_output.w);
         // Compute the warp-wide prefix and block-wide aggregate for each warp.  Warp prefix for warp0 is invalid.
         T warp_prefix = ComputeWarpPrefix(scan_op, inclusive_output, block_aggregate);
 

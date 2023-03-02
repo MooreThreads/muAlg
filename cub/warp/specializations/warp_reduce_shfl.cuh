@@ -216,135 +216,135 @@ struct WarpReduceShfl
     }
 
 
-    /// Reduction (specialized for summation across unsigned long long types)
-    __device__ __forceinline__ unsigned long long ReduceStep(
-        unsigned long long  input,              ///< [in] Calling thread's input item.
-        cub::Sum            /*reduction_op*/,   ///< [in] Binary reduction operator
-        int                 last_lane,          ///< [in] Index of last lane in segment
-        int                 offset)             ///< [in] Up-offset to pull from
-    {
-        unsigned long long output;
-        int shfl_c = last_lane | SHFL_C;   // Shuffle control (mask and last_lane)
+//     /// Reduction (specialized for summation across unsigned long long types)
+//     __device__ __forceinline__ unsigned long long ReduceStep(
+//         unsigned long long  input,              ///< [in] Calling thread's input item.
+//         cub::Sum            /*reduction_op*/,   ///< [in] Binary reduction operator
+//         int                 last_lane,          ///< [in] Index of last lane in segment
+//         int                 offset)             ///< [in] Up-offset to pull from
+//     {
+//         unsigned long long output;
+//         int shfl_c = last_lane | SHFL_C;   // Shuffle control (mask and last_lane)
 
-// #ifdef CUB_USE_COOPERATIVE_GROUPS
-//         asm volatile(
-//             "{"
-//             "  .reg .u32 lo;"
-//             "  .reg .u32 hi;"
-//             "  .reg .pred p;"
-//             "  mov.b64 {lo, hi}, %1;"
-//             "  shfl.sync.down.b32 lo|p, lo, %2, %3, %4;"
-//             "  shfl.sync.down.b32 hi|p, hi, %2, %3, %4;"
-//             "  mov.b64 %0, {lo, hi};"
-//             "  @p add.u64 %0, %0, %1;"
-//             "}"
-//             : "=l"(output) : "l"(input), "r"(offset), "r"(shfl_c), "r"(member_mask));
-// #else
-//         asm volatile(
-//             "{"
-//             "  .reg .u32 lo;"
-//             "  .reg .u32 hi;"
-//             "  .reg .pred p;"
-//             "  mov.b64 {lo, hi}, %1;"
-//             "  shfl.down.b32 lo|p, lo, %2, %3;"
-//             "  shfl.down.b32 hi|p, hi, %2, %3;"
-//             "  mov.b64 %0, {lo, hi};"
-//             "  @p add.u64 %0, %0, %1;"
-//             "}"
-//             : "=l"(output) : "l"(input), "r"(offset), "r"(shfl_c));
-// #endif
+// // #ifdef CUB_USE_COOPERATIVE_GROUPS
+// //         asm volatile(
+// //             "{"
+// //             "  .reg .u32 lo;"
+// //             "  .reg .u32 hi;"
+// //             "  .reg .pred p;"
+// //             "  mov.b64 {lo, hi}, %1;"
+// //             "  shfl.sync.down.b32 lo|p, lo, %2, %3, %4;"
+// //             "  shfl.sync.down.b32 hi|p, hi, %2, %3, %4;"
+// //             "  mov.b64 %0, {lo, hi};"
+// //             "  @p add.u64 %0, %0, %1;"
+// //             "}"
+// //             : "=l"(output) : "l"(input), "r"(offset), "r"(shfl_c), "r"(member_mask));
+// // #else
+// //         asm volatile(
+// //             "{"
+// //             "  .reg .u32 lo;"
+// //             "  .reg .u32 hi;"
+// //             "  .reg .pred p;"
+// //             "  mov.b64 {lo, hi}, %1;"
+// //             "  shfl.down.b32 lo|p, lo, %2, %3;"
+// //             "  shfl.down.b32 hi|p, hi, %2, %3;"
+// //             "  mov.b64 %0, {lo, hi};"
+// //             "  @p add.u64 %0, %0, %1;"
+// //             "}"
+// //             : "=l"(output) : "l"(input), "r"(offset), "r"(shfl_c));
+// // #endif
 
-    }
-
-
-    /// Reduction (specialized for summation across long long types)
-    __device__ __forceinline__ long long ReduceStep(
-        long long           input,              ///< [in] Calling thread's input item.
-        cub::Sum            /*reduction_op*/,   ///< [in] Binary reduction operator
-        int                 last_lane,          ///< [in] Index of last lane in segment
-        int                 offset)             ///< [in] Up-offset to pull from
-    {
-        long long output;
-        int shfl_c = last_lane | SHFL_C;   // Shuffle control (mask and last_lane)
-
-        // Use predicate set from SHFL to guard against invalid peers
-// #ifdef CUB_USE_COOPERATIVE_GROUPS
-//         asm volatile(
-//             "{"
-//             "  .reg .u32 lo;"
-//             "  .reg .u32 hi;"
-//             "  .reg .pred p;"
-//             "  mov.b64 {lo, hi}, %1;"
-//             "  shfl.sync.down.b32 lo|p, lo, %2, %3, %4;"
-//             "  shfl.sync.down.b32 hi|p, hi, %2, %3, %4;"
-//             "  mov.b64 %0, {lo, hi};"
-//             "  @p add.s64 %0, %0, %1;"
-//             "}"
-//             : "=l"(output) : "l"(input), "r"(offset), "r"(shfl_c), "r"(member_mask));
-// #else
-//         asm volatile(
-//             "{"
-//             "  .reg .u32 lo;"
-//             "  .reg .u32 hi;"
-//             "  .reg .pred p;"
-//             "  mov.b64 {lo, hi}, %1;"
-//             "  shfl.down.b32 lo|p, lo, %2, %3;"
-//             "  shfl.down.b32 hi|p, hi, %2, %3;"
-//             "  mov.b64 %0, {lo, hi};"
-//             "  @p add.s64 %0, %0, %1;"
-//             "}"
-//             : "=l"(output) : "l"(input), "r"(offset), "r"(shfl_c));
-// #endif
-
-        return output;
-    }
+//     }
 
 
-    /// Reduction (specialized for summation across double types)
-    __device__ __forceinline__ double ReduceStep(
-        double              input,              ///< [in] Calling thread's input item.
-        cub::Sum            /*reduction_op*/,   ///< [in] Binary reduction operator
-        int                 last_lane,          ///< [in] Index of last lane in segment
-        int                 offset)             ///< [in] Up-offset to pull from
-    {
-        double output;
-        int shfl_c = last_lane | SHFL_C;   // Shuffle control (mask and last_lane)
+//     /// Reduction (specialized for summation across long long types)
+//     __device__ __forceinline__ long long ReduceStep(
+//         long long           input,              ///< [in] Calling thread's input item.
+//         cub::Sum            /*reduction_op*/,   ///< [in] Binary reduction operator
+//         int                 last_lane,          ///< [in] Index of last lane in segment
+//         int                 offset)             ///< [in] Up-offset to pull from
+//     {
+//         long long output;
+//         int shfl_c = last_lane | SHFL_C;   // Shuffle control (mask and last_lane)
 
-        // Use predicate set from SHFL to guard against invalid peers
-// #ifdef CUB_USE_COOPERATIVE_GROUPS
-//         asm volatile(
-//             "{"
-//             "  .reg .u32 lo;"
-//             "  .reg .u32 hi;"
-//             "  .reg .pred p;"
-//             "  .reg .f64 r0;"
-//             "  mov.b64 %0, %1;"
-//             "  mov.b64 {lo, hi}, %1;"
-//             "  shfl.sync.down.b32 lo|p, lo, %2, %3, %4;"
-//             "  shfl.sync.down.b32 hi|p, hi, %2, %3, %4;"
-//             "  mov.b64 r0, {lo, hi};"
-//             "  @p add.f64 %0, %0, r0;"
-//             "}"
-//             : "=d"(output) : "d"(input), "r"(offset), "r"(shfl_c), "r"(member_mask));
-// #else
-//         asm volatile(
-//             "{"
-//             "  .reg .u32 lo;"
-//             "  .reg .u32 hi;"
-//             "  .reg .pred p;"
-//             "  .reg .f64 r0;"
-//             "  mov.b64 %0, %1;"
-//             "  mov.b64 {lo, hi}, %1;"
-//             "  shfl.down.b32 lo|p, lo, %2, %3;"
-//             "  shfl.down.b32 hi|p, hi, %2, %3;"
-//             "  mov.b64 r0, {lo, hi};"
-//             "  @p add.f64 %0, %0, r0;"
-//             "}"
-//             : "=d"(output) : "d"(input), "r"(offset), "r"(shfl_c));
-// #endif
+//         // Use predicate set from SHFL to guard against invalid peers
+// // #ifdef CUB_USE_COOPERATIVE_GROUPS
+// //         asm volatile(
+// //             "{"
+// //             "  .reg .u32 lo;"
+// //             "  .reg .u32 hi;"
+// //             "  .reg .pred p;"
+// //             "  mov.b64 {lo, hi}, %1;"
+// //             "  shfl.sync.down.b32 lo|p, lo, %2, %3, %4;"
+// //             "  shfl.sync.down.b32 hi|p, hi, %2, %3, %4;"
+// //             "  mov.b64 %0, {lo, hi};"
+// //             "  @p add.s64 %0, %0, %1;"
+// //             "}"
+// //             : "=l"(output) : "l"(input), "r"(offset), "r"(shfl_c), "r"(member_mask));
+// // #else
+// //         asm volatile(
+// //             "{"
+// //             "  .reg .u32 lo;"
+// //             "  .reg .u32 hi;"
+// //             "  .reg .pred p;"
+// //             "  mov.b64 {lo, hi}, %1;"
+// //             "  shfl.down.b32 lo|p, lo, %2, %3;"
+// //             "  shfl.down.b32 hi|p, hi, %2, %3;"
+// //             "  mov.b64 %0, {lo, hi};"
+// //             "  @p add.s64 %0, %0, %1;"
+// //             "}"
+// //             : "=l"(output) : "l"(input), "r"(offset), "r"(shfl_c));
+// // #endif
 
-        return output;
-    }
+//         return output;
+//     }
+
+
+//     /// Reduction (specialized for summation across double types)
+//     __device__ __forceinline__ double ReduceStep(
+//         double              input,              ///< [in] Calling thread's input item.
+//         cub::Sum            /*reduction_op*/,   ///< [in] Binary reduction operator
+//         int                 last_lane,          ///< [in] Index of last lane in segment
+//         int                 offset)             ///< [in] Up-offset to pull from
+//     {
+//         double output;
+//         int shfl_c = last_lane | SHFL_C;   // Shuffle control (mask and last_lane)
+
+//         // Use predicate set from SHFL to guard against invalid peers
+// // #ifdef CUB_USE_COOPERATIVE_GROUPS
+// //         asm volatile(
+// //             "{"
+// //             "  .reg .u32 lo;"
+// //             "  .reg .u32 hi;"
+// //             "  .reg .pred p;"
+// //             "  .reg .f64 r0;"
+// //             "  mov.b64 %0, %1;"
+// //             "  mov.b64 {lo, hi}, %1;"
+// //             "  shfl.sync.down.b32 lo|p, lo, %2, %3, %4;"
+// //             "  shfl.sync.down.b32 hi|p, hi, %2, %3, %4;"
+// //             "  mov.b64 r0, {lo, hi};"
+// //             "  @p add.f64 %0, %0, r0;"
+// //             "}"
+// //             : "=d"(output) : "d"(input), "r"(offset), "r"(shfl_c), "r"(member_mask));
+// // #else
+// //         asm volatile(
+// //             "{"
+// //             "  .reg .u32 lo;"
+// //             "  .reg .u32 hi;"
+// //             "  .reg .pred p;"
+// //             "  .reg .f64 r0;"
+// //             "  mov.b64 %0, %1;"
+// //             "  mov.b64 {lo, hi}, %1;"
+// //             "  shfl.down.b32 lo|p, lo, %2, %3;"
+// //             "  shfl.down.b32 hi|p, hi, %2, %3;"
+// //             "  mov.b64 r0, {lo, hi};"
+// //             "  @p add.f64 %0, %0, r0;"
+// //             "}"
+// //             : "=d"(output) : "d"(input), "r"(offset), "r"(shfl_c));
+// // #endif
+
+//         return output;
+//     }
 
 
     /// Reduction (specialized for swizzled ReduceByKeyOp<cub::Sum> across KeyValuePair<KeyT, ValueT> types)
