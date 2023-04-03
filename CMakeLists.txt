@@ -8,8 +8,12 @@ if (CMAKE_VERSION VERSION_GREATER_EQUAL 3.18)
   cmake_policy(SET CMP0104 OLD)
 endif()
 
+set( CMAKE_INSTALL_PREFIX "/usr/local/musa" CACHE PATH
+    "Install path prefix, prepended onto install directories" )
+
+set ( VERSION_STRING "0.1.0" )
 # CXX is only needed for AppendOptionIfAvailable.
-project(CUB NONE)
+project(muAlg_dev VERSION ${VERSION_STRING})
 
 # Determine whether CUB is the top-level project or included into
 # another project via add_subdirectory().
@@ -49,11 +53,11 @@ if (NOT CUB_TOPLEVEL_PROJECT AND NOT CUB_IN_THRUST)
 endif()
 
 option(CUB_ENABLE_HEADER_TESTING "Test that all public headers compile." ON)
-option(CUB_ENABLE_TESTING "Build CUB testing suite." ON)
-option(CUB_ENABLE_THOROUGH_TESTING "Build CUB thorough test variants." ON)
+option(CUB_ENABLE_TESTING "Build CUB testing suite." OFF)
+option(CUB_ENABLE_THOROUGH_TESTING "Build CUB thorough test variants." OFF)
 option(CUB_ENABLE_BENCHMARK_TESTING  "Build CUB benchmark test variants." OFF)
-option(CUB_ENABLE_MINIMAL_TESTING "Build CUB minimal test variants." ON)
-option(CUB_ENABLE_EXAMPLES "Build CUB examples." ON)
+option(CUB_ENABLE_MINIMAL_TESTING "Build CUB minimal test variants." OFF)
+option(CUB_ENABLE_EXAMPLES "Build CUB examples." OFF)
 # This is needed for NVCXX QA, which requires a static set of executable names.
 # Only a single dialect may be enabled when this is off.
 option(CUB_ENABLE_CPP_DIALECT_IN_NAMES

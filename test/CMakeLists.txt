@@ -7,7 +7,7 @@ foreach(cub_target IN LISTS CUB_TARGETS)
 endforeach()
 
 file(GLOB test_srcs
-  RELATIVE ${CUB_SOURCE_DIR}/test
+  RELATIVE ${PROJECT_SOURCE_DIR}/test
   CONFIGURE_DEPENDS
   test_*.cu
 )
@@ -38,7 +38,7 @@ function(cub_add_test target_name_var test_name test_src cub_target)
   musa_add_executable(${test_target} "${test_src}")
   target_link_libraries(${test_target} ${cub_target})
   cub_clone_target_properties(${test_target} ${cub_target})
-  target_include_directories(${test_target} PRIVATE "${CUB_SOURCE_DIR}/test")
+  target_include_directories(${test_target} PRIVATE "${PROJECT_SOURCE_DIR}/test")
 
   # Add to the active configuration's meta target
   add_dependencies(${config_meta_target} ${test_target})

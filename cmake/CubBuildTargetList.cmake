@@ -221,9 +221,9 @@ function(cub_build_target_list)
   cub_build_compiler_targets()
 
   # Set up the CUB target while testing out our find_package scripts.
-  find_package(CUB REQUIRED CONFIG
+  find_package(muAlg REQUIRED CONFIG
     NO_DEFAULT_PATH # Only check the explicit path in HINTS:
-    HINTS "${CUB_SOURCE_DIR}"
+    HINTS "${PROJECT_SOURCE_DIR}/cub/"
   )
 
   # TODO
@@ -270,7 +270,7 @@ function(cub_build_target_list)
   # aware of them. This will not generate build rules.
   file(GLOB_RECURSE all_sources
     RELATIVE "${CMAKE_CURRENT_LIST_DIR}"
-    "${CUB_SOURCE_DIR}/cub/*.cuh"
+    "${PROJECT_SOURCE_DIR}/cub/*.cuh"
   )
 
   # Add a cub.all target that builds all configs.

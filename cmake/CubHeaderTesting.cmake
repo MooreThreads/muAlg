@@ -8,7 +8,7 @@
 add_custom_target(cub.all.headers)
 
 file(GLOB_RECURSE headers
-  RELATIVE "${CUB_SOURCE_DIR}/cub"
+  RELATIVE "${PROJECT_SOURCE_DIR}/cub"
   CONFIGURE_DEPENDS
   cub/*.cuh
 )
@@ -16,7 +16,7 @@ file(GLOB_RECURSE headers
 set(headertest_srcs)
 foreach (header IN LISTS headers)
   set(headertest_src "${CMAKE_BINARY_DIR}/headers/${header}.cu")
-  configure_file("${CUB_SOURCE_DIR}/cmake/header_test.in" "${headertest_src}")
+  configure_file("${PROJECT_SOURCE_DIR}/cmake/header_test.in" "${headertest_src}")
   list(APPEND headertest_srcs "${headertest_src}")
 endforeach()
 
