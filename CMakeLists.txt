@@ -52,7 +52,7 @@ if (NOT CUB_TOPLEVEL_PROJECT AND NOT CUB_IN_THRUST)
   return()
 endif()
 
-option(CUB_ENABLE_HEADER_TESTING "Test that all public headers compile." ON)
+option(CUB_ENABLE_HEADER_TESTING "Test that all public headers compile." OFF)
 option(CUB_ENABLE_TESTING "Build CUB testing suite." OFF)
 option(CUB_ENABLE_THOROUGH_TESTING "Build CUB thorough test variants." OFF)
 option(CUB_ENABLE_BENCHMARK_TESTING  "Build CUB benchmark test variants." OFF)

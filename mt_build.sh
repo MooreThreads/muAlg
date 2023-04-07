@@ -29,8 +29,8 @@
 # OF THE SOFTWARE.
 
 workdir="$(cd -- "$(dirname "$0")" >/dev/null 2>&1 ; pwd -P)"
-
-op_type="install"
+BUILD_DIR=$(cd `dirname $0`; pwd)/build
+op_type="package"
 
 ### the following line is no need to modify, it will be modified automatically by build.sh
 install_prefix=/usr/local/musa
@@ -39,6 +39,7 @@ usage() {
     echo -e "musa toolkits install script"
     echo -e "Usage:"
     echo -e "$0 <options>"
+    echo -e "   [-p | --package]"
     echo -e "   [-i | --install]"
     echo -e "   [-u | --uninstall]"
     echo -e "   [-d | --prefix=<install_prefix>]"
@@ -65,22 +66,50 @@ element_in () {
     return 0
 }
 
+package_func () {
+    mkdir -p ${BUILD_DIR}
+    pushd ${BUILD_DIR}
+    cmake \
+      -DCMAKE_INSTALL_PREFIX=${install_prefix} \
+      .. 2>&1 | tee cmake.log
+    if [ "$UID" -ne "0" ]; then
+      sudo cmake --build . --target package  2>&1 | tee package.log
+    else
+      cmake --build . --target package  2>&1 | tee package.log
+    fi
+    popd
+}
+
 install_func () {
-    mkdir -p ${install_prefix}/include/cub
-    cp -vrf ${workdir}/cub/* ${install_prefix}/include/cub
+    mkdir -p ${BUILD_DIR}
+    pushd ${BUILD_DIR}
+    cmake \
+      -DCMAKE_INSTALL_PREFIX=${install_prefix} \
+      .. 2>&1 | tee cmake.log
+    if [ "$UID" -ne "0" ]; then
+      sudo cmake --build . --target install  2>&1 | tee install.log
+    else
+      cmake --build . --target install  2>&1 | tee install.log
+    fi
+    popd
 }
 
 uninstall_func () {
-    \rm -vrf ${install_prefix}/include/cub
+    if [ "$UID" -ne "0" ]; then
+      sudo \rm -vrf ${install_prefix}/include/cub
+    else
+      \rm -vrf ${install_prefix}/include/cub
+    fi
 }
 
-while getopts d:-:iuh OPT; do
+while getopts d:-:piuh OPT; do
     if [ "$OPT" = "-" ]; then   # long option: reformulate OPT and OPTARG
         OPT="${OPTARG%%=*}"       # extract long option name
         OPTARG="${OPTARG#$OPT}"   # extract long option argument (may be empty)
         OPTARG="${OPTARG#=}"      # if long option argument, remove assigning `=`
     fi
     case "$OPT" in
+        p | package )    op_type=package;;
         i | install )    op_type=install;;
         u | uninstall )    op_type=uninstall;;
         d | prefix )        needs_arg; install_prefix="$OPTARG";;
@@ -95,12 +124,17 @@ OTHER_ARGS_TMP=( ${OTHER_ARGS} )
 OTHER_ARGS_LEN=${#OTHER_ARGS_TMP[@]}
 # echo "OTHER_ARGS: ${OTHER_ARGS}"
 
+if [[ "$op_type" == "package" ]]; then
+  echo "package  ..."
+  package_func
+fi
+
 if [[ "$op_type" == "install" ]]; then
-  echo "install muAlg ..."
+  echo "install  ..."
   install_func
 fi
 
 if [[ "$op_type" == "uninstall" ]]; then
-  echo "uninstall muAlg ..."
+  echo "uninstall  ..."
   uninstall_func
 fi
