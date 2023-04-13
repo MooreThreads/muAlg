@@ -131,89 +131,89 @@ struct WarpReduceShfl
     // Reduction steps
     //---------------------------------------------------------------------
 
-    /// Reduction (specialized for summation across uint32 types)
-    __device__ __forceinline__ unsigned int ReduceStep(
-        unsigned int    input,              ///< [in] Calling thread's input item.
-        cub::Sum        /*reduction_op*/,   ///< [in] Binary reduction operator
-        int             last_lane,          ///< [in] Index of last lane in segment
-        int             offset)             ///< [in] Up-offset to pull from
-    {
-        unsigned int output;
-        int shfl_c = last_lane | SHFL_C;   // Shuffle control (mask and last_lane)
+//     /// Reduction (specialized for summation across uint32 types)
+//     __device__ __forceinline__ unsigned int ReduceStep(
+//         unsigned int    input,              ///< [in] Calling thread's input item.
+//         cub::Sum        /*reduction_op*/,   ///< [in] Binary reduction operator
+//         int             last_lane,          ///< [in] Index of last lane in segment
+//         int             offset)             ///< [in] Up-offset to pull from
+//     {
+//         unsigned int output;
+//         int shfl_c = last_lane | SHFL_C;   // Shuffle control (mask and last_lane)
 
-        // Use predicate set from SHFL to guard against invalid peers
-// #ifdef CUB_USE_COOPERATIVE_GROUPS
-//         asm volatile(
-//             "{"
-//             "  .reg .u32 r0;"
-//             "  .reg .pred p;"
-//             "  shfl.sync.down.b32 r0|p, %1, %2, %3, %5;"
-//             "  @p add.u32 r0, r0, %4;"
-//             "  mov.u32 %0, r0;"
-//             "}"
-//             : "=r"(output) : "r"(input), "r"(offset), "r"(shfl_c), "r"(input), "r"(member_mask));
-// #else
-//         asm volatile(
-//             "{"
-//             "  .reg .u32 r0;"
-//             "  .reg .pred p;"
-//             "  shfl.down.b32 r0|p, %1, %2, %3;"
-//             "  @p add.u32 r0, r0, %4;"
-//             "  mov.u32 %0, r0;"
-//             "}"
-//             : "=r"(output) : "r"(input), "r"(offset), "r"(shfl_c), "r"(input));
-// #endif
-        int width = 32 - (shfl_c >> 8);
-        bool pred = false;
-        output = __shfl_down_sync(member_mask, input, offset, width, &pred);
-        if (pred) {
-          output += input;
-        }
-        return output;
-    }
+//         // Use predicate set from SHFL to guard against invalid peers
+// // #ifdef CUB_USE_COOPERATIVE_GROUPS
+// //         asm volatile(
+// //             "{"
+// //             "  .reg .u32 r0;"
+// //             "  .reg .pred p;"
+// //             "  shfl.sync.down.b32 r0|p, %1, %2, %3, %5;"
+// //             "  @p add.u32 r0, r0, %4;"
+// //             "  mov.u32 %0, r0;"
+// //             "}"
+// //             : "=r"(output) : "r"(input), "r"(offset), "r"(shfl_c), "r"(input), "r"(member_mask));
+// // #else
+// //         asm volatile(
+// //             "{"
+// //             "  .reg .u32 r0;"
+// //             "  .reg .pred p;"
+// //             "  shfl.down.b32 r0|p, %1, %2, %3;"
+// //             "  @p add.u32 r0, r0, %4;"
+// //             "  mov.u32 %0, r0;"
+// //             "}"
+// //             : "=r"(output) : "r"(input), "r"(offset), "r"(shfl_c), "r"(input));
+// // #endif
+//         int width = (32 - shfl_c) >> 8;
+//         bool pred = false;
+//         output = __shfl_down_sync(member_mask, input, offset, width, &pred);
+//         if (pred) {
+//           output += input;
+//         }
+//         return output;
+//     }
 
 
-    /// Reduction (specialized for summation across fp32 types)
-    __device__ __forceinline__ float ReduceStep(
-        float           input,              ///< [in] Calling thread's input item.
-        cub::Sum        /*reduction_op*/,   ///< [in] Binary reduction operator
-        int             last_lane,          ///< [in] Index of last lane in segment
-        int             offset)             ///< [in] Up-offset to pull from
-    {
-        float output;
-        int shfl_c = last_lane | SHFL_C;   // Shuffle control (mask and last_lane)
+//     /// Reduction (specialized for summation across fp32 types)
+//     __device__ __forceinline__ float ReduceStep(
+//         float           input,              ///< [in] Calling thread's input item.
+//         cub::Sum        /*reduction_op*/,   ///< [in] Binary reduction operator
+//         int             last_lane,          ///< [in] Index of last lane in segment
+//         int             offset)             ///< [in] Up-offset to pull from
+//     {
+//         float output;
+//         int shfl_c = last_lane | SHFL_C;   // Shuffle control (mask and last_lane)
 
-        // Use predicate set from SHFL to guard against invalid peers
-// #ifdef CUB_USE_COOPERATIVE_GROUPS
-//         asm volatile(
-//             "{"
-//             "  .reg .f32 r0;"
-//             "  .reg .pred p;"
-//             "  shfl.sync.down.b32 r0|p, %1, %2, %3, %5;"
-//             "  @p add.f32 r0, r0, %4;"
-//             "  mov.f32 %0, r0;"
-//             "}"
-//             : "=f"(output) : "f"(input), "r"(offset), "r"(shfl_c), "f"(input), "r"(member_mask));
-// #else
-//         asm volatile(
-//             "{"
-//             "  .reg .f32 r0;"
-//             "  .reg .pred p;"
-//             "  shfl.down.b32 r0|p, %1, %2, %3;"
-//             "  @p add.f32 r0, r0, %4;"
-//             "  mov.f32 %0, r0;"
-//             "}"
-//             : "=f"(output) : "f"(input), "r"(offset), "r"(shfl_c), "f"(input));
-// #endif
+//         // Use predicate set from SHFL to guard against invalid peers
+// // #ifdef CUB_USE_COOPERATIVE_GROUPS
+// //         asm volatile(
+// //             "{"
+// //             "  .reg .f32 r0;"
+// //             "  .reg .pred p;"
+// //             "  shfl.sync.down.b32 r0|p, %1, %2, %3, %5;"
+// //             "  @p add.f32 r0, r0, %4;"
+// //             "  mov.f32 %0, r0;"
+// //             "}"
+// //             : "=f"(output) : "f"(input), "r"(offset), "r"(shfl_c), "f"(input), "r"(member_mask));
+// // #else
+// //         asm volatile(
+// //             "{"
+// //             "  .reg .f32 r0;"
+// //             "  .reg .pred p;"
+// //             "  shfl.down.b32 r0|p, %1, %2, %3;"
+// //             "  @p add.f32 r0, r0, %4;"
+// //             "  mov.f32 %0, r0;"
+// //             "}"
+// //             : "=f"(output) : "f"(input), "r"(offset), "r"(shfl_c), "f"(input));
+// // #endif
 
-        int width = 32 - (shfl_c >> 8);
-        bool pred = false;
-        output = __shfl_down_sync(member_mask, input, offset, width, &pred);
-        if (pred) {
-          output += input;
-        }
-        return output;
-    }
+//         int width = 32 - (shfl_c >> 8);
+//         bool pred = false;
+//         output = __shfl_down_sync(member_mask, input, offset, width, &pred);
+//         if (pred) {
+//           output += input;
+//         }
+//         return output;
+//     }
 
 
 //     /// Reduction (specialized for summation across unsigned long long types)
