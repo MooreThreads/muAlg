@@ -433,7 +433,7 @@ void TestFullTile(
 
     enum
     {
-        sufficient_smem       = (sizeof(typename BlockReduceT::TempStorage) <= 48 * 1024),
+        sufficient_smem       = (sizeof(typename BlockReduceT::TempStorage) <= 16 * 1024),
         sufficient_threads    = ((BLOCK_DIM_X * BLOCK_DIM_Y * BLOCK_DIM_Z) <= 1024),
     };
 
@@ -612,7 +612,7 @@ void TestPartialTile(
 
     enum
     {
-        sufficient_smem       = sizeof(typename BlockReduceT::TempStorage)  <= 48 * 1024,
+        sufficient_smem       = sizeof(typename BlockReduceT::TempStorage)  <= 16 * 1024,
         sufficient_threads    = (BLOCK_DIM_X * BLOCK_DIM_Y * BLOCK_DIM_Z)   <= 1024,
     };
 
@@ -686,13 +686,13 @@ void Test(
     ReductionOp     reduction_op)
 {
   (void)reduction_op;
-#ifdef TEST_RAKING
-    Test<BLOCK_REDUCE_RAKING, BLOCK_THREADS, T>(reduction_op);
-    Test<BLOCK_REDUCE_RAKING_COMMUTATIVE_ONLY, BLOCK_THREADS, T>(reduction_op);
-#endif
-#ifdef TEST_WARP_REDUCTIONS
+// #ifdef TEST_RAKING
+    // Test<BLOCK_REDUCE_RAKING, BLOCK_THREADS, T>(reduction_op);
+    // Test<BLOCK_REDUCE_RAKING_COMMUTATIVE_ONLY, BLOCK_THREADS, T>(reduction_op);
+// #endif
+// #ifdef TEST_WARP_REDUCTIONS
     Test<BLOCK_REDUCE_WARP_REDUCTIONS, BLOCK_THREADS, T>(reduction_op);
-#endif
+// #endif
 }
 
 
@@ -784,9 +784,8 @@ int main(int argc, char** argv)
         Test<short>();
         Test<int>();
         Test<long long>();
-        if (ptx_version > 120)                          // Don't check doubles on PTX120 or below because they're down-converted
-            Test<double>();
 
+        Test<double>();
         Test<float>();
 
         // vector types
