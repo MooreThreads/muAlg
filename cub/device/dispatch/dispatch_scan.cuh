@@ -156,9 +156,9 @@ struct DeviceScanPolicy
         typedef AgentScanPolicy<
                 128, 12,                                        ///< Threads per block, items per thread
                 OutputT,
-                ScanTransposedLoad,
+                BLOCK_LOAD_DIRECT,
                 LOAD_DEFAULT,
-                ScanTransposedStore,
+                BLOCK_STORE_DIRECT,
                 BLOCK_SCAN_WARP_SCANS>
             ScanPolicyT;
     };
