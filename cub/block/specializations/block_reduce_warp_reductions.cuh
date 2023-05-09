@@ -155,16 +155,7 @@ struct BlockReduceWarpReductions
         // Update total aggregate in warp 0, lane 0
         if (linear_tid == 0)
         {
-            for(int i = 1; i < WARPS; i++)
-            {
-                if(FULL_TILE || (i * LOGICAL_WARP_SIZE < num_valid))
-                {
-                  T addend = temp_storage.warp_aggregates[i];
-                  warp_aggregate = reduction_op(warp_aggregate, addend);
-                } 
-                else break; 
-            }
-            // warp_aggregate = ApplyWarpAggregates<FULL_TILE>(reduction_op, warp_aggregate, num_valid, Int2Type<1>());
+            warp_aggregate = ApplyWarpAggregates<FULL_TILE>(reduction_op, warp_aggregate, num_valid, Int2Type<1>());
         }
 
         return warp_aggregate;
