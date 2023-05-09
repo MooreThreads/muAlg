@@ -115,7 +115,8 @@ enum ScanTileStatus
  */
 template <
     typename    T,
-    bool        SINGLE_WORD = false>
+    bool        SINGLE_WORD = false //Traits<T>::PRIMITIVE
+    > 
 struct ScanTileState;
 
 

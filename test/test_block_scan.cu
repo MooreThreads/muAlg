@@ -838,7 +838,7 @@ void Test()
     Test<BLOCK_THREADS, ITEMS_PER_THREAD>(Sum(), make_short4(0, 0, 0, 0), make_short4(17, 21, 32, 85));
     Test<BLOCK_THREADS, ITEMS_PER_THREAD>(Sum(), make_int4(0, 0, 0, 0), make_int4(17, 21, 32, 85));
     Test<BLOCK_THREADS, ITEMS_PER_THREAD>(Sum(), make_longlong4(0, 0, 0, 0), make_longlong4(17, 21, 32, 85));
-
+    Test<BLOCK_THREADS, ITEMS_PER_THREAD>(Max(), make_longlong4(std::numeric_limits<long long>::min(), std::numeric_limits<long long>::min(), std::numeric_limits<long long>::min(), std::numeric_limits<long long>::min()), make_longlong4(17, 21, 32, 85));
     // complex
     Test<BLOCK_THREADS, ITEMS_PER_THREAD>(Sum(), TestFoo::MakeTestFoo(0, 0, 0, 0), TestFoo::MakeTestFoo(17, 21, 32, 85));
     Test<BLOCK_THREADS, ITEMS_PER_THREAD>(Sum(), TestBar(0, 0), TestBar(17, 21));
@@ -852,10 +852,9 @@ void Test()
 template <int BLOCK_THREADS>
 void Test()
 {
-    // Test<BLOCK_THREADS, 1>();
-    // Test<BLOCK_THREADS, 2>();
-    // Test<BLOCK_THREADS, 9>();
-    Test<BLOCK_THREADS, 8>();
+    Test<BLOCK_THREADS, 1>();
+    Test<BLOCK_THREADS, 2>();
+    Test<BLOCK_THREADS, 9>();
 }
 
 
@@ -902,9 +901,9 @@ int main(int argc, char** argv)
     // Compile/run thorough tests
     for (int i = 0; i <= g_repeat; ++i)
     {
-        // Run tests for different thread block sizes
+        // Run tests for different thread block sizes  none 2^n will use ranking!
         // Test<17>();
-        // Test<32>();
+        Test<32>();
         // Test<62>();
         // Test<65>();
 //            Test<96>();             // TODO: file bug for UNREACHABLE error for Test<96, 9, BASIC, BLOCK_SCAN_RAKING>(UNIFORM, Sum(), NullType(), make_ulonglong2(17, 21));

@@ -419,68 +419,68 @@ struct AgentScan
     }
 
 
-    /**
-     * Scan a consecutive share of input tiles
-     */
-    __device__ __forceinline__ void ConsumeRange(
-        OffsetT  range_offset,      ///< [in] Threadblock begin offset (inclusive)
-        OffsetT  range_end)         ///< [in] Threadblock end offset (exclusive)
-    {
-        BlockScanRunningPrefixOp<OutputT, ScanOpT> prefix_op(scan_op);
+    // /**
+    //  * Scan a consecutive share of input tiles
+    //  */
+    // __device__ __forceinline__ void ConsumeRange(
+    //     OffsetT  range_offset,      ///< [in] Threadblock begin offset (inclusive)
+    //     OffsetT  range_end)         ///< [in] Threadblock end offset (exclusive)
+    // {
+    //     BlockScanRunningPrefixOp<OutputT, ScanOpT> prefix_op(scan_op);
 
-        if (range_offset + TILE_ITEMS <= range_end)
-        {
-            // Consume first tile of input (full)
-            ConsumeTile<true, true>(range_offset, prefix_op);
-            range_offset += TILE_ITEMS;
+    //     if (range_offset + TILE_ITEMS <= range_end)
+    //     {
+    //         // Consume first tile of input (full)
+    //         ConsumeTile<true, true>(range_offset, prefix_op);
+    //         range_offset += TILE_ITEMS;
 
-            // Consume subsequent full tiles of input
-            while (range_offset + TILE_ITEMS <= range_end)
-            {
-                ConsumeTile<false, true>(range_offset, prefix_op);
-                range_offset += TILE_ITEMS;
-            }
+    //         // Consume subsequent full tiles of input
+    //         while (range_offset + TILE_ITEMS <= range_end)
+    //         {
+    //             ConsumeTile<false, true>(range_offset, prefix_op);
+    //             range_offset += TILE_ITEMS;
+    //         }
 
-            // Consume a partially-full tile
-            if (range_offset < range_end)
-            {
-                int valid_items = range_end - range_offset;
-                ConsumeTile<false, false>(range_offset, prefix_op, valid_items);
-            }
-        }
-        else
-        {
-            // Consume the first tile of input (partially-full)
-            int valid_items = range_end - range_offset;
-            ConsumeTile<true, false>(range_offset, prefix_op, valid_items);
-        }
-    }
+    //         // Consume a partially-full tile
+    //         if (range_offset < range_end)
+    //         {
+    //             int valid_items = range_end - range_offset;
+    //             ConsumeTile<false, false>(range_offset, prefix_op, valid_items);
+    //         }
+    //     }
+    //     else
+    //     {
+    //         // Consume the first tile of input (partially-full)
+    //         int valid_items = range_end - range_offset;
+    //         ConsumeTile<true, false>(range_offset, prefix_op, valid_items);
+    //     }
+    // }
 
 
-    /**
-     * Scan a consecutive share of input tiles, seeded with the specified prefix value
-     */
-    __device__ __forceinline__ void ConsumeRange(
-        OffsetT range_offset,                       ///< [in] Threadblock begin offset (inclusive)
-        OffsetT range_end,                          ///< [in] Threadblock end offset (exclusive)
-        OutputT prefix)                             ///< [in] The prefix to apply to the scan segment
-    {
-        BlockScanRunningPrefixOp<OutputT, ScanOpT> prefix_op(prefix, scan_op);
+    // /**
+    //  * Scan a consecutive share of input tiles, seeded with the specified prefix value
+    //  */
+    // __device__ __forceinline__ void ConsumeRange(
+    //     OffsetT range_offset,                       ///< [in] Threadblock begin offset (inclusive)
+    //     OffsetT range_end,                          ///< [in] Threadblock end offset (exclusive)
+    //     OutputT prefix)                             ///< [in] The prefix to apply to the scan segment
+    // {
+    //     BlockScanRunningPrefixOp<OutputT, ScanOpT> prefix_op(prefix, scan_op);
 
-        // Consume full tiles of input
-        while (range_offset + TILE_ITEMS <= range_end)
-        {
-            ConsumeTile<true, false>(range_offset, prefix_op);
-            range_offset += TILE_ITEMS;
-        }
+    //     // Consume full tiles of input
+    //     while (range_offset + TILE_ITEMS <= range_end)
+    //     {
+    //         ConsumeTile<true, false>(range_offset, prefix_op);
+    //         range_offset += TILE_ITEMS;
+    //     }
 
-        // Consume a partially-full tile
-        if (range_offset < range_end)
-        {
-            int valid_items = range_end - range_offset;
-            ConsumeTile<false, false>(range_offset, prefix_op, valid_items);
-        }
-    }
+    //     // Consume a partially-full tile
+    //     if (range_offset < range_end)
+    //     {
+    //         int valid_items = range_end - range_offset;
+    //         ConsumeTile<false, false>(range_offset, prefix_op, valid_items);
+    //     }
+    // }
 
 };
 
