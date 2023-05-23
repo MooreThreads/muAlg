@@ -422,12 +422,10 @@ struct WarpScanShfl
         int             offset)             ///< [in] Up-offset to pull from
     {
         _T temp = ShuffleUp<LOGICAL_WARP_THREADS>(input, offset, first_lane, member_mask);
-        // printf("input%d, %u, %u, %u, %u\n", threadIdx.x, input.x, input.y, input.x, input.y);
-        // printf("temp%d, %u, %u, %u, %u\n", threadIdx.x, temp.x, temp.y, temp.x, temp.y);
+
         // Perform scan op if from a valid peer
         _T output = scan_op(temp, input);
-        // printf("output%d, %u, %u, %u, %u\n", threadIdx.x, output.x, output.y, output.x, output.y);
-        // printf("T(%d):%ld, %ld, %ld\n", sizeof(_T), temp, input, output);
+
         if (static_cast<int>(lane_id) < first_lane + offset)
             output = input;
 

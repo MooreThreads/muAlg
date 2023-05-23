@@ -154,16 +154,32 @@ struct DispatchSelectIf
      * Tuning policies
      ******************************************************************************/
 
-    /// SM35
+    // /// SM35
+    // struct Policy350
+    // {
+    //     enum {
+    //         NOMINAL_4B_ITEMS_PER_THREAD = 10,
+    //         ITEMS_PER_THREAD            = CUB_MIN(NOMINAL_4B_ITEMS_PER_THREAD, CUB_MAX(1, (NOMINAL_4B_ITEMS_PER_THREAD * 4 / sizeof(OutputT)))),
+    //     };
+
+    //     typedef AgentSelectIfPolicy<
+    //             128,
+    //             ITEMS_PER_THREAD,
+    //             BLOCK_LOAD_DIRECT,
+    //             LOAD_LDG,
+    //             BLOCK_SCAN_WARP_SCANS>
+    //         SelectIfPolicyT;
+    // };
+
     struct Policy350
     {
         enum {
-            NOMINAL_4B_ITEMS_PER_THREAD = 10,
+            NOMINAL_4B_ITEMS_PER_THREAD = 1,
             ITEMS_PER_THREAD            = CUB_MIN(NOMINAL_4B_ITEMS_PER_THREAD, CUB_MAX(1, (NOMINAL_4B_ITEMS_PER_THREAD * 4 / sizeof(OutputT)))),
         };
 
         typedef AgentSelectIfPolicy<
-                128,
+                256,
                 ITEMS_PER_THREAD,
                 BLOCK_LOAD_DIRECT,
                 LOAD_LDG,
