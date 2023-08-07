@@ -11,9 +11,11 @@ endif()
 set( CMAKE_INSTALL_PREFIX "/usr/local/musa" CACHE PATH
     "Install path prefix, prepended onto install directories" )
 
-set ( VERSION_STRING "0.1.0" )
+set ( VERSION_STRING "0.2.0" )
 # CXX is only needed for AppendOptionIfAvailable.
 project(muAlg_dev VERSION ${VERSION_STRING})
+include(./module_version/generate_version_query.cmake)
+add_version_query(${VERSION_STRING})
 
 # Determine whether CUB is the top-level project or included into
 # another project via add_subdirectory().

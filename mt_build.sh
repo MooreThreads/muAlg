@@ -72,11 +72,8 @@ package_func () {
     cmake \
       -DCMAKE_INSTALL_PREFIX=${install_prefix} \
       .. 2>&1 | tee cmake.log
-    if [ "$UID" -ne "0" ]; then
-      sudo cmake --build . --target package  2>&1 | tee package.log
-    else
-      cmake --build . --target package  2>&1 | tee package.log
-    fi
+    cmake --build .  2>&1 | tee build.log
+    cmake --build . --target package  2>&1 | tee package.log
     popd
 }
 
@@ -86,7 +83,8 @@ install_func () {
     cmake \
       -DCMAKE_INSTALL_PREFIX=${install_prefix} \
       .. 2>&1 | tee cmake.log
-    if [ "$UID" -ne "0" ]; then
+    cmake --build .  2>&1 | tee build.log
+    if [ ! -w ${install_prefix} ]; then
       sudo cmake --build . --target install  2>&1 | tee install.log
     else
       cmake --build . --target install  2>&1 | tee install.log
