@@ -413,7 +413,7 @@ unsigned int SHFL_IDX_SYNC(unsigned int word, int src_lane, unsigned int member_
  */
 __device__ __forceinline__ void ThreadExit() {
     // asm volatile("exit;");
-    __mtgpu_exit();
+    __musa_exit();
     return;
 }    
 
