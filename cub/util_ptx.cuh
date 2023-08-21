@@ -268,9 +268,9 @@ __device__  __forceinline__ int CTA_SYNC_OR(int p)
  */
 __device__  __forceinline__ void WARP_SYNC(unsigned int member_mask)
 {
-#ifdef CUB_USE_COOPERATIVE_GROUPS
+// #ifdef CUB_USE_COOPERATIVE_GROUPS
     __syncwarp(member_mask);
-#endif
+// #endif
 }
 
 
@@ -279,11 +279,11 @@ __device__  __forceinline__ void WARP_SYNC(unsigned int member_mask)
  */
 __device__  __forceinline__ int WARP_ANY(int predicate, unsigned int member_mask)
 {
-#ifdef CUB_USE_COOPERATIVE_GROUPS
+// #ifdef CUB_USE_COOPERATIVE_GROUPS
     return __any_sync(member_mask, predicate);
-#else
-    return ::__any(predicate);
-#endif
+// #else
+//     return ::__any(predicate);
+// #endif
 }
 
 
@@ -292,11 +292,11 @@ __device__  __forceinline__ int WARP_ANY(int predicate, unsigned int member_mask
  */
 __device__  __forceinline__ int WARP_ALL(int predicate, unsigned int member_mask)
 {
-#ifdef CUB_USE_COOPERATIVE_GROUPS
+// #ifdef CUB_USE_COOPERATIVE_GROUPS
     return __all_sync(member_mask, predicate);
-#else
-    return ::__all(predicate);
-#endif
+// #else
+//     return ::__all(predicate);
+// #endif
 }
 
 
@@ -305,11 +305,11 @@ __device__  __forceinline__ int WARP_ALL(int predicate, unsigned int member_mask
  */
 __device__  __forceinline__ int WARP_BALLOT(int predicate, unsigned int member_mask)
 {
-#ifdef CUB_USE_COOPERATIVE_GROUPS
+// #ifdef CUB_USE_COOPERATIVE_GROUPS
     return __ballot_sync(member_mask, predicate);
-#else
-    return __ballot(predicate);
-#endif
+// #else
+//     return __ballot(predicate);
+// #endif
 }
 
 
@@ -376,11 +376,11 @@ unsigned int SHFL_IDX_SYNC(unsigned int word, int src_lane, int flags, unsigned 
 __device__ __forceinline__ 
 unsigned int SHFL_IDX_SYNC(unsigned int word, int src_lane, unsigned int member_mask)
 {
-#ifdef CUB_USE_COOPERATIVE_GROUPS
+// #ifdef CUB_USE_COOPERATIVE_GROUPS
   return __shfl_sync(member_mask, word, src_lane);
-#else
-  return __shfl(word, src_lane);
-#endif
+// #else
+//   return __shfl(word, src_lane);
+// #endif
 }
 
 // /**
