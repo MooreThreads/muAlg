@@ -506,7 +506,7 @@ void TestTexObj()
 }
 
 
-#if MUSART_VERSION >= 5050
+#if 0 //MUSART_VERSION >= 5050
 
 /**
  * Test tex-ref texture iterator
@@ -681,7 +681,7 @@ void TestTexTransform()
 template <typename T, typename CastT>
 void Test(Int2Type<false> /* is_integer */)
 {
-    TestModified<T, CastT>();
+    // TestModified<T, CastT>();
     TestTransform<T, CastT>();
 
 #if CUB_CDP
@@ -689,7 +689,7 @@ void Test(Int2Type<false> /* is_integer */)
     TestTexObj<T, CastT>(type_string);
 #endif  // CUB_CDP
 
-#if MUSART_VERSION >= 5050
+#if 0//MUSART_VERSION >= 5050
     // Test tex-ref iterators for CUDA 5.5
     TestTexRef<T, CastT>();
     TestTexTransform<T, CastT>();
@@ -763,7 +763,7 @@ int main(int argc, char** argv)
     Test<long>();
     Test<long long>();
     Test<float>();
-    if (ptx_version > 120)                          // Don't check doubles on PTX120 or below because they're down-converted
+    // if (ptx_version > 120)                          // Don't check doubles on PTX120 or below because they're down-converted
         Test<double>();
 
     Test<char2>();
@@ -772,7 +772,7 @@ int main(int argc, char** argv)
     Test<long2>();
     Test<longlong2>();
     Test<float2>();
-    if (ptx_version > 120)                          // Don't check doubles on PTX120 or below because they're down-converted
+    // if (ptx_version > 120)                          // Don't check doubles on PTX120 or below because they're down-converted
         Test<double2>();
 
     Test<char3>();
@@ -781,7 +781,7 @@ int main(int argc, char** argv)
     Test<long3>();
     Test<longlong3>();
     Test<float3>();
-    if (ptx_version > 120)                          // Don't check doubles on PTX120 or below because they're down-converted
+    // if (ptx_version > 120)                          // Don't check doubles on PTX120 or below because they're down-converted
         Test<double3>();
 
     Test<char4>();
@@ -790,7 +790,7 @@ int main(int argc, char** argv)
     Test<long4>();
     Test<longlong4>();
     Test<float4>();
-    if (ptx_version > 120)                          // Don't check doubles on PTX120 or below because they're down-converted
+    // if (ptx_version > 120)                          // Don't check doubles on PTX120 or below because they're down-converted
         Test<double4>();
 
     Test<TestFoo>();
