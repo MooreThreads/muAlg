@@ -401,7 +401,7 @@ void TestPointerType(
     static const bool sufficient_resources  = sufficient_load_smem && sufficient_store_smem && sufficient_threads;
 
     TestNative<T, BLOCK_THREADS, ITEMS_PER_THREAD, LOAD_ALGORITHM, STORE_ALGORITHM>(grid_size, fraction_valid, Int2Type<sufficient_resources>());
-    // TestIterator<T, BLOCK_THREADS, ITEMS_PER_THREAD, LOAD_ALGORITHM, STORE_ALGORITHM, LOAD_DEFAULT, STORE_DEFAULT>(grid_size, fraction_valid, Int2Type<sufficient_resources>());
+    TestIterator<T, BLOCK_THREADS, ITEMS_PER_THREAD, LOAD_ALGORITHM, STORE_ALGORITHM, LOAD_DEFAULT, STORE_DEFAULT>(grid_size, fraction_valid, Int2Type<sufficient_resources>());
 }
 
 

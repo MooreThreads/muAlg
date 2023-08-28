@@ -681,7 +681,7 @@ void TestTexTransform()
 template <typename T, typename CastT>
 void Test(Int2Type<false> /* is_integer */)
 {
-    // TestModified<T, CastT>();
+    TestModified<T, CastT>();
     TestTransform<T, CastT>();
 
 #if CUB_CDP
