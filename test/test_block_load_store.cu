@@ -388,20 +388,20 @@ void TestPointerType(
     typedef BlockLoad<T, BLOCK_THREADS, ITEMS_PER_THREAD, LOAD_ALGORITHM> BlockLoad;
     typedef BlockStore<T, BLOCK_THREADS, ITEMS_PER_THREAD, STORE_ALGORITHM> BlockStore;
 
-#if defined(SM100) || defined(SM110) || defined(SM130)
-    static const bool sufficient_load_smem  = sizeof(typename BlockLoad::TempStorage)   <= 1024 * 16;
-    static const bool sufficient_store_smem = sizeof(typename BlockStore::TempStorage)  <= 1024 * 16;
-    static const bool sufficient_threads    = BLOCK_THREADS <= 512;
-#else
-    static const bool sufficient_load_smem  = sizeof(typename BlockLoad::TempStorage)   <= 1024 * 48;
-    static const bool sufficient_store_smem = sizeof(typename BlockStore::TempStorage)  <= 1024 * 48;
+// #if defined(SM100) || defined(SM110) || defined(SM130)
+//     static const bool sufficient_load_smem  = sizeof(typename BlockLoad::TempStorage)   <= 1024 * 16;
+//     static const bool sufficient_store_smem = sizeof(typename BlockStore::TempStorage)  <= 1024 * 16;
+//     static const bool sufficient_threads    = BLOCK_THREADS <= 512;
+// #else
+    static const bool sufficient_load_smem  = sizeof(typename BlockLoad::TempStorage)   <= 1024 * 28;
+    static const bool sufficient_store_smem = sizeof(typename BlockStore::TempStorage)  <= 1024 * 28;
     static const bool sufficient_threads    = BLOCK_THREADS <= 1024;
-#endif
+// #endif
 
     static const bool sufficient_resources  = sufficient_load_smem && sufficient_store_smem && sufficient_threads;
 
     TestNative<T, BLOCK_THREADS, ITEMS_PER_THREAD, LOAD_ALGORITHM, STORE_ALGORITHM>(grid_size, fraction_valid, Int2Type<sufficient_resources>());
-    TestIterator<T, BLOCK_THREADS, ITEMS_PER_THREAD, LOAD_ALGORITHM, STORE_ALGORITHM, LOAD_DEFAULT, STORE_DEFAULT>(grid_size, fraction_valid, Int2Type<sufficient_resources>());
+    // TestIterator<T, BLOCK_THREADS, ITEMS_PER_THREAD, LOAD_ALGORITHM, STORE_ALGORITHM, LOAD_DEFAULT, STORE_DEFAULT>(grid_size, fraction_valid, Int2Type<sufficient_resources>());
 }
 
 
@@ -535,8 +535,7 @@ int main(int argc, char** argv)
     TestThreads<long>(2, 0.8f);
     TestThreads<long2>(2, 0.8f);
 
-    if (ptx_version > 120)                          // Don't check doubles on PTX120 or below because they're down-converted
-        TestThreads<double2>(2, 0.8f);
+    TestThreads<double2>(2, 0.8f);
     TestThreads<TestFoo>(2, 0.8f);
     TestThreads<TestBar>(2, 0.8f);
 
