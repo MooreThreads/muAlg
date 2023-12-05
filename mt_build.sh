@@ -34,6 +34,7 @@ op_type="package"
 
 ### the following line is no need to modify, it will be modified automatically by build.sh
 install_prefix=/usr/local/musa
+package_arch=""
 
 usage() {
     echo -e "musa toolkits install script"
@@ -43,6 +44,7 @@ usage() {
     echo -e "   [-i | --install]"
     echo -e "   [-u | --uninstall]"
     echo -e "   [-d | --prefix=<install_prefix>]"
+    echo -e "   [--package_arch=arm64]"
     echo -e "   [-h | --help]"
     echo -e ""
 }
@@ -69,7 +71,7 @@ element_in () {
 package_func () {
     mkdir -p ${BUILD_DIR}
     pushd ${BUILD_DIR}
-    cmake \
+    cmake ${cmake_opts} \
       -DCMAKE_INSTALL_PREFIX=${install_prefix} \
       .. 2>&1 | tee cmake.log
     cmake --build .  2>&1 | tee build.log
@@ -111,6 +113,7 @@ while getopts d:-:piuh OPT; do
         i | install )    op_type=install;;
         u | uninstall )    op_type=uninstall;;
         d | prefix )        needs_arg; install_prefix="$OPTARG";;
+        package_arch )         needs_arg; package_arch="$OPTARG";;
         h | help )          usage; exit 2;;
         ??* )               die "Illegal option --$OPT" ;;  # bad long option
         ? )                 exit 2 ;;  # bad short option (error reported via getopts)
@@ -121,6 +124,11 @@ OTHER_ARGS=$@
 OTHER_ARGS_TMP=( ${OTHER_ARGS} )
 OTHER_ARGS_LEN=${#OTHER_ARGS_TMP[@]}
 # echo "OTHER_ARGS: ${OTHER_ARGS}"
+if [[ ${package_arch} == "arm64" ]]; then
+  cmake_opts="${cmake_opts} -DPACKAGE_ARCH_ARM64=ON"
+else
+  cmake_opts="${cmake_opts} -DPACKAGE_ARCH_ARM64=OFF"
+fi
 
 if [[ "$op_type" == "package" ]]; then
   echo "package  ..."
