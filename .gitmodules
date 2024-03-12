@@ -1,3 +1,3 @@
 [submodule "module_version"]
 	path = module_version
-	url = git@github.mthreads.com:mthreads/module_version.git
+	url = ../module_version.git
