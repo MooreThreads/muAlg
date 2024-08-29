@@ -8,7 +8,7 @@
 add_custom_target(cub.all.headers)
 
 file(GLOB_RECURSE headers
-  RELATIVE "${PROJECT_SOURCE_DIR}/cub"
+  RELATIVE "${CUB_SOURCE_DIR}/cub"
   CONFIGURE_DEPENDS
   cub/*.cuh
 )
@@ -16,7 +16,7 @@ file(GLOB_RECURSE headers
 set(headertest_srcs)
 foreach (header IN LISTS headers)
   set(headertest_src "${CMAKE_BINARY_DIR}/headers/${header}.cu")
-  configure_file("${PROJECT_SOURCE_DIR}/cmake/header_test.in" "${headertest_src}")
+  configure_file("${CUB_SOURCE_DIR}/cmake/header_test.in" "${headertest_src}")
   list(APPEND headertest_srcs "${headertest_src}")
 endforeach()
 
@@ -24,8 +24,10 @@ foreach(cub_target IN LISTS CUB_TARGETS)
   cub_get_target_property(config_prefix ${cub_target} PREFIX)
 
   set(headertest_target ${config_prefix}.headers)
+  set(MUSA_LINK_LIBRARIES_KEYWORD PUBLIC)
   musa_add_library(${headertest_target} ${headertest_srcs})
-  target_link_libraries(${headertest_target}  ${cub_target})
+  set(MUSA_LINK_LIBRARIES_KEYWORD)
+  target_link_libraries(${headertest_target} PUBLIC ${cub_target})
   cub_clone_target_properties(${headertest_target} ${cub_target})
 
   add_dependencies(cub.all.headers ${headertest_target})

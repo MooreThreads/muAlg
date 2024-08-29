@@ -1,5 +1,5 @@
 #!/bin/bash
-# Copyright @2020-2022 Moore Threads Technology Co., Ltd("Moore Threads"). All
+# Copyright @2020-2023 Moore Threads Technology Co., Ltd("Moore Threads"). All
 # rights reserved.
 #
 # This software ("this software and its documentations" or "the software") is
@@ -73,6 +73,9 @@ package_func () {
     pushd ${BUILD_DIR}
     cmake ${cmake_opts} \
       -DCMAKE_INSTALL_PREFIX=${install_prefix} \
+      -DCUB_ENABLE_HEADER_TESTING=OFF \
+      -DCUB_ENABLE_TESTING=OFF \
+      -DCUB_ENABLE_EXAMPLES=OFF \
       .. 2>&1 | tee cmake.log
     cmake --build .  2>&1 | tee build.log
     cmake --build . --target package  2>&1 | tee package.log
@@ -84,6 +87,9 @@ install_func () {
     pushd ${BUILD_DIR}
     cmake \
       -DCMAKE_INSTALL_PREFIX=${install_prefix} \
+      -DCUB_ENABLE_HEADER_TESTING=OFF \
+      -DCUB_ENABLE_TESTING=OFF \
+      -DCUB_ENABLE_EXAMPLES=OFF \
       .. 2>&1 | tee cmake.log
     cmake --build .  2>&1 | tee build.log
     if [ ! -w ${install_prefix} ]; then
@@ -97,8 +103,12 @@ install_func () {
 uninstall_func () {
     if [ "$UID" -ne "0" ]; then
       sudo \rm -vrf ${install_prefix}/include/cub
+      sudo \rm -vrf ${install_prefix}/lib/cmake/cub
+      sudo \rm -vf ${install_prefix}/bin/CUB_version
     else
       \rm -vrf ${install_prefix}/include/cub
+      \rm -vrf ${install_prefix}/lib/cmake/cub
+      \rm -vf ${install_prefix}/bin/CUB_version
     fi
 }
 

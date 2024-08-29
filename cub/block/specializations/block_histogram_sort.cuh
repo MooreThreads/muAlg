@@ -77,7 +77,7 @@ struct BlockHistogramSort
             ITEMS_PER_THREAD,
             NullType,
             4,
-            false, //(PTX_ARCH >= 350) ? true : false,
+            (PTX_ARCH >= 350) ? true : false,
             BLOCK_SCAN_WARP_SCANS,
             musaSharedMemBankSizeFourByte,
             BLOCK_DIM_Y,

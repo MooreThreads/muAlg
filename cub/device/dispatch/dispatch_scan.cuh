@@ -161,41 +161,53 @@ struct DeviceScanPolicy
                 128, 12,                                        ///< Threads per block, items per thread
                 OutputT,
                 BLOCK_LOAD_DIRECT,
-                LOAD_DEFAULT,
-                BLOCK_STORE_DIRECT,
+                LOAD_LDG,
+                BLOCK_STORE_WARP_TRANSPOSE_TIMESLICED,
+                BLOCK_SCAN_RAKING>
+            ScanPolicyT;
+    };
+
+    /// SM520
+    struct Policy520 : ChainedPolicy<520, Policy520, Policy350>
+    {
+        // Titan X: 32.47B items/s @ 48M 32-bit T
+        typedef AgentScanPolicy<
+                128, 12,                                        ///< Threads per block, items per thread
+                OutputT,
+                BLOCK_LOAD_DIRECT,
+                LOAD_LDG,
+                ScanTransposedStore,
                 BLOCK_SCAN_WARP_SCANS>
             ScanPolicyT;
     };
 
-    // /// SM520
-    // struct Policy520 : ChainedPolicy<520, Policy520, Policy350>
-    // {
-    //     // Titan X: 32.47B items/s @ 48M 32-bit T
-    //     typedef AgentScanPolicy<
-    //             128, 12,                                        ///< Threads per block, items per thread
-    //             OutputT,
-    //             BLOCK_LOAD_DIRECT,
-    //             LOAD_LDG,
-    //             ScanTransposedStore,
-    //             BLOCK_SCAN_WARP_SCANS>
-    //         ScanPolicyT;
-    // };
+    /// SM600
+    struct Policy600 : ChainedPolicy<600, Policy600, Policy520>
+    {
+        typedef AgentScanPolicy<
+                128, 15,                                        ///< Threads per block, items per thread
+                OutputT,
+                ScanTransposedLoad,
+                LOAD_DEFAULT,
+                ScanTransposedStore,
+                BLOCK_SCAN_WARP_SCANS>
+            ScanPolicyT;
+    };
 
-    // /// SM600
-    // struct Policy600 : ChainedPolicy<600, Policy600, Policy520>
-    // {
-    //     typedef AgentScanPolicy<
-    //             128, 15,                                        ///< Threads per block, items per thread
-    //             OutputT,
-    //             ScanTransposedLoad,
-    //             LOAD_DEFAULT,
-    //             ScanTransposedStore,
-    //             BLOCK_SCAN_WARP_SCANS>
-    //         ScanPolicyT;
-    // };
-
+    /// MUSA mp_21
+    struct Policy210 : ChainedPolicy<210, Policy210, Policy210>
+    {
+        typedef AgentScanPolicy<
+                128, 12,                                        ///< Threads per block, items per thread
+                OutputT,
+                BLOCK_LOAD_DIRECT,
+                LOAD_DEFAULT,
+                BLOCK_STORE_DIRECT,
+                BLOCK_SCAN_RAKING>
+            ScanPolicyT;
+    };
     /// MaxPolicy
-    typedef Policy350 MaxPolicy;
+    typedef Policy210 MaxPolicy;
 };
 
 

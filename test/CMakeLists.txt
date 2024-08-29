@@ -7,7 +7,7 @@ foreach(cub_target IN LISTS CUB_TARGETS)
 endforeach()
 
 file(GLOB test_srcs
-  RELATIVE ${PROJECT_SOURCE_DIR}/test
+  RELATIVE ${CUB_SOURCE_DIR}/test
   CONFIGURE_DEPENDS
   test_*.cu
 )
@@ -38,7 +38,7 @@ function(cub_add_test target_name_var test_name test_src cub_target)
   musa_add_executable(${test_target} "${test_src}")
   target_link_libraries(${test_target} ${cub_target})
   cub_clone_target_properties(${test_target} ${cub_target})
-  target_include_directories(${test_target} PRIVATE "${PROJECT_SOURCE_DIR}/test")
+  target_include_directories(${test_target} PRIVATE "${CUB_SOURCE_DIR}/test")
 
   # Add to the active configuration's meta target
   add_dependencies(${config_meta_target} ${test_target})
@@ -77,6 +77,10 @@ function(cub_check_for_test_variants src)
     set(HAS_MINIMAL_VARIANT True PARENT_SCOPE)
   endif()
 
+  set(NO_VARIANTS False PARENT_SCOPE)
+  if ((benchmark_loc EQUAL -1) AND (minimal_loc EQUAL -1))
+    set(NO_VARIANTS True PARENT_SCOPE)
+  endif()
 endfunction()
 
 foreach (test_src IN LISTS test_srcs)
@@ -89,10 +93,6 @@ foreach (test_src IN LISTS test_srcs)
   # and/or MINIMAL_TEST are defined. Detect these and build variants for each
   # configuration:
   cub_check_for_test_variants("${test_src}")
-  set(NO_VARIANTS False)
-  if (NOT (HAS_BENCHMARK_VARIANT OR HAS_MINIMAL_VARIANT))
-    set(NO_VARIANTS True)
-  endif()
 
   foreach(cub_target IN LISTS CUB_TARGETS)
     if (NO_VARIANTS)

@@ -634,312 +634,314 @@ struct DeviceRadixSortPolicy
     // Architecture-specific tuning policies
     //------------------------------------------------------------------------------
 
-    // /// SM35
-    // struct Policy350 : ChainedPolicy<350, Policy350, Policy350>
-    // {
-    //     enum {
-    //         PRIMARY_RADIX_BITS      = 5,    // 1.72B 32b keys/s, 1.17B 32b pairs/s, 1.55B 32b segmented keys/s (K40m)
-    //         ONESWEEP = false,
-    //         ONESWEEP_RADIX_BITS = 8,
-    //     };
-
-    //     // Histogram policy
-    //     typedef AgentRadixSortHistogramPolicy <128, 4, 1, KeyT, ONESWEEP_RADIX_BITS> HistogramPolicy;
-
-    //     // Exclusive sum policy
-    //     typedef AgentRadixSortExclusiveSumPolicy <128, ONESWEEP_RADIX_BITS> ExclusiveSumPolicy;
-
-    //     // Onesweep policy
-    //     typedef AgentRadixSortOnesweepPolicy <128, 4, DominantT, 1,
-    //         RADIX_RANK_MATCH_EARLY_COUNTS_ANY, BLOCK_SCAN_WARP_SCANS, RADIX_SORT_STORE_DIRECT,
-    //         ONESWEEP_RADIX_BITS> OnesweepPolicy;
-
-    //     // Scan policy
-    //     typedef AgentScanPolicy <128, 4, OffsetT, BLOCK_LOAD_VECTORIZE, LOAD_DEFAULT, BLOCK_STORE_VECTORIZE, BLOCK_SCAN_WARP_SCANS> ScanPolicy;
-
-    //     // Keys-only downsweep policies
-    //     typedef AgentRadixSortDownsweepPolicy <128, 4, DominantT, BLOCK_LOAD_WARP_TRANSPOSE, LOAD_LDG, RADIX_RANK_MATCH, BLOCK_SCAN_WARP_SCANS, PRIMARY_RADIX_BITS> DownsweepPolicyKeys;
-    //     typedef AgentRadixSortDownsweepPolicy <128, 4, DominantT, BLOCK_LOAD_DIRECT, LOAD_LDG, RADIX_RANK_MEMOIZE, BLOCK_SCAN_WARP_SCANS, PRIMARY_RADIX_BITS - 1> AltDownsweepPolicyKeys;
-
-    //     // Key-value pairs downsweep policies
-    //     typedef DownsweepPolicyKeys DownsweepPolicyPairs;
-    //     typedef AgentRadixSortDownsweepPolicy <128, 4, DominantT, BLOCK_LOAD_DIRECT, LOAD_LDG, RADIX_RANK_MEMOIZE, BLOCK_SCAN_WARP_SCANS, PRIMARY_RADIX_BITS - 1> AltDownsweepPolicyPairs;
-
-    //     // Downsweep policies
-    //     typedef typename If<KEYS_ONLY, DownsweepPolicyKeys, DownsweepPolicyPairs>::Type DownsweepPolicy;
-    //     typedef typename If<KEYS_ONLY, AltDownsweepPolicyKeys, AltDownsweepPolicyPairs>::Type AltDownsweepPolicy;
-
-    //     // Upsweep policies
-    //     typedef DownsweepPolicy UpsweepPolicy;
-    //     typedef AltDownsweepPolicy AltUpsweepPolicy;
-
-    //     // Single-tile policy
-    //     typedef DownsweepPolicy SingleTilePolicy;
-
-    //     // Segmented policies
-    //     typedef DownsweepPolicy     SegmentedPolicy;
-    //     typedef AltDownsweepPolicy  AltSegmentedPolicy;
-
-
-    // };
-
-
-    // /// SM50
-    // struct Policy500 : ChainedPolicy<500, Policy500, Policy350>
-    // {
-    //     enum {
-    //         PRIMARY_RADIX_BITS      = 5,    // 3.5B 32b keys/s, 1.92B 32b pairs/s (TitanX)
-    //         SINGLE_TILE_RADIX_BITS  = 5,
-    //         SEGMENTED_RADIX_BITS    = 5,    // 3.1B 32b segmented keys/s (TitanX)
-    //         ONESWEEP = false,
-    //         ONESWEEP_RADIX_BITS = 8,
-    //     };
-
-    //     // Histogram policy
-    //     typedef AgentRadixSortHistogramPolicy <128, 4, 1, KeyT, ONESWEEP_RADIX_BITS> HistogramPolicy;
-
-    //     // Exclusive sum policy
-    //     typedef AgentRadixSortExclusiveSumPolicy <128, ONESWEEP_RADIX_BITS> ExclusiveSumPolicy;
-
-    //     // Onesweep policy
-    //     typedef AgentRadixSortOnesweepPolicy <128, 4, DominantT, 1,
-    //         RADIX_RANK_MATCH_EARLY_COUNTS_ANY, BLOCK_SCAN_WARP_SCANS, RADIX_SORT_STORE_DIRECT,
-    //         ONESWEEP_RADIX_BITS> OnesweepPolicy;
-
-    //     // ScanPolicy
-    //     typedef AgentScanPolicy <128, 4, OffsetT, BLOCK_LOAD_WARP_TRANSPOSE, LOAD_DEFAULT, BLOCK_STORE_WARP_TRANSPOSE, BLOCK_SCAN_RAKING_MEMOIZE> ScanPolicy;
-
-    //     // Downsweep policies
-    //     typedef AgentRadixSortDownsweepPolicy <128, 4, DominantT,  BLOCK_LOAD_WARP_TRANSPOSE, LOAD_DEFAULT, RADIX_RANK_BASIC, BLOCK_SCAN_WARP_SCANS, PRIMARY_RADIX_BITS>  DownsweepPolicy;
-    //     typedef AgentRadixSortDownsweepPolicy <128, 4, DominantT,  BLOCK_LOAD_DIRECT, LOAD_LDG, RADIX_RANK_MEMOIZE, BLOCK_SCAN_RAKING_MEMOIZE, PRIMARY_RADIX_BITS - 1>   AltDownsweepPolicy;
-
-    //     // Upsweep policies
-    //     typedef DownsweepPolicy UpsweepPolicy;
-    //     typedef AltDownsweepPolicy AltUpsweepPolicy;
-
-    //     // Single-tile policy
-    //     typedef AgentRadixSortDownsweepPolicy <128, 4, DominantT,  BLOCK_LOAD_DIRECT, LOAD_LDG, RADIX_RANK_MEMOIZE, BLOCK_SCAN_WARP_SCANS, SINGLE_TILE_RADIX_BITS> SingleTilePolicy;
-
-    //     // Segmented policies
-    //     typedef AgentRadixSortDownsweepPolicy <128, 4, DominantT,  BLOCK_LOAD_WARP_TRANSPOSE, LOAD_DEFAULT, RADIX_RANK_MEMOIZE, BLOCK_SCAN_WARP_SCANS, SEGMENTED_RADIX_BITS>   SegmentedPolicy;
-    //     typedef AgentRadixSortDownsweepPolicy <128, 4, DominantT,  BLOCK_LOAD_WARP_TRANSPOSE, LOAD_DEFAULT, RADIX_RANK_MEMOIZE, BLOCK_SCAN_WARP_SCANS, SEGMENTED_RADIX_BITS - 1>       AltSegmentedPolicy;
-    // };
-
-
-    // /// SM60 (GP100)
-    // struct Policy600 : ChainedPolicy<600, Policy600, Policy500>
-    // {
-    //     enum {
-    //         PRIMARY_RADIX_BITS      = 5,    // 6.9B 32b keys/s (Quadro P100)
-    //         SINGLE_TILE_RADIX_BITS  = 5,
-    //         SEGMENTED_RADIX_BITS    = 5,    // 5.9B 32b segmented keys/s (Quadro P100)
-    //         ONESWEEP = sizeof(KeyT) >= sizeof(uint32_t),  // 10.0B 32b keys/s (GP100, 64M random keys)
-    //         ONESWEEP_RADIX_BITS = 8,
-    //     };
-
-    //     // Histogram policy
-    //     typedef AgentRadixSortHistogramPolicy <128, 4, 4, KeyT, ONESWEEP_RADIX_BITS> HistogramPolicy;
-
-    //     // Exclusive sum policy
-    //     typedef AgentRadixSortExclusiveSumPolicy <128, ONESWEEP_RADIX_BITS> ExclusiveSumPolicy;
-
-    //     // Onesweep policy
-    //     typedef AgentRadixSortOnesweepPolicy <128, 4, DominantT, 2,
-    //         RADIX_RANK_MATCH_EARLY_COUNTS_ANY, BLOCK_SCAN_WARP_SCANS,
-    //         RADIX_SORT_STORE_DIRECT, ONESWEEP_RADIX_BITS> OnesweepPolicy;
-
-    //     // ScanPolicy
-    //     typedef AgentScanPolicy <128, 4, OffsetT, BLOCK_LOAD_WARP_TRANSPOSE, LOAD_DEFAULT, BLOCK_STORE_WARP_TRANSPOSE, BLOCK_SCAN_RAKING_MEMOIZE> ScanPolicy;
-
-    //     // Downsweep policies
-    //     typedef AgentRadixSortDownsweepPolicy <128, 4, DominantT,  BLOCK_LOAD_TRANSPOSE, LOAD_DEFAULT, RADIX_RANK_MATCH, BLOCK_SCAN_WARP_SCANS, PRIMARY_RADIX_BITS>   DownsweepPolicy;
-    //     typedef AgentRadixSortDownsweepPolicy <128, 4, DominantT,  BLOCK_LOAD_TRANSPOSE, LOAD_DEFAULT, RADIX_RANK_MEMOIZE, BLOCK_SCAN_WARP_SCANS, PRIMARY_RADIX_BITS - 1>   AltDownsweepPolicy;
-
-    //     // Upsweep policies
-    //     typedef DownsweepPolicy UpsweepPolicy;
-    //     typedef AltDownsweepPolicy AltUpsweepPolicy;
-
-    //     // Single-tile policy
-    //     typedef AgentRadixSortDownsweepPolicy <128, 4, DominantT,  BLOCK_LOAD_DIRECT, LOAD_LDG, RADIX_RANK_MEMOIZE, BLOCK_SCAN_WARP_SCANS, SINGLE_TILE_RADIX_BITS>          SingleTilePolicy;
-
-    //     // Segmented policies
-    //     typedef AgentRadixSortDownsweepPolicy <128, 4, DominantT,  BLOCK_LOAD_TRANSPOSE, LOAD_DEFAULT, RADIX_RANK_MEMOIZE, BLOCK_SCAN_WARP_SCANS, SEGMENTED_RADIX_BITS>     SegmentedPolicy;
-    //     typedef AgentRadixSortDownsweepPolicy <128, 4, DominantT,  BLOCK_LOAD_TRANSPOSE, LOAD_DEFAULT, RADIX_RANK_MEMOIZE, BLOCK_SCAN_WARP_SCANS, SEGMENTED_RADIX_BITS - 1> AltSegmentedPolicy;
-
-    // };
-
-
-    // /// SM61 (GP104)
-    // struct Policy610 : ChainedPolicy<610, Policy610, Policy600>
-    // {
-    //     enum {
-    //         PRIMARY_RADIX_BITS      = 5,    // 3.4B 32b keys/s, 1.83B 32b pairs/s (1080)
-    //         SINGLE_TILE_RADIX_BITS  = 5,
-    //         SEGMENTED_RADIX_BITS    = 5,    // 3.3B 32b segmented keys/s (1080)
-    //         ONESWEEP = sizeof(KeyT) >= sizeof(uint32_t),
-    //         ONESWEEP_RADIX_BITS = 8,
-    //     };
-
-    //     // Histogram policy
-    //     typedef AgentRadixSortHistogramPolicy <128, 4, 4, KeyT, ONESWEEP_RADIX_BITS> HistogramPolicy;
-
-    //     // Exclusive sum policy
-    //     typedef AgentRadixSortExclusiveSumPolicy <128, ONESWEEP_RADIX_BITS> ExclusiveSumPolicy;
-
-    //     // Onesweep policy
-    //     typedef AgentRadixSortOnesweepPolicy <128, 4, DominantT, 2,
-    //         RADIX_RANK_MATCH_EARLY_COUNTS_ANY, BLOCK_SCAN_WARP_SCANS,
-    //         RADIX_SORT_STORE_DIRECT, ONESWEEP_RADIX_BITS> OnesweepPolicy;
-
-    //     // ScanPolicy
-    //     typedef AgentScanPolicy <128, 4, OffsetT, BLOCK_LOAD_WARP_TRANSPOSE, LOAD_DEFAULT, BLOCK_STORE_WARP_TRANSPOSE, BLOCK_SCAN_RAKING_MEMOIZE> ScanPolicy;
-
-    //     // Downsweep policies
-    //     typedef AgentRadixSortDownsweepPolicy <128, 4, DominantT,  BLOCK_LOAD_TRANSPOSE, LOAD_DEFAULT, RADIX_RANK_MATCH, BLOCK_SCAN_RAKING_MEMOIZE, PRIMARY_RADIX_BITS>   DownsweepPolicy;
-    //     typedef AgentRadixSortDownsweepPolicy <128, 4, DominantT,  BLOCK_LOAD_TRANSPOSE, LOAD_DEFAULT, RADIX_RANK_MEMOIZE, BLOCK_SCAN_RAKING_MEMOIZE, PRIMARY_RADIX_BITS - 1>   AltDownsweepPolicy;
-
-    //     // Upsweep policies
-    //     typedef AgentRadixSortUpsweepPolicy <128, 4, DominantT, LOAD_LDG, PRIMARY_RADIX_BITS>        UpsweepPolicy;
-    //     typedef AgentRadixSortUpsweepPolicy <128, 4, DominantT, LOAD_LDG, PRIMARY_RADIX_BITS - 1>    AltUpsweepPolicy;
-
-    //     // Single-tile policy
-    //     typedef AgentRadixSortDownsweepPolicy <128, 4, DominantT,  BLOCK_LOAD_DIRECT, LOAD_LDG, RADIX_RANK_MEMOIZE, BLOCK_SCAN_WARP_SCANS, SINGLE_TILE_RADIX_BITS>          SingleTilePolicy;
-
-    //     // Segmented policies
-    //     typedef AgentRadixSortDownsweepPolicy <128, 4, DominantT,  BLOCK_LOAD_TRANSPOSE, LOAD_DEFAULT, RADIX_RANK_MEMOIZE, BLOCK_SCAN_WARP_SCANS, SEGMENTED_RADIX_BITS>     SegmentedPolicy;
-    //     typedef AgentRadixSortDownsweepPolicy <128, 4, DominantT,  BLOCK_LOAD_TRANSPOSE, LOAD_DEFAULT, RADIX_RANK_MEMOIZE, BLOCK_SCAN_WARP_SCANS, SEGMENTED_RADIX_BITS - 1> AltSegmentedPolicy;
-    // };
-
-
-    // /// SM62 (Tegra, less RF)
-    // struct Policy620 : ChainedPolicy<620, Policy620, Policy610>
-    // {
-    //     enum {
-    //         PRIMARY_RADIX_BITS      = 5,
-    //         ALT_RADIX_BITS          = PRIMARY_RADIX_BITS - 1,
-    //         ONESWEEP = sizeof(KeyT) >= sizeof(uint32_t),
-    //         ONESWEEP_RADIX_BITS = 8,
-    //     };
-
-    //     // Histogram policy
-    //     typedef AgentRadixSortHistogramPolicy <128, 4, 4, KeyT, ONESWEEP_RADIX_BITS> HistogramPolicy;
-
-    //     // Exclusive sum policy
-    //     typedef AgentRadixSortExclusiveSumPolicy <128, ONESWEEP_RADIX_BITS> ExclusiveSumPolicy;
-
-    //     // Onesweep policy
-    //     typedef AgentRadixSortOnesweepPolicy <128, 4, DominantT, 2,
-    //         RADIX_RANK_MATCH_EARLY_COUNTS_ANY, BLOCK_SCAN_WARP_SCANS,
-    //         RADIX_SORT_STORE_DIRECT, ONESWEEP_RADIX_BITS> OnesweepPolicy;
-
-    //     // ScanPolicy
-    //     typedef AgentScanPolicy <128, 4, OffsetT, BLOCK_LOAD_WARP_TRANSPOSE, LOAD_DEFAULT, BLOCK_STORE_WARP_TRANSPOSE, BLOCK_SCAN_RAKING_MEMOIZE> ScanPolicy;
-
-    //     // Downsweep policies
-    //     typedef AgentRadixSortDownsweepPolicy <128, 4, DominantT,  BLOCK_LOAD_TRANSPOSE, LOAD_DEFAULT, RADIX_RANK_MEMOIZE, BLOCK_SCAN_RAKING_MEMOIZE, PRIMARY_RADIX_BITS>   DownsweepPolicy;
-    //     typedef AgentRadixSortDownsweepPolicy <128, 4, DominantT,  BLOCK_LOAD_TRANSPOSE, LOAD_DEFAULT, RADIX_RANK_MEMOIZE, BLOCK_SCAN_RAKING_MEMOIZE, ALT_RADIX_BITS>       AltDownsweepPolicy;
-
-    //     // Upsweep policies
-    //     typedef DownsweepPolicy UpsweepPolicy;
-    //     typedef AltDownsweepPolicy AltUpsweepPolicy;
-
-    //     // Single-tile policy
-    //     typedef AgentRadixSortDownsweepPolicy <128, 4, DominantT,  BLOCK_LOAD_DIRECT, LOAD_LDG, RADIX_RANK_MEMOIZE, BLOCK_SCAN_WARP_SCANS, PRIMARY_RADIX_BITS> SingleTilePolicy;
-
-    //     // Segmented policies
-    //     typedef DownsweepPolicy     SegmentedPolicy;
-    //     typedef AltDownsweepPolicy  AltSegmentedPolicy;
-    // };
-
-
-    // /// SM70 (GV100)
-    // struct Policy700 : ChainedPolicy<700, Policy700, Policy620>
-    // {
-    //     enum {
-    //         PRIMARY_RADIX_BITS      = 5,    // 7.62B 32b keys/s (GV100)
-    //         SINGLE_TILE_RADIX_BITS  = 5,
-    //         SEGMENTED_RADIX_BITS    = 5,    // 8.7B 32b segmented keys/s (GV100)
-    //         ONESWEEP = sizeof(KeyT) >= sizeof(uint32_t),  // 15.8B 32b keys/s (V100-SXM2, 64M random keys)
-    //         ONESWEEP_RADIX_BITS = 8,
-    //     };
-
-    //     // Histogram policy
-    //     typedef AgentRadixSortHistogramPolicy <128, 4, 4, KeyT, ONESWEEP_RADIX_BITS> HistogramPolicy;
-
-    //     // Exclusive sum policy
-    //     typedef AgentRadixSortExclusiveSumPolicy <128, ONESWEEP_RADIX_BITS> ExclusiveSumPolicy;
-
-    //     // Onesweep policy
-    //     typedef AgentRadixSortOnesweepPolicy <128, 4, DominantT, 4,
-    //         RADIX_RANK_MATCH_EARLY_COUNTS_ANY, BLOCK_SCAN_WARP_SCANS,
-    //         RADIX_SORT_STORE_DIRECT, ONESWEEP_RADIX_BITS> OnesweepPolicy;
-
-
-    //     // ScanPolicy
-    //     typedef AgentScanPolicy <128, 4, OffsetT, BLOCK_LOAD_WARP_TRANSPOSE, LOAD_DEFAULT, BLOCK_STORE_WARP_TRANSPOSE, BLOCK_SCAN_RAKING_MEMOIZE> ScanPolicy;
-
-    //     // Downsweep policies
-    //     typedef AgentRadixSortDownsweepPolicy <128, 4, DominantT,  BLOCK_LOAD_TRANSPOSE, LOAD_DEFAULT, RADIX_RANK_MATCH, BLOCK_SCAN_WARP_SCANS, PRIMARY_RADIX_BITS>   DownsweepPolicy;
-    //     typedef AgentRadixSortDownsweepPolicy <128, 4, DominantT,  BLOCK_LOAD_TRANSPOSE, LOAD_DEFAULT, RADIX_RANK_MEMOIZE, BLOCK_SCAN_WARP_SCANS, PRIMARY_RADIX_BITS - 1>   AltDownsweepPolicy;
-
-    //     // Upsweep policies
-    //     typedef AgentRadixSortUpsweepPolicy <128, 4, DominantT, LOAD_DEFAULT, PRIMARY_RADIX_BITS>     UpsweepPolicy;
-    //     typedef AgentRadixSortUpsweepPolicy <128, 4, DominantT, LOAD_DEFAULT, PRIMARY_RADIX_BITS - 1> AltUpsweepPolicy;
-
-    //     // Single-tile policy
-    //     typedef AgentRadixSortDownsweepPolicy <128, 4, DominantT,  BLOCK_LOAD_DIRECT, LOAD_LDG, RADIX_RANK_MEMOIZE, BLOCK_SCAN_WARP_SCANS, SINGLE_TILE_RADIX_BITS>          SingleTilePolicy;
-
-    //     // Segmented policies
-    //     typedef AgentRadixSortDownsweepPolicy <128, 4, DominantT,  BLOCK_LOAD_TRANSPOSE, LOAD_DEFAULT, RADIX_RANK_MEMOIZE, BLOCK_SCAN_WARP_SCANS, SEGMENTED_RADIX_BITS>     SegmentedPolicy;
-    //     typedef AgentRadixSortDownsweepPolicy <128, 4, DominantT,  BLOCK_LOAD_TRANSPOSE, LOAD_DEFAULT, RADIX_RANK_MEMOIZE, BLOCK_SCAN_WARP_SCANS, SEGMENTED_RADIX_BITS - 1> AltSegmentedPolicy;
-    // };
-
-
-    // /// SM80
-    // struct Policy800 : ChainedPolicy<800, Policy800, Policy700>
-    // {
-    //     enum {
-    //         PRIMARY_RADIX_BITS      = 5,
-    //         SINGLE_TILE_RADIX_BITS  = 5,
-    //         SEGMENTED_RADIX_BITS    = 5,
-    //         ONESWEEP = sizeof(KeyT) >= sizeof(uint32_t),
-    //         ONESWEEP_RADIX_BITS = 8,
-    //     };
-
-    //     // Histogram policy
-    //     typedef AgentRadixSortHistogramPolicy <128, 4, 1, KeyT, ONESWEEP_RADIX_BITS> HistogramPolicy;
-
-    //     // Exclusive sum policy
-    //     typedef AgentRadixSortExclusiveSumPolicy <128, ONESWEEP_RADIX_BITS> ExclusiveSumPolicy;
-
-    //     // Onesweep policy
-    //     typedef AgentRadixSortOnesweepPolicy <128, 4, DominantT, 1,
-    //         RADIX_RANK_MATCH_EARLY_COUNTS_ANY, BLOCK_SCAN_RAKING_MEMOIZE,
-    //         RADIX_SORT_STORE_DIRECT, ONESWEEP_RADIX_BITS> OnesweepPolicy;
-
-    //     // ScanPolicy
-    //     typedef AgentScanPolicy <128, 4, OffsetT, BLOCK_LOAD_WARP_TRANSPOSE, LOAD_DEFAULT, BLOCK_STORE_WARP_TRANSPOSE, BLOCK_SCAN_RAKING_MEMOIZE> ScanPolicy;
-
-    //     // Downsweep policies
-    //     typedef AgentRadixSortDownsweepPolicy <128, 4, DominantT,  BLOCK_LOAD_TRANSPOSE, LOAD_DEFAULT, RADIX_RANK_MATCH, BLOCK_SCAN_WARP_SCANS, PRIMARY_RADIX_BITS>   DownsweepPolicy;
-    //     typedef AgentRadixSortDownsweepPolicy <128, 4, DominantT,  BLOCK_LOAD_TRANSPOSE, LOAD_DEFAULT, RADIX_RANK_MEMOIZE, BLOCK_SCAN_WARP_SCANS, PRIMARY_RADIX_BITS - 1>   AltDownsweepPolicy;
-
-    //     // Upsweep policies
-    //     typedef AgentRadixSortUpsweepPolicy <128, 4, DominantT, LOAD_DEFAULT, PRIMARY_RADIX_BITS>     UpsweepPolicy;
-    //     typedef AgentRadixSortUpsweepPolicy <128, 4, DominantT, LOAD_DEFAULT, PRIMARY_RADIX_BITS - 1> AltUpsweepPolicy;
-
-    //     // Single-tile policy
-    //     typedef AgentRadixSortDownsweepPolicy <128, 4, DominantT,  BLOCK_LOAD_DIRECT, LOAD_LDG, RADIX_RANK_MEMOIZE, BLOCK_SCAN_WARP_SCANS, SINGLE_TILE_RADIX_BITS>          SingleTilePolicy;
-
-    //     // Segmented policies
-    //     typedef AgentRadixSortDownsweepPolicy <128, 4, DominantT,  BLOCK_LOAD_TRANSPOSE, LOAD_DEFAULT, RADIX_RANK_MEMOIZE, BLOCK_SCAN_WARP_SCANS, SEGMENTED_RADIX_BITS>     SegmentedPolicy;
-    //     typedef AgentRadixSortDownsweepPolicy <128, 4, DominantT,  BLOCK_LOAD_TRANSPOSE, LOAD_DEFAULT, RADIX_RANK_MEMOIZE, BLOCK_SCAN_WARP_SCANS, SEGMENTED_RADIX_BITS - 1> AltSegmentedPolicy;
-    // };
-
-    struct Policy800 : ChainedPolicy<800, Policy800, Policy800>
+    /// SM35
+    struct Policy350 : ChainedPolicy<350, Policy350, Policy350>
     {
         enum {
-            PRIMARY_RADIX_BITS      = 5,    // 1.72B 32b keys/s, 1.17B 32b pairs/s, 1.55B 32b segmented keys/s (K40m)
+            PRIMARY_RADIX_BITS      = (sizeof(KeyT) > 1) ? 6 : 5,    // 1.72B 32b keys/s, 1.17B 32b pairs/s, 1.55B 32b segmented keys/s (K40m)
+            ONESWEEP = false,
+            ONESWEEP_RADIX_BITS = 8,
+        };
+
+        // Histogram policy
+        typedef AgentRadixSortHistogramPolicy <256, 8, 1, KeyT, ONESWEEP_RADIX_BITS> HistogramPolicy;
+        
+        // Exclusive sum policy
+        typedef AgentRadixSortExclusiveSumPolicy <256, ONESWEEP_RADIX_BITS> ExclusiveSumPolicy;
+        
+        // Onesweep policy
+        typedef AgentRadixSortOnesweepPolicy <256, 21, DominantT, 1,
+            RADIX_RANK_MATCH_EARLY_COUNTS_ANY, BLOCK_SCAN_WARP_SCANS, RADIX_SORT_STORE_DIRECT,
+            ONESWEEP_RADIX_BITS> OnesweepPolicy;
+
+        // Scan policy
+        typedef AgentScanPolicy <1024, 4, OffsetT, BLOCK_LOAD_VECTORIZE, LOAD_DEFAULT, BLOCK_STORE_VECTORIZE, BLOCK_SCAN_WARP_SCANS> ScanPolicy;
+
+        // Keys-only downsweep policies
+        typedef AgentRadixSortDownsweepPolicy <128, 9, DominantT, BLOCK_LOAD_WARP_TRANSPOSE, LOAD_LDG, RADIX_RANK_MATCH, BLOCK_SCAN_WARP_SCANS, PRIMARY_RADIX_BITS> DownsweepPolicyKeys;
+        typedef AgentRadixSortDownsweepPolicy <64, 18, DominantT, BLOCK_LOAD_DIRECT, LOAD_LDG, RADIX_RANK_MEMOIZE, BLOCK_SCAN_WARP_SCANS, PRIMARY_RADIX_BITS - 1> AltDownsweepPolicyKeys;
+
+        // Key-value pairs downsweep policies
+        typedef DownsweepPolicyKeys DownsweepPolicyPairs;
+        typedef AgentRadixSortDownsweepPolicy <128, 15, DominantT, BLOCK_LOAD_DIRECT, LOAD_LDG, RADIX_RANK_MEMOIZE, BLOCK_SCAN_WARP_SCANS, PRIMARY_RADIX_BITS - 1> AltDownsweepPolicyPairs;
+
+        // Downsweep policies
+        typedef typename If<KEYS_ONLY, DownsweepPolicyKeys, DownsweepPolicyPairs>::Type DownsweepPolicy;
+        typedef typename If<KEYS_ONLY, AltDownsweepPolicyKeys, AltDownsweepPolicyPairs>::Type AltDownsweepPolicy;
+
+        // Upsweep policies
+        typedef DownsweepPolicy UpsweepPolicy;
+        typedef AltDownsweepPolicy AltUpsweepPolicy;
+
+        // Single-tile policy
+        typedef DownsweepPolicy SingleTilePolicy;
+
+        // Segmented policies
+        typedef DownsweepPolicy     SegmentedPolicy;
+        typedef AltDownsweepPolicy  AltSegmentedPolicy;
+
+
+    };
+
+
+    /// SM50
+    struct Policy500 : ChainedPolicy<500, Policy500, Policy350>
+    {
+        enum {
+            PRIMARY_RADIX_BITS      = (sizeof(KeyT) > 1) ? 7 : 5,    // 3.5B 32b keys/s, 1.92B 32b pairs/s (TitanX)
+            SINGLE_TILE_RADIX_BITS  = (sizeof(KeyT) > 1) ? 6 : 5,
+            SEGMENTED_RADIX_BITS    = (sizeof(KeyT) > 1) ? 6 : 5,    // 3.1B 32b segmented keys/s (TitanX)
+            ONESWEEP = false,
+            ONESWEEP_RADIX_BITS = 8,
+        };
+
+        // Histogram policy
+        typedef AgentRadixSortHistogramPolicy <256, 8, 1, KeyT, ONESWEEP_RADIX_BITS> HistogramPolicy;
+        
+        // Exclusive sum policy
+        typedef AgentRadixSortExclusiveSumPolicy <256, ONESWEEP_RADIX_BITS> ExclusiveSumPolicy;
+        
+        // Onesweep policy
+        typedef AgentRadixSortOnesweepPolicy <256, 21, DominantT, 1,
+            RADIX_RANK_MATCH_EARLY_COUNTS_ANY, BLOCK_SCAN_WARP_SCANS, RADIX_SORT_STORE_DIRECT,
+            ONESWEEP_RADIX_BITS> OnesweepPolicy;
+
+        // ScanPolicy
+        typedef AgentScanPolicy <512, 23, OffsetT, BLOCK_LOAD_WARP_TRANSPOSE, LOAD_DEFAULT, BLOCK_STORE_WARP_TRANSPOSE, BLOCK_SCAN_RAKING_MEMOIZE> ScanPolicy;
+
+        // Downsweep policies
+        typedef AgentRadixSortDownsweepPolicy <160, 39, DominantT,  BLOCK_LOAD_WARP_TRANSPOSE, LOAD_DEFAULT, RADIX_RANK_BASIC, BLOCK_SCAN_WARP_SCANS, PRIMARY_RADIX_BITS>  DownsweepPolicy;
+        typedef AgentRadixSortDownsweepPolicy <256, 16, DominantT,  BLOCK_LOAD_DIRECT, LOAD_LDG, RADIX_RANK_MEMOIZE, BLOCK_SCAN_RAKING_MEMOIZE, PRIMARY_RADIX_BITS - 1>   AltDownsweepPolicy;
+
+        // Upsweep policies
+        typedef DownsweepPolicy UpsweepPolicy;
+        typedef AltDownsweepPolicy AltUpsweepPolicy;
+
+        // Single-tile policy
+        typedef AgentRadixSortDownsweepPolicy <256, 19, DominantT,  BLOCK_LOAD_DIRECT, LOAD_LDG, RADIX_RANK_MEMOIZE, BLOCK_SCAN_WARP_SCANS, SINGLE_TILE_RADIX_BITS> SingleTilePolicy;
+
+        // Segmented policies
+        typedef AgentRadixSortDownsweepPolicy <192, 31, DominantT,  BLOCK_LOAD_WARP_TRANSPOSE, LOAD_DEFAULT, RADIX_RANK_MEMOIZE, BLOCK_SCAN_WARP_SCANS, SEGMENTED_RADIX_BITS>   SegmentedPolicy;
+        typedef AgentRadixSortDownsweepPolicy <256, 11, DominantT,  BLOCK_LOAD_WARP_TRANSPOSE, LOAD_DEFAULT, RADIX_RANK_MEMOIZE, BLOCK_SCAN_WARP_SCANS, SEGMENTED_RADIX_BITS - 1>       AltSegmentedPolicy;
+    };
+
+
+    /// SM60 (GP100)
+    struct Policy600 : ChainedPolicy<600, Policy600, Policy500>
+    {
+        enum {
+            PRIMARY_RADIX_BITS      = (sizeof(KeyT) > 1) ? 7 : 5,    // 6.9B 32b keys/s (Quadro P100)
+            SINGLE_TILE_RADIX_BITS  = (sizeof(KeyT) > 1) ? 6 : 5,
+            SEGMENTED_RADIX_BITS    = (sizeof(KeyT) > 1) ? 6 : 5,    // 5.9B 32b segmented keys/s (Quadro P100)
+            ONESWEEP = sizeof(KeyT) >= sizeof(uint32_t),  // 10.0B 32b keys/s (GP100, 64M random keys)
+            ONESWEEP_RADIX_BITS = 8,
+        };
+
+        // Histogram policy
+        typedef AgentRadixSortHistogramPolicy <256, 8, 8, KeyT, ONESWEEP_RADIX_BITS> HistogramPolicy;
+        
+        // Exclusive sum policy
+        typedef AgentRadixSortExclusiveSumPolicy <256, ONESWEEP_RADIX_BITS> ExclusiveSumPolicy;
+        
+        // Onesweep policy
+        typedef AgentRadixSortOnesweepPolicy <256, 30, DominantT, 2,
+            RADIX_RANK_MATCH_EARLY_COUNTS_ANY, BLOCK_SCAN_WARP_SCANS,
+            RADIX_SORT_STORE_DIRECT, ONESWEEP_RADIX_BITS> OnesweepPolicy;
+
+        // ScanPolicy
+        typedef AgentScanPolicy <512, 23, OffsetT, BLOCK_LOAD_WARP_TRANSPOSE, LOAD_DEFAULT, BLOCK_STORE_WARP_TRANSPOSE, BLOCK_SCAN_RAKING_MEMOIZE> ScanPolicy;
+
+        // Downsweep policies
+        typedef AgentRadixSortDownsweepPolicy <256, 25, DominantT,  BLOCK_LOAD_TRANSPOSE, LOAD_DEFAULT, RADIX_RANK_MATCH, BLOCK_SCAN_WARP_SCANS, PRIMARY_RADIX_BITS>   DownsweepPolicy;
+        typedef AgentRadixSortDownsweepPolicy <192, 39, DominantT,  BLOCK_LOAD_TRANSPOSE, LOAD_DEFAULT, RADIX_RANK_MEMOIZE, BLOCK_SCAN_WARP_SCANS, PRIMARY_RADIX_BITS - 1>   AltDownsweepPolicy;
+
+        // Upsweep policies
+        typedef DownsweepPolicy UpsweepPolicy;
+        typedef AltDownsweepPolicy AltUpsweepPolicy;
+
+        // Single-tile policy
+        typedef AgentRadixSortDownsweepPolicy <256, 19, DominantT,  BLOCK_LOAD_DIRECT, LOAD_LDG, RADIX_RANK_MEMOIZE, BLOCK_SCAN_WARP_SCANS, SINGLE_TILE_RADIX_BITS>          SingleTilePolicy;
+
+        // Segmented policies
+        typedef AgentRadixSortDownsweepPolicy <192, 39, DominantT,  BLOCK_LOAD_TRANSPOSE, LOAD_DEFAULT, RADIX_RANK_MEMOIZE, BLOCK_SCAN_WARP_SCANS, SEGMENTED_RADIX_BITS>     SegmentedPolicy;
+        typedef AgentRadixSortDownsweepPolicy <384, 11, DominantT,  BLOCK_LOAD_TRANSPOSE, LOAD_DEFAULT, RADIX_RANK_MEMOIZE, BLOCK_SCAN_WARP_SCANS, SEGMENTED_RADIX_BITS - 1> AltSegmentedPolicy;
+
+    };
+
+
+    /// SM61 (GP104)
+    struct Policy610 : ChainedPolicy<610, Policy610, Policy600>
+    {
+        enum {
+            PRIMARY_RADIX_BITS      = (sizeof(KeyT) > 1) ? 7 : 5,    // 3.4B 32b keys/s, 1.83B 32b pairs/s (1080)
+            SINGLE_TILE_RADIX_BITS  = (sizeof(KeyT) > 1) ? 6 : 5,
+            SEGMENTED_RADIX_BITS    = (sizeof(KeyT) > 1) ? 6 : 5,    // 3.3B 32b segmented keys/s (1080)
+            ONESWEEP = sizeof(KeyT) >= sizeof(uint32_t),
+            ONESWEEP_RADIX_BITS = 8,
+        };
+
+        // Histogram policy
+        typedef AgentRadixSortHistogramPolicy <256, 8, 8, KeyT, ONESWEEP_RADIX_BITS> HistogramPolicy;
+        
+        // Exclusive sum policy
+        typedef AgentRadixSortExclusiveSumPolicy <256, ONESWEEP_RADIX_BITS> ExclusiveSumPolicy;
+        
+        // Onesweep policy
+        typedef AgentRadixSortOnesweepPolicy <256, 30, DominantT, 2,
+            RADIX_RANK_MATCH_EARLY_COUNTS_ANY, BLOCK_SCAN_WARP_SCANS,
+            RADIX_SORT_STORE_DIRECT, ONESWEEP_RADIX_BITS> OnesweepPolicy;
+
+        // ScanPolicy
+        typedef AgentScanPolicy <512, 23, OffsetT, BLOCK_LOAD_WARP_TRANSPOSE, LOAD_DEFAULT, BLOCK_STORE_WARP_TRANSPOSE, BLOCK_SCAN_RAKING_MEMOIZE> ScanPolicy;
+
+        // Downsweep policies
+        typedef AgentRadixSortDownsweepPolicy <384, 31, DominantT,  BLOCK_LOAD_TRANSPOSE, LOAD_DEFAULT, RADIX_RANK_MATCH, BLOCK_SCAN_RAKING_MEMOIZE, PRIMARY_RADIX_BITS>   DownsweepPolicy;
+        typedef AgentRadixSortDownsweepPolicy <256, 35, DominantT,  BLOCK_LOAD_TRANSPOSE, LOAD_DEFAULT, RADIX_RANK_MEMOIZE, BLOCK_SCAN_RAKING_MEMOIZE, PRIMARY_RADIX_BITS - 1>   AltDownsweepPolicy;
+
+        // Upsweep policies
+        typedef AgentRadixSortUpsweepPolicy <128, 16, DominantT, LOAD_LDG, PRIMARY_RADIX_BITS>        UpsweepPolicy;
+        typedef AgentRadixSortUpsweepPolicy <128, 16, DominantT, LOAD_LDG, PRIMARY_RADIX_BITS - 1>    AltUpsweepPolicy;
+
+        // Single-tile policy
+        typedef AgentRadixSortDownsweepPolicy <256, 19, DominantT,  BLOCK_LOAD_DIRECT, LOAD_LDG, RADIX_RANK_MEMOIZE, BLOCK_SCAN_WARP_SCANS, SINGLE_TILE_RADIX_BITS>          SingleTilePolicy;
+
+        // Segmented policies
+        typedef AgentRadixSortDownsweepPolicy <192, 39, DominantT,  BLOCK_LOAD_TRANSPOSE, LOAD_DEFAULT, RADIX_RANK_MEMOIZE, BLOCK_SCAN_WARP_SCANS, SEGMENTED_RADIX_BITS>     SegmentedPolicy;
+        typedef AgentRadixSortDownsweepPolicy <384, 11, DominantT,  BLOCK_LOAD_TRANSPOSE, LOAD_DEFAULT, RADIX_RANK_MEMOIZE, BLOCK_SCAN_WARP_SCANS, SEGMENTED_RADIX_BITS - 1> AltSegmentedPolicy;
+    };
+
+
+    /// SM62 (Tegra, less RF)
+    struct Policy620 : ChainedPolicy<620, Policy620, Policy610>
+    {
+        enum {
+            PRIMARY_RADIX_BITS      = 5,
+            ALT_RADIX_BITS          = PRIMARY_RADIX_BITS - 1,
+            ONESWEEP = sizeof(KeyT) >= sizeof(uint32_t),
+            ONESWEEP_RADIX_BITS = 8,
+        };
+
+        // Histogram policy
+        typedef AgentRadixSortHistogramPolicy <256, 8, 8, KeyT, ONESWEEP_RADIX_BITS> HistogramPolicy;
+        
+        // Exclusive sum policy
+        typedef AgentRadixSortExclusiveSumPolicy <256, ONESWEEP_RADIX_BITS> ExclusiveSumPolicy;
+        
+        // Onesweep policy
+        typedef AgentRadixSortOnesweepPolicy <256, 30, DominantT, 2,
+            RADIX_RANK_MATCH_EARLY_COUNTS_ANY, BLOCK_SCAN_WARP_SCANS,
+            RADIX_SORT_STORE_DIRECT, ONESWEEP_RADIX_BITS> OnesweepPolicy;
+
+        // ScanPolicy
+        typedef AgentScanPolicy <512, 23, OffsetT, BLOCK_LOAD_WARP_TRANSPOSE, LOAD_DEFAULT, BLOCK_STORE_WARP_TRANSPOSE, BLOCK_SCAN_RAKING_MEMOIZE> ScanPolicy;
+
+        // Downsweep policies
+        typedef AgentRadixSortDownsweepPolicy <256, 16, DominantT,  BLOCK_LOAD_TRANSPOSE, LOAD_DEFAULT, RADIX_RANK_MEMOIZE, BLOCK_SCAN_RAKING_MEMOIZE, PRIMARY_RADIX_BITS>   DownsweepPolicy;
+        typedef AgentRadixSortDownsweepPolicy <256, 16, DominantT,  BLOCK_LOAD_TRANSPOSE, LOAD_DEFAULT, RADIX_RANK_MEMOIZE, BLOCK_SCAN_RAKING_MEMOIZE, ALT_RADIX_BITS>       AltDownsweepPolicy;
+
+        // Upsweep policies
+        typedef DownsweepPolicy UpsweepPolicy;
+        typedef AltDownsweepPolicy AltUpsweepPolicy;
+
+        // Single-tile policy
+        typedef AgentRadixSortDownsweepPolicy <256, 19, DominantT,  BLOCK_LOAD_DIRECT, LOAD_LDG, RADIX_RANK_MEMOIZE, BLOCK_SCAN_WARP_SCANS, PRIMARY_RADIX_BITS> SingleTilePolicy;
+
+        // Segmented policies
+        typedef DownsweepPolicy     SegmentedPolicy;
+        typedef AltDownsweepPolicy  AltSegmentedPolicy;
+    };
+
+
+    /// SM70 (GV100)
+    struct Policy700 : ChainedPolicy<700, Policy700, Policy620>
+    {
+        enum {
+            PRIMARY_RADIX_BITS      = (sizeof(KeyT) > 1) ? 7 : 5,    // 7.62B 32b keys/s (GV100)
+            SINGLE_TILE_RADIX_BITS  = (sizeof(KeyT) > 1) ? 6 : 5,
+            SEGMENTED_RADIX_BITS    = (sizeof(KeyT) > 1) ? 6 : 5,    // 8.7B 32b segmented keys/s (GV100)
+            ONESWEEP = sizeof(KeyT) >= sizeof(uint32_t),  // 15.8B 32b keys/s (V100-SXM2, 64M random keys)
+            ONESWEEP_RADIX_BITS = 8,
+        };
+
+        // Histogram policy
+        typedef AgentRadixSortHistogramPolicy <256, 8, 8, KeyT, ONESWEEP_RADIX_BITS> HistogramPolicy;
+        
+        // Exclusive sum policy
+        typedef AgentRadixSortExclusiveSumPolicy <256, ONESWEEP_RADIX_BITS> ExclusiveSumPolicy;
+        
+        // Onesweep policy
+        typedef AgentRadixSortOnesweepPolicy <256,
+            sizeof(KeyT) == 4 && sizeof(ValueT) == 4 ? 46 : 23, DominantT, 4,
+            RADIX_RANK_MATCH_EARLY_COUNTS_ANY, BLOCK_SCAN_WARP_SCANS,
+            RADIX_SORT_STORE_DIRECT, ONESWEEP_RADIX_BITS> OnesweepPolicy;
+
+
+        // ScanPolicy
+        typedef AgentScanPolicy <512, 23, OffsetT, BLOCK_LOAD_WARP_TRANSPOSE, LOAD_DEFAULT, BLOCK_STORE_WARP_TRANSPOSE, BLOCK_SCAN_RAKING_MEMOIZE> ScanPolicy;
+
+        // Downsweep policies
+        typedef AgentRadixSortDownsweepPolicy <512, 23, DominantT,  BLOCK_LOAD_TRANSPOSE, LOAD_DEFAULT, RADIX_RANK_MATCH, BLOCK_SCAN_WARP_SCANS, PRIMARY_RADIX_BITS>   DownsweepPolicy;
+        typedef AgentRadixSortDownsweepPolicy <(sizeof(KeyT) > 1) ? 256 : 128, 47, DominantT,  BLOCK_LOAD_TRANSPOSE, LOAD_DEFAULT, RADIX_RANK_MEMOIZE, BLOCK_SCAN_WARP_SCANS, PRIMARY_RADIX_BITS - 1>   AltDownsweepPolicy;
+
+        // Upsweep policies
+        typedef AgentRadixSortUpsweepPolicy <256, 23, DominantT, LOAD_DEFAULT, PRIMARY_RADIX_BITS>     UpsweepPolicy;
+        typedef AgentRadixSortUpsweepPolicy <256, 47, DominantT, LOAD_DEFAULT, PRIMARY_RADIX_BITS - 1> AltUpsweepPolicy;
+
+        // Single-tile policy
+        typedef AgentRadixSortDownsweepPolicy <256, 19, DominantT,  BLOCK_LOAD_DIRECT, LOAD_LDG, RADIX_RANK_MEMOIZE, BLOCK_SCAN_WARP_SCANS, SINGLE_TILE_RADIX_BITS>          SingleTilePolicy;
+
+        // Segmented policies
+        typedef AgentRadixSortDownsweepPolicy <192, 39, DominantT,  BLOCK_LOAD_TRANSPOSE, LOAD_DEFAULT, RADIX_RANK_MEMOIZE, BLOCK_SCAN_WARP_SCANS, SEGMENTED_RADIX_BITS>     SegmentedPolicy;
+        typedef AgentRadixSortDownsweepPolicy <384, 11, DominantT,  BLOCK_LOAD_TRANSPOSE, LOAD_DEFAULT, RADIX_RANK_MEMOIZE, BLOCK_SCAN_WARP_SCANS, SEGMENTED_RADIX_BITS - 1> AltSegmentedPolicy;
+    };
+
+
+    /// SM80
+    struct Policy800 : ChainedPolicy<800, Policy800, Policy700>
+    {
+        enum {
+            PRIMARY_RADIX_BITS      = (sizeof(KeyT) > 1) ? 7 : 5,
+            SINGLE_TILE_RADIX_BITS  = (sizeof(KeyT) > 1) ? 6 : 5,
+            SEGMENTED_RADIX_BITS    = (sizeof(KeyT) > 1) ? 6 : 5,
+            ONESWEEP = sizeof(KeyT) >= sizeof(uint32_t),
+            ONESWEEP_RADIX_BITS = 8,
+        };
+
+        // Histogram policy
+        typedef AgentRadixSortHistogramPolicy <128, 16, 1, KeyT, ONESWEEP_RADIX_BITS> HistogramPolicy;
+        
+        // Exclusive sum policy
+        typedef AgentRadixSortExclusiveSumPolicy <256, ONESWEEP_RADIX_BITS> ExclusiveSumPolicy;
+        
+        // Onesweep policy
+        typedef AgentRadixSortOnesweepPolicy <384, 21, DominantT, 1,
+            RADIX_RANK_MATCH_EARLY_COUNTS_ANY, BLOCK_SCAN_RAKING_MEMOIZE,
+            RADIX_SORT_STORE_DIRECT, ONESWEEP_RADIX_BITS> OnesweepPolicy;
+
+        // ScanPolicy
+        typedef AgentScanPolicy <512, 23, OffsetT, BLOCK_LOAD_WARP_TRANSPOSE, LOAD_DEFAULT, BLOCK_STORE_WARP_TRANSPOSE, BLOCK_SCAN_RAKING_MEMOIZE> ScanPolicy;
+
+        // Downsweep policies
+        typedef AgentRadixSortDownsweepPolicy <512, 23, DominantT,  BLOCK_LOAD_TRANSPOSE, LOAD_DEFAULT, RADIX_RANK_MATCH, BLOCK_SCAN_WARP_SCANS, PRIMARY_RADIX_BITS>   DownsweepPolicy;
+        typedef AgentRadixSortDownsweepPolicy <(sizeof(KeyT) > 1) ? 256 : 128, 47, DominantT,  BLOCK_LOAD_TRANSPOSE, LOAD_DEFAULT, RADIX_RANK_MEMOIZE, BLOCK_SCAN_WARP_SCANS, PRIMARY_RADIX_BITS - 1>   AltDownsweepPolicy;
+
+        // Upsweep policies
+        typedef AgentRadixSortUpsweepPolicy <256, 23, DominantT, LOAD_DEFAULT, PRIMARY_RADIX_BITS>     UpsweepPolicy;
+        typedef AgentRadixSortUpsweepPolicy <256, 47, DominantT, LOAD_DEFAULT, PRIMARY_RADIX_BITS - 1> AltUpsweepPolicy;
+
+        // Single-tile policy
+        typedef AgentRadixSortDownsweepPolicy <256, 19, DominantT,  BLOCK_LOAD_DIRECT, LOAD_LDG, RADIX_RANK_MEMOIZE, BLOCK_SCAN_WARP_SCANS, SINGLE_TILE_RADIX_BITS>          SingleTilePolicy;
+
+        // Segmented policies
+        typedef AgentRadixSortDownsweepPolicy <192, 39, DominantT,  BLOCK_LOAD_TRANSPOSE, LOAD_DEFAULT, RADIX_RANK_MEMOIZE, BLOCK_SCAN_WARP_SCANS, SEGMENTED_RADIX_BITS>     SegmentedPolicy;
+        typedef AgentRadixSortDownsweepPolicy <384, 11, DominantT,  BLOCK_LOAD_TRANSPOSE, LOAD_DEFAULT, RADIX_RANK_MEMOIZE, BLOCK_SCAN_WARP_SCANS, SEGMENTED_RADIX_BITS - 1> AltSegmentedPolicy;
+    };
+
+    /// MUSA mp_21
+    struct Policy210 : ChainedPolicy<210, Policy210, Policy210>
+    {
+        enum {
+            PRIMARY_RADIX_BITS      = 5,
             ONESWEEP = false,
             ONESWEEP_RADIX_BITS = 8,
         };
@@ -985,7 +987,7 @@ struct DeviceRadixSortPolicy
     };
 
     /// MaxPolicy
-    typedef Policy800 MaxPolicy;
+    typedef Policy210 MaxPolicy;
 
 
 };

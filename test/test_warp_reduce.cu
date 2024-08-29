@@ -1,3 +1,7 @@
+/****************************************************************************
+* This library contains code from cub, cub is licensed under the license below.
+* Some files of cub may have been modified by Moore Threads Technology Co., Ltd
+******************************************************************************/
 /******************************************************************************
  * Copyright (c) 2011, Duane Merrill.  All rights reserved.
  * Copyright (c) 2011-2018, NVIDIA CORPORATION.  All rights reserved.
@@ -68,10 +72,10 @@ struct WrapperFunctor
     template <typename T>
     inline __host__ __device__ T operator()(const T &a, const T &b) const
     {
-// #if CUB_PTX_ARCH != 0
-//         if ((cub::LaneId() % LOGICAL_WARP_THREADS) >= num_valid)
-//             cub::ThreadTrap();
-// #endif
+#if CUB_PTX_ARCH != 0
+        if ((cub::LaneId() % LOGICAL_WARP_THREADS) >= num_valid)
+            cub::ThreadTrap();
+#endif
 
         return op(a, b);
     }

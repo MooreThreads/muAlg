@@ -53,7 +53,7 @@ namespace cub {
 // #if ((__CUDACC_VER_MAJOR__ >= 9) || defined(__NVCOMPILER_CUDA__) ||            \
 //      MUSA_VERSION >= 9000) &&                                                  \
 //   !defined(CUB_USE_COOPERATIVE_GROUPS)
-// #define CUB_USE_COOPERATIVE_GROUPS
+#define CUB_USE_COOPERATIVE_GROUPS
 // #endif
 
 /// In device code, CUB_PTX_ARCH expands to the PTX version for which we are
@@ -101,7 +101,7 @@ namespace cub {
 
 /// Whether or not the source targeted by the active compiler pass is allowed to  invoke device kernels or methods from the CUDA runtime API.
 #ifndef CUB_RUNTIME_FUNCTION
-    #if !defined(__MUSA_ARCH__) || (__MUSA_ARCH__>= 100 && defined(__MUSACC_RDC__))
+    #if !defined(__MUSA_ARCH__) || (__MUSA_ARCH__>= 350 && defined(__MUSACC_RDC__))
         #define CUB_RUNTIME_ENABLED
         #define CUB_RUNTIME_FUNCTION __host__ __device__
     #else

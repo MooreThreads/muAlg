@@ -377,15 +377,24 @@ CUB_RUNTIME_FUNCTION inline musaError_t PtxVersionUncached(int& ptx_version)
     musaError_t result = musaSuccess;
     if (CUB_IS_HOST_CODE) {
        #if CUB_INCLUDE_HOST_CODE
-            musaFuncAttributes empty_kernel_attrs;
+            // musaFuncAttributes empty_kernel_attrs;
 
+            // do {
+            //     if (CubDebug(result = musaFuncGetAttributes(&empty_kernel_attrs, empty_kernel)))
+            //         break;
+            // }
+            // while(0);
+
+            // ptx_version = empty_kernel_attrs.ptxVersion * 10;
+
+            musaDeviceProp deviceProp;
             do {
-                if (CubDebug(result = musaFuncGetAttributes(&empty_kernel_attrs, empty_kernel)))
+                if (CubDebug(result = musaGetDeviceProperties(&(deviceProp), CurrentDevice())))
                     break;
             }
             while(0);
+            ptx_version = 100 * deviceProp.major + deviceProp.minor * 10;
 
-            ptx_version = empty_kernel_attrs.ptxVersion * 10;
         #endif
     } else {
         #if CUB_INCLUDE_DEVICE_CODE

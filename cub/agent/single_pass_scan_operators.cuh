@@ -119,8 +119,7 @@ enum ScanTileStatus
  */
 template <
     typename    T,
-    bool        SINGLE_WORD = false //Traits<T>::PRIMITIVE
-    > 
+    bool        SINGLE_WORD = Traits<T>::PRIMITIVE && (sizeof(T) < 4)>
 struct ScanTileState;
 
 
@@ -732,7 +731,7 @@ struct TilePrefixCallbackOp
     {
         T value;
         tile_status.WaitForValid(predecessor_idx, predecessor_status, value);
-        // printf("%d:%d, %d\n", threadIdx.x, predecessor_status, value);
+
         // Perform a segmented reduction to get the prefix for the current window.
         // Use the swizzled scan operator because we are now scanning *down* towards thread0.
 
@@ -759,22 +758,21 @@ struct TilePrefixCallbackOp
         int         predecessor_idx = tile_idx - threadIdx.x - 1;
         StatusWord  predecessor_status;
         T           window_aggregate;
-        // printf("%d, %d, %d\n", threadIdx.x, CUB_PTX_WARP_THREADS, predecessor_idx);
+
         // Wait for the warp-wide window of predecessor tiles to become valid
         ProcessWindow(predecessor_idx, predecessor_status, window_aggregate);
-        // printf("predecessor_status :%d, window_aggregate:%d\n", predecessor_status, window_aggregate);
+
         // The exclusive tile prefix starts out as the current window aggregate
         exclusive_prefix = window_aggregate;
-        // printf("%d:prefix:%d, %d,%d\n", threadIdx.x, predecessor_idx, predecessor_status, window_aggregate);
+
         // Keep sliding the window back until we come across a tile whose inclusive prefix is known
         while (WARP_ALL((predecessor_status != StatusWord(SCAN_TILE_INCLUSIVE)), 0xffffffff))
         {
             predecessor_idx -= CUB_PTX_WARP_THREADS;
-            // printf("%d, %d, %d\n", threadIdx.x, CUB_PTX_WARP_THREADS, predecessor_idx);
+
             // Update exclusive tile prefix with the window prefix
             ProcessWindow(predecessor_idx, predecessor_status, window_aggregate);
             exclusive_prefix = scan_op(window_aggregate, exclusive_prefix);
-            // printf("%d:prefix:%d, %d,%d\n", threadIdx.x, predecessor_idx, predecessor_status, window_aggregate);
         }
 
         // Compute the inclusive tile prefix and update the status for this tile

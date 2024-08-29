@@ -8,14 +8,15 @@ if (CMAKE_VERSION VERSION_GREATER_EQUAL 3.18)
   cmake_policy(SET CMP0104 OLD)
 endif()
 
-project(CubAddSubDirExample CUDA)
-
+project(CubAddSubDirExample)
+list(APPEND CMAKE_MODULE_PATH /usr/local/musa/cmake)
+find_package(MUSA REQUIRED)
 # Use your project's checkout of CUB here, for most cases
 # `add_subdirectory(cub)` will be sufficient.
 add_subdirectory("${CUB_ROOT}" cub)
 
 # Link the CUB::CUB target to your project's targets
-add_executable(HelloCUB dummy.cu)
+musa_add_executable(HelloCUB dummy.cu)
 target_link_libraries(HelloCUB CUB::CUB)
 
 #

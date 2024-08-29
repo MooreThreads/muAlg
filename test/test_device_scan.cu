@@ -1,3 +1,7 @@
+/****************************************************************************
+* This library contains code from cub, cub is licensed under the license below.
+* Some files of cub may have been modified by Moore Threads Technology Co., Ltd
+******************************************************************************/
 /******************************************************************************
  * Copyright (c) 2011, Duane Merrill.  All rights reserved.
  * Copyright (c) 2011-2018, NVIDIA CORPORATION.  All rights reserved.
@@ -1030,7 +1034,7 @@ int main(int argc, char** argv)
         TestSize<char>(num_items,               (char) 0,               (char) 99);
         TestSize<unsigned short>(num_items,     (unsigned short) 0,     (unsigned short)99);
         TestSize<unsigned int>(num_items,       (unsigned int) 0,       (unsigned int) 99);
-        TestSize<unsigned long long>(num_items, (unsigned long long) 0, (unsigned long long) 99); //
+        TestSize<unsigned long long>(num_items, (unsigned long long) 0, (unsigned long long) 99);
 
         TestSize<uchar2>(num_items,     make_uchar2(0, 0),              make_uchar2(17, 21));
         TestSize<char2>(num_items,      make_char2(0, 0),               make_char2(17, 21));

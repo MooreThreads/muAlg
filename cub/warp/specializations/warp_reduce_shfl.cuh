@@ -146,33 +146,28 @@ struct WarpReduceShfl
 //         int shfl_c = last_lane | SHFL_C;   // Shuffle control (mask and last_lane)
 
 //         // Use predicate set from SHFL to guard against invalid peers
-// // #ifdef CUB_USE_COOPERATIVE_GROUPS
-// //         asm volatile(
-// //             "{"
-// //             "  .reg .u32 r0;"
-// //             "  .reg .pred p;"
-// //             "  shfl.sync.down.b32 r0|p, %1, %2, %3, %5;"
-// //             "  @p add.u32 r0, r0, %4;"
-// //             "  mov.u32 %0, r0;"
-// //             "}"
-// //             : "=r"(output) : "r"(input), "r"(offset), "r"(shfl_c), "r"(input), "r"(member_mask));
-// // #else
-// //         asm volatile(
-// //             "{"
-// //             "  .reg .u32 r0;"
-// //             "  .reg .pred p;"
-// //             "  shfl.down.b32 r0|p, %1, %2, %3;"
-// //             "  @p add.u32 r0, r0, %4;"
-// //             "  mov.u32 %0, r0;"
-// //             "}"
-// //             : "=r"(output) : "r"(input), "r"(offset), "r"(shfl_c), "r"(input));
-// // #endif
-//         int width = (32 - shfl_c) >> 8;
-//         bool pred = false;
-//         output = __shfl_down_sync(member_mask, input, offset, width, &pred);
-//         if (pred) {
-//           output += input;
-//         }
+// #ifdef CUB_USE_COOPERATIVE_GROUPS
+//         asm volatile(
+//             "{"
+//             "  .reg .u32 r0;"
+//             "  .reg .pred p;"
+//             "  shfl.sync.down.b32 r0|p, %1, %2, %3, %5;"
+//             "  @p add.u32 r0, r0, %4;"
+//             "  mov.u32 %0, r0;"
+//             "}"
+//             : "=r"(output) : "r"(input), "r"(offset), "r"(shfl_c), "r"(input), "r"(member_mask));
+// #else
+//         asm volatile(
+//             "{"
+//             "  .reg .u32 r0;"
+//             "  .reg .pred p;"
+//             "  shfl.down.b32 r0|p, %1, %2, %3;"
+//             "  @p add.u32 r0, r0, %4;"
+//             "  mov.u32 %0, r0;"
+//             "}"
+//             : "=r"(output) : "r"(input), "r"(offset), "r"(shfl_c), "r"(input));
+// #endif
+
 //         return output;
 //     }
 
@@ -188,34 +183,28 @@ struct WarpReduceShfl
 //         int shfl_c = last_lane | SHFL_C;   // Shuffle control (mask and last_lane)
 
 //         // Use predicate set from SHFL to guard against invalid peers
-// // #ifdef CUB_USE_COOPERATIVE_GROUPS
-// //         asm volatile(
-// //             "{"
-// //             "  .reg .f32 r0;"
-// //             "  .reg .pred p;"
-// //             "  shfl.sync.down.b32 r0|p, %1, %2, %3, %5;"
-// //             "  @p add.f32 r0, r0, %4;"
-// //             "  mov.f32 %0, r0;"
-// //             "}"
-// //             : "=f"(output) : "f"(input), "r"(offset), "r"(shfl_c), "f"(input), "r"(member_mask));
-// // #else
-// //         asm volatile(
-// //             "{"
-// //             "  .reg .f32 r0;"
-// //             "  .reg .pred p;"
-// //             "  shfl.down.b32 r0|p, %1, %2, %3;"
-// //             "  @p add.f32 r0, r0, %4;"
-// //             "  mov.f32 %0, r0;"
-// //             "}"
-// //             : "=f"(output) : "f"(input), "r"(offset), "r"(shfl_c), "f"(input));
-// // #endif
+// #ifdef CUB_USE_COOPERATIVE_GROUPS
+//         asm volatile(
+//             "{"
+//             "  .reg .f32 r0;"
+//             "  .reg .pred p;"
+//             "  shfl.sync.down.b32 r0|p, %1, %2, %3, %5;"
+//             "  @p add.f32 r0, r0, %4;"
+//             "  mov.f32 %0, r0;"
+//             "}"
+//             : "=f"(output) : "f"(input), "r"(offset), "r"(shfl_c), "f"(input), "r"(member_mask));
+// #else
+//         asm volatile(
+//             "{"
+//             "  .reg .f32 r0;"
+//             "  .reg .pred p;"
+//             "  shfl.down.b32 r0|p, %1, %2, %3;"
+//             "  @p add.f32 r0, r0, %4;"
+//             "  mov.f32 %0, r0;"
+//             "}"
+//             : "=f"(output) : "f"(input), "r"(offset), "r"(shfl_c), "f"(input));
+// #endif
 
-//         int width = 32 - (shfl_c >> 8);
-//         bool pred = false;
-//         output = __shfl_down_sync(member_mask, input, offset, width, &pred);
-//         if (pred) {
-//           output += input;
-//         }
 //         return output;
 //     }
 
@@ -230,34 +219,35 @@ struct WarpReduceShfl
 //         unsigned long long output;
 //         int shfl_c = last_lane | SHFL_C;   // Shuffle control (mask and last_lane)
 
-// // #ifdef CUB_USE_COOPERATIVE_GROUPS
-// //         asm volatile(
-// //             "{"
-// //             "  .reg .u32 lo;"
-// //             "  .reg .u32 hi;"
-// //             "  .reg .pred p;"
-// //             "  mov.b64 {lo, hi}, %1;"
-// //             "  shfl.sync.down.b32 lo|p, lo, %2, %3, %4;"
-// //             "  shfl.sync.down.b32 hi|p, hi, %2, %3, %4;"
-// //             "  mov.b64 %0, {lo, hi};"
-// //             "  @p add.u64 %0, %0, %1;"
-// //             "}"
-// //             : "=l"(output) : "l"(input), "r"(offset), "r"(shfl_c), "r"(member_mask));
-// // #else
-// //         asm volatile(
-// //             "{"
-// //             "  .reg .u32 lo;"
-// //             "  .reg .u32 hi;"
-// //             "  .reg .pred p;"
-// //             "  mov.b64 {lo, hi}, %1;"
-// //             "  shfl.down.b32 lo|p, lo, %2, %3;"
-// //             "  shfl.down.b32 hi|p, hi, %2, %3;"
-// //             "  mov.b64 %0, {lo, hi};"
-// //             "  @p add.u64 %0, %0, %1;"
-// //             "}"
-// //             : "=l"(output) : "l"(input), "r"(offset), "r"(shfl_c));
-// // #endif
+// #ifdef CUB_USE_COOPERATIVE_GROUPS
+//         asm volatile(
+//             "{"
+//             "  .reg .u32 lo;"
+//             "  .reg .u32 hi;"
+//             "  .reg .pred p;"
+//             "  mov.b64 {lo, hi}, %1;"
+//             "  shfl.sync.down.b32 lo|p, lo, %2, %3, %4;"
+//             "  shfl.sync.down.b32 hi|p, hi, %2, %3, %4;"
+//             "  mov.b64 %0, {lo, hi};"
+//             "  @p add.u64 %0, %0, %1;"
+//             "}"
+//             : "=l"(output) : "l"(input), "r"(offset), "r"(shfl_c), "r"(member_mask));
+// #else
+//         asm volatile(
+//             "{"
+//             "  .reg .u32 lo;"
+//             "  .reg .u32 hi;"
+//             "  .reg .pred p;"
+//             "  mov.b64 {lo, hi}, %1;"
+//             "  shfl.down.b32 lo|p, lo, %2, %3;"
+//             "  shfl.down.b32 hi|p, hi, %2, %3;"
+//             "  mov.b64 %0, {lo, hi};"
+//             "  @p add.u64 %0, %0, %1;"
+//             "}"
+//             : "=l"(output) : "l"(input), "r"(offset), "r"(shfl_c));
+// #endif
 
+//         return output;
 //     }
 
 
@@ -272,33 +262,33 @@ struct WarpReduceShfl
 //         int shfl_c = last_lane | SHFL_C;   // Shuffle control (mask and last_lane)
 
 //         // Use predicate set from SHFL to guard against invalid peers
-// // #ifdef CUB_USE_COOPERATIVE_GROUPS
-// //         asm volatile(
-// //             "{"
-// //             "  .reg .u32 lo;"
-// //             "  .reg .u32 hi;"
-// //             "  .reg .pred p;"
-// //             "  mov.b64 {lo, hi}, %1;"
-// //             "  shfl.sync.down.b32 lo|p, lo, %2, %3, %4;"
-// //             "  shfl.sync.down.b32 hi|p, hi, %2, %3, %4;"
-// //             "  mov.b64 %0, {lo, hi};"
-// //             "  @p add.s64 %0, %0, %1;"
-// //             "}"
-// //             : "=l"(output) : "l"(input), "r"(offset), "r"(shfl_c), "r"(member_mask));
-// // #else
-// //         asm volatile(
-// //             "{"
-// //             "  .reg .u32 lo;"
-// //             "  .reg .u32 hi;"
-// //             "  .reg .pred p;"
-// //             "  mov.b64 {lo, hi}, %1;"
-// //             "  shfl.down.b32 lo|p, lo, %2, %3;"
-// //             "  shfl.down.b32 hi|p, hi, %2, %3;"
-// //             "  mov.b64 %0, {lo, hi};"
-// //             "  @p add.s64 %0, %0, %1;"
-// //             "}"
-// //             : "=l"(output) : "l"(input), "r"(offset), "r"(shfl_c));
-// // #endif
+// #ifdef CUB_USE_COOPERATIVE_GROUPS
+//         asm volatile(
+//             "{"
+//             "  .reg .u32 lo;"
+//             "  .reg .u32 hi;"
+//             "  .reg .pred p;"
+//             "  mov.b64 {lo, hi}, %1;"
+//             "  shfl.sync.down.b32 lo|p, lo, %2, %3, %4;"
+//             "  shfl.sync.down.b32 hi|p, hi, %2, %3, %4;"
+//             "  mov.b64 %0, {lo, hi};"
+//             "  @p add.s64 %0, %0, %1;"
+//             "}"
+//             : "=l"(output) : "l"(input), "r"(offset), "r"(shfl_c), "r"(member_mask));
+// #else
+//         asm volatile(
+//             "{"
+//             "  .reg .u32 lo;"
+//             "  .reg .u32 hi;"
+//             "  .reg .pred p;"
+//             "  mov.b64 {lo, hi}, %1;"
+//             "  shfl.down.b32 lo|p, lo, %2, %3;"
+//             "  shfl.down.b32 hi|p, hi, %2, %3;"
+//             "  mov.b64 %0, {lo, hi};"
+//             "  @p add.s64 %0, %0, %1;"
+//             "}"
+//             : "=l"(output) : "l"(input), "r"(offset), "r"(shfl_c));
+// #endif
 
 //         return output;
 //     }
@@ -315,37 +305,37 @@ struct WarpReduceShfl
 //         int shfl_c = last_lane | SHFL_C;   // Shuffle control (mask and last_lane)
 
 //         // Use predicate set from SHFL to guard against invalid peers
-// // #ifdef CUB_USE_COOPERATIVE_GROUPS
-// //         asm volatile(
-// //             "{"
-// //             "  .reg .u32 lo;"
-// //             "  .reg .u32 hi;"
-// //             "  .reg .pred p;"
-// //             "  .reg .f64 r0;"
-// //             "  mov.b64 %0, %1;"
-// //             "  mov.b64 {lo, hi}, %1;"
-// //             "  shfl.sync.down.b32 lo|p, lo, %2, %3, %4;"
-// //             "  shfl.sync.down.b32 hi|p, hi, %2, %3, %4;"
-// //             "  mov.b64 r0, {lo, hi};"
-// //             "  @p add.f64 %0, %0, r0;"
-// //             "}"
-// //             : "=d"(output) : "d"(input), "r"(offset), "r"(shfl_c), "r"(member_mask));
-// // #else
-// //         asm volatile(
-// //             "{"
-// //             "  .reg .u32 lo;"
-// //             "  .reg .u32 hi;"
-// //             "  .reg .pred p;"
-// //             "  .reg .f64 r0;"
-// //             "  mov.b64 %0, %1;"
-// //             "  mov.b64 {lo, hi}, %1;"
-// //             "  shfl.down.b32 lo|p, lo, %2, %3;"
-// //             "  shfl.down.b32 hi|p, hi, %2, %3;"
-// //             "  mov.b64 r0, {lo, hi};"
-// //             "  @p add.f64 %0, %0, r0;"
-// //             "}"
-// //             : "=d"(output) : "d"(input), "r"(offset), "r"(shfl_c));
-// // #endif
+// #ifdef CUB_USE_COOPERATIVE_GROUPS
+//         asm volatile(
+//             "{"
+//             "  .reg .u32 lo;"
+//             "  .reg .u32 hi;"
+//             "  .reg .pred p;"
+//             "  .reg .f64 r0;"
+//             "  mov.b64 %0, %1;"
+//             "  mov.b64 {lo, hi}, %1;"
+//             "  shfl.sync.down.b32 lo|p, lo, %2, %3, %4;"
+//             "  shfl.sync.down.b32 hi|p, hi, %2, %3, %4;"
+//             "  mov.b64 r0, {lo, hi};"
+//             "  @p add.f64 %0, %0, r0;"
+//             "}"
+//             : "=d"(output) : "d"(input), "r"(offset), "r"(shfl_c), "r"(member_mask));
+// #else
+//         asm volatile(
+//             "{"
+//             "  .reg .u32 lo;"
+//             "  .reg .u32 hi;"
+//             "  .reg .pred p;"
+//             "  .reg .f64 r0;"
+//             "  mov.b64 %0, %1;"
+//             "  mov.b64 {lo, hi}, %1;"
+//             "  shfl.down.b32 lo|p, lo, %2, %3;"
+//             "  shfl.down.b32 hi|p, hi, %2, %3;"
+//             "  mov.b64 r0, {lo, hi};"
+//             "  @p add.f64 %0, %0, r0;"
+//             "}"
+//             : "=d"(output) : "d"(input), "r"(offset), "r"(shfl_c));
+// #endif
 
 //         return output;
 //     }

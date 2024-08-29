@@ -1,3 +1,7 @@
+/****************************************************************************
+* This library contains code from cub, cub is licensed under the license below.
+* Some files of cub may have been modified by Moore Threads Technology Co., Ltd
+******************************************************************************/
 /******************************************************************************
  * Copyright (c) 2011, Duane Merrill.  All rights reserved.
  * Copyright (c) 2011-2018, NVIDIA CORPORATION.  All rights reserved.
@@ -939,7 +943,7 @@ void TestValueTypes(
     TestBackend<IS_DESCENDING, KeyT, unsigned long long>(h_keys, num_items, num_segments, h_segment_offsets, begin_bit, end_bit, h_reference_keys, h_reference_ranks);
 
     // Test with non-trivially-constructable value
-    // TestBackend<IS_DESCENDING, KeyT, TestBar>           (h_keys, num_items, num_segments, h_segment_offsets, begin_bit, end_bit, h_reference_keys, h_reference_ranks);
+    TestBackend<IS_DESCENDING, KeyT, TestBar>           (h_keys, num_items, num_segments, h_segment_offsets, begin_bit, end_bit, h_reference_keys, h_reference_ranks);
 
     // Cleanup
     if (h_reference_ranks) delete[] h_reference_ranks;
@@ -1279,12 +1283,12 @@ int main(int argc, char** argv)
         TestGen<long long>            (num_items, num_segments);
         TestGen<unsigned long long>   (num_items, num_segments);
 
-// #if (__CUDACC_VER_MAJOR__ >= 9 || MUSA_VERSION >= 9000) && !__NVCOMPILER_CUDA__
-        // TestGen<half_t>                (num_items, num_segments);
-// #endif
+#if (__CUDACC_VER_MAJOR__ >= 9 || MUSA_VERSION >= 9000) && !__NVCOMPILER_CUDA__
+        TestGen<half_t>                (num_items, num_segments);
+#endif
         TestGen<float>                (num_items, num_segments);
 
-        // if (ptx_version > 120)                          // Don't check doubles on PTX120 or below because they're down-converted
+        if (ptx_version > 120)                          // Don't check doubles on PTX120 or below because they're down-converted
             TestGen<double>           (num_items, num_segments);
 
     }

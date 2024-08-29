@@ -1,3 +1,7 @@
+/****************************************************************************
+* This library contains code from cub, cub is licensed under the license below.
+* Some files of cub may have been modified by Moore Threads Technology Co., Ltd
+******************************************************************************/
 /******************************************************************************
  * Copyright (c) 2011, Duane Merrill.  All rights reserved.
  * Copyright (c) 2011-2018, NVIDIA CORPORATION.  All rights reserved.
@@ -712,7 +716,9 @@ void Test(
     Test<BLOCK_THREADS, 2, 2, ITEMS_PER_THREAD, SCAN_MODE, TEST_MODE, ALGORITHM>(gen_mode, scan_op, initial_value);
 }
 
-
+// #define TEST_RAKING 1
+// #define TEST_RAKING_MEMOIZE 1
+#define TEST_WARP_SCANS 1
 /**
  * Run test for different policy types
  */
@@ -731,15 +737,15 @@ void Test(
   (void)gen_mode;
   (void)scan_op;
   (void)initial_value;
-// #ifdef TEST_RAKING
-    // Test<BLOCK_THREADS, ITEMS_PER_THREAD, SCAN_MODE, TEST_MODE, BLOCK_SCAN_RAKING>(gen_mode, scan_op, initial_value);
-// #endif
-// #ifdef TEST_RAKING_MEMOIZE
-    // Test<BLOCK_THREADS, ITEMS_PER_THREAD, SCAN_MODE, TEST_MODE, BLOCK_SCAN_RAKING_MEMOIZE>(gen_mode, scan_op, initial_value);
-// #endif
-// #ifdef TEST_WARP_SCANS
+#ifdef TEST_RAKING
+    Test<BLOCK_THREADS, ITEMS_PER_THREAD, SCAN_MODE, TEST_MODE, BLOCK_SCAN_RAKING>(gen_mode, scan_op, initial_value);
+#endif
+#ifdef TEST_RAKING_MEMOIZE
+    Test<BLOCK_THREADS, ITEMS_PER_THREAD, SCAN_MODE, TEST_MODE, BLOCK_SCAN_RAKING_MEMOIZE>(gen_mode, scan_op, initial_value);
+#endif
+#ifdef TEST_WARP_SCANS
     Test<BLOCK_THREADS, ITEMS_PER_THREAD, SCAN_MODE, TEST_MODE, BLOCK_SCAN_WARP_SCANS>(gen_mode, scan_op, initial_value);
-// #endif
+#endif
 }
 
 
@@ -821,7 +827,7 @@ void Test()
     Test<BLOCK_THREADS, ITEMS_PER_THREAD>(Max(), std::numeric_limits<int>::min(), (int) 99);
     Test<BLOCK_THREADS, ITEMS_PER_THREAD>(Max(), std::numeric_limits<long long>::min(), (long long) 99);
 
-    // if (ptx_version > 120)                          // Don't check doubles on PTX120 or below because they're down-converted
+    if (ptx_version > 120)                          // Don't check doubles on PTX120 or below because they're down-converted
         Test<BLOCK_THREADS, ITEMS_PER_THREAD>(Max(), std::numeric_limits<double>::max() * -1, (double) 99);
 
     // vec-1
@@ -838,7 +844,7 @@ void Test()
     Test<BLOCK_THREADS, ITEMS_PER_THREAD>(Sum(), make_short4(0, 0, 0, 0), make_short4(17, 21, 32, 85));
     Test<BLOCK_THREADS, ITEMS_PER_THREAD>(Sum(), make_int4(0, 0, 0, 0), make_int4(17, 21, 32, 85));
     Test<BLOCK_THREADS, ITEMS_PER_THREAD>(Sum(), make_longlong4(0, 0, 0, 0), make_longlong4(17, 21, 32, 85));
-    Test<BLOCK_THREADS, ITEMS_PER_THREAD>(Max(), make_longlong4(std::numeric_limits<long long>::min(), std::numeric_limits<long long>::min(), std::numeric_limits<long long>::min(), std::numeric_limits<long long>::min()), make_longlong4(17, 21, 32, 85));
+
     // complex
     Test<BLOCK_THREADS, ITEMS_PER_THREAD>(Sum(), TestFoo::MakeTestFoo(0, 0, 0, 0), TestFoo::MakeTestFoo(17, 21, 32, 85));
     Test<BLOCK_THREADS, ITEMS_PER_THREAD>(Sum(), TestBar(0, 0), TestBar(17, 21));
@@ -901,11 +907,11 @@ int main(int argc, char** argv)
     // Compile/run thorough tests
     for (int i = 0; i <= g_repeat; ++i)
     {
-        // Run tests for different thread block sizes  none 2^n will use ranking!
-        // Test<17>();
+        // Run tests for different thread block sizes
+        Test<17>();
         Test<32>();
-        // Test<62>();
-        // Test<65>();
+        Test<62>();
+        Test<65>();
 //            Test<96>();             // TODO: file bug for UNREACHABLE error for Test<96, 9, BASIC, BLOCK_SCAN_RAKING>(UNIFORM, Sum(), NullType(), make_ulonglong2(17, 21));
         Test<128>();
     }

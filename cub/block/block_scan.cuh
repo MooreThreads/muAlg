@@ -750,7 +750,6 @@ public:
         T               initial_value,                  ///< [in] Initial value to seed the exclusive scan (and is assigned to \p output[0] in <em>thread</em><sub>0</sub>)
         ScanOp          scan_op)                        ///< [in] Binary scan functor 
     {
-        // printf("b.ex.i.o.ini.sop\n");
         InternalBlockScan(temp_storage).ExclusiveScan(input, output, initial_value, scan_op);
     }
 
@@ -802,7 +801,6 @@ public:
         ScanOp          scan_op,            ///< [in] Binary scan functor 
         T               &block_aggregate)   ///< [out] block-wide aggregate reduction of input items
     {
-      // printf("b.ex.i.o.ini.sop.agg\n");
         InternalBlockScan(temp_storage).ExclusiveScan(input, output, initial_value, scan_op, block_aggregate);
     }
 
@@ -891,7 +889,6 @@ public:
         ScanOp                  scan_op,                        ///< [in] Binary scan functor 
         BlockPrefixCallbackOp   &block_prefix_callback_op)      ///< [in-out] <b>[<em>warp</em><sub>0</sub> only]</b> Call-back functor for specifying a block-wide prefix to be applied to the logical input sequence.
     {
-      // printf("b.ex.i.o.sop.preop\n");
         InternalBlockScan(temp_storage).ExclusiveScan(input, output, scan_op, block_prefix_callback_op);
     }
 
@@ -954,7 +951,6 @@ public:
         T                 initial_value,                ///< [in] Initial value to seed the exclusive scan (and is assigned to \p output[0] in <em>thread</em><sub>0</sub>)
         ScanOp            scan_op)                      ///< [in] Binary scan functor
     {
-        // printf("b.ex.ii.oo.ini.sop\n");
         // Reduce consecutive thread items in registers
         T thread_prefix = internal::ThreadReduce(input, scan_op);
 
@@ -1018,7 +1014,6 @@ public:
         ScanOp            scan_op,                      ///< [in] Binary scan functor
         T                 &block_aggregate)             ///< [out] block-wide aggregate reduction of input items
     {
-        // printf("b.ex.ii.oo.ini.sop.agg\n");
         // Reduce consecutive thread items in registers
         T thread_prefix = internal::ThreadReduce(input, scan_op);
 
@@ -1126,7 +1121,6 @@ public:
         ScanOp                  scan_op,                        ///< [in] Binary scan functor
         BlockPrefixCallbackOp   &block_prefix_callback_op)      ///< [in-out] <b>[<em>warp</em><sub>0</sub> only]</b> Call-back functor for specifying a block-wide prefix to be applied to the logical input sequence.
     {
-        // printf("b.ex.ii.oo.sop.preop\n");
         // Reduce consecutive thread items in registers
         T thread_prefix = internal::ThreadReduce(input, scan_op);
 
@@ -1163,7 +1157,6 @@ public:
         T               &output,                        ///< [out] Calling thread's output item (may be aliased to \p input)
         ScanOp          scan_op)                        ///< [in] Binary scan functor
     {
-      // printf("b.ex.i.o.sop\n");
         InternalBlockScan(temp_storage).ExclusiveScan(input, output, scan_op);
     }
 
@@ -1185,7 +1178,6 @@ public:
         ScanOp          scan_op,                        ///< [in] Binary scan functor
         T               &block_aggregate)               ///< [out] block-wide aggregate reduction of input items
     {
-      // printf("b.ex.i.o.sop.agg\n");
         InternalBlockScan(temp_storage).ExclusiveScan(input, output, scan_op, block_aggregate);
     }
 
@@ -1216,7 +1208,6 @@ public:
         T                 (&output)[ITEMS_PER_THREAD],  ///< [out] Calling thread's output items (may be aliased to \p input)
         ScanOp            scan_op)                      ///< [in] Binary scan functor
     {
-        // printf("b.ex.ii.oo.sop\n");
         // Reduce consecutive thread items in registers
         T thread_partial = internal::ThreadReduce(input, scan_op);
 
@@ -1249,7 +1240,6 @@ public:
         ScanOp          scan_op,                        ///< [in] Binary scan functor
         T               &block_aggregate)               ///< [out] block-wide aggregate reduction of input items
     {
-        // printf("b.ex.ii.oo.sop.agg\n");
         // Reduce consecutive thread items in registers
         T thread_partial = internal::ThreadReduce(input, scan_op);
 

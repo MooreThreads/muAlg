@@ -10,15 +10,15 @@ include(GNUInstallDirs)
 # CUB is a header library; no need to build anything before installing:
 set(CMAKE_SKIP_INSTALL_ALL_DEPENDENCY TRUE)
 
-install(DIRECTORY "${PROJECT_SOURCE_DIR}/cub"
+install(DIRECTORY "${CUB_SOURCE_DIR}/cub"
   TYPE INCLUDE
   FILES_MATCHING
     PATTERN "*.cuh"
 )
 
-# install(DIRECTORY "${PROJECT_SOURCE_DIR}/cub/cmake/"
-#   DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/muAlg"
-# )
+install(DIRECTORY "${CUB_SOURCE_DIR}/cub/cmake/"
+  DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/cub"
+)
 
 ############# package ##########
 set(CPACK_GENERATOR "DEB")

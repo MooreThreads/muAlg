@@ -1,3 +1,7 @@
+/****************************************************************************
+* This library contains code from cub, cub is licensed under the license below.
+* Some files of cub may have been modified by Moore Threads Technology Co., Ltd
+******************************************************************************/
 /******************************************************************************
  * Copyright (c) 2011, Duane Merrill.  All rights reserved.
  * Copyright (c) 2011-2018, NVIDIA CORPORATION.  All rights reserved.
@@ -674,7 +678,8 @@ void Test(
     }
 }
 
-
+// #define TEST_RAKING 1
+#define TEST_WARP_REDUCTIONS 1
 /**
  * Run battery of tests for different block-reduction algorithmic variants
  */
@@ -686,13 +691,13 @@ void Test(
     ReductionOp     reduction_op)
 {
   (void)reduction_op;
-// #ifdef TEST_RAKING
-    // Test<BLOCK_REDUCE_RAKING, BLOCK_THREADS, T>(reduction_op);
-    // Test<BLOCK_REDUCE_RAKING_COMMUTATIVE_ONLY, BLOCK_THREADS, T>(reduction_op);
-// #endif
-// #ifdef TEST_WARP_REDUCTIONS
+#ifdef TEST_RAKING
+    Test<BLOCK_REDUCE_RAKING, BLOCK_THREADS, T>(reduction_op);
+    Test<BLOCK_REDUCE_RAKING_COMMUTATIVE_ONLY, BLOCK_THREADS, T>(reduction_op);
+#endif
+#ifdef TEST_WARP_REDUCTIONS
     Test<BLOCK_REDUCE_WARP_REDUCTIONS, BLOCK_THREADS, T>(reduction_op);
-// #endif
+#endif
 }
 
 
@@ -784,8 +789,9 @@ int main(int argc, char** argv)
         Test<short>();
         Test<int>();
         Test<long long>();
-
+        if (ptx_version > 120)                          // Don't check doubles on PTX120 or below because they're down-converted
         Test<double>();
+
         Test<float>();
 
         // vector types

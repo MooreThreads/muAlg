@@ -32,7 +32,7 @@ function(cub_add_example target_name_var example_name example_src cub_target)
   musa_add_executable(${example_target} "${example_src}")
   target_link_libraries(${example_target} ${cub_target})
   cub_clone_target_properties(${example_target} ${cub_target})
-  target_include_directories(${example_target} PRIVATE "${PROJECT_SOURCE_DIR}/examples")
+  target_include_directories(${example_target} PRIVATE "${CUB_SOURCE_DIR}/examples")
 
   # Add to the active configuration's meta target
   add_dependencies(${config_meta_target} ${example_target})

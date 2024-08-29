@@ -96,7 +96,6 @@ __device__ __forceinline__ unsigned int SHR_ADD(
     unsigned int ret;
     // asm ("vshr.u32.u32.u32.clamp.add %0, %1, %2, %3;" :
     //     "=r"(ret) : "r"(x), "r"(shift), "r"(addend));
-    // printf("SHR_ADD\n");
     ret = (x >> shift) + addend;
     return ret;
 }
@@ -113,7 +112,6 @@ __device__ __forceinline__ unsigned int SHL_ADD(
     unsigned int ret;
     // asm ("vshl.u32.u32.u32.clamp.add %0, %1, %2, %3;" :
     //     "=r"(ret) : "r"(x), "r"(shift), "r"(addend));
-    // printf("SHL_ADD\n");
     ret = (x << shift) + addend;
     return ret;
 }
@@ -132,7 +130,6 @@ __device__ __forceinline__ unsigned int BFE(
 {
     unsigned int bits;
     // asm ("bfe.u32 %0, %1, %2, %3;" : "=r"(bits) : "r"((unsigned int) source), "r"(bit_start), "r"(num_bits));
-    // printf("BFE\n");
     bits = __bfe_u32((unsigned int)source, bit_start, num_bits);
     return bits;
 }
@@ -149,7 +146,6 @@ __device__ __forceinline__ unsigned int BFE(
     Int2Type<8>             /*byte_len*/)
 {
     const unsigned long long MASK = (1ull << num_bits) - 1;
-    // printf("BFE8\n");
     return (source >> bit_start) & MASK;
 }
 
@@ -168,9 +164,9 @@ __device__ __forceinline__ unsigned int BFE(
 }
 
 
-// /**
-//  * \brief Bitfield insert.  Inserts the \p num_bits least significant bits of \p y into \p x at bit-offset \p bit_start.
-//  */
+/**
+ * \brief Bitfield insert.  Inserts the \p num_bits least significant bits of \p y into \p x at bit-offset \p bit_start.
+ */
 // __device__ __forceinline__ void BFI(
 //     unsigned int &ret,
 //     unsigned int x,
@@ -178,54 +174,51 @@ __device__ __forceinline__ unsigned int BFE(
 //     unsigned int bit_start,
 //     unsigned int num_bits)
 // {
-//     // asm ("bfi.b32 %0, %1, %2, %3, %4;" :
-//     //     "=r"(ret) : "r"(y), "r"(x), "r"(bit_start), "r"(num_bits));
-//     // printf("BFI\n");
+//     asm ("bfi.b32 %0, %1, %2, %3, %4;" :
+//         "=r"(ret) : "r"(y), "r"(x), "r"(bit_start), "r"(num_bits));
 // }
 
 
-// /**
-//  * \brief Three-operand add.  Returns \p x + \p y + \p z.
-//  */
+/**
+ * \brief Three-operand add.  Returns \p x + \p y + \p z.
+ */
 // __device__ __forceinline__ unsigned int IADD3(unsigned int x, unsigned int y, unsigned int z)
 // {
-//     // asm ("vadd.u32.u32.u32.add %0, %1, %2, %3;" : "=r"(x) : "r"(x), "r"(y), "r"(z));
-//     // printf("IADD3\n");
+//     asm ("vadd.u32.u32.u32.add %0, %1, %2, %3;" : "=r"(x) : "r"(x), "r"(y), "r"(z));
 //     return x;
 // }
 
 
-// /**
-//  * \brief Byte-permute. Pick four arbitrary bytes from two 32-bit registers, and reassemble them into a 32-bit destination register.  For SM2.0 or later.
-//  *
-//  * \par
-//  * The bytes in the two source registers \p a and \p b are numbered from 0 to 7:
-//  * {\p b, \p a} = {{b7, b6, b5, b4}, {b3, b2, b1, b0}}. For each of the four bytes
-//  * {b3, b2, b1, b0} selected in the return value, a 4-bit selector is defined within
-//  * the four lower "nibbles" of \p index: {\p index } = {n7, n6, n5, n4, n3, n2, n1, n0}
-//  *
-//  * \par Snippet
-//  * The code snippet below illustrates byte-permute.
-//  * \par
-//  * \code
-//  * #include <cub/cub.cuh>
-//  *
-//  * __global__ void ExampleKernel(...)
-//  * {
-//  *     int a        = 0x03020100;
-//  *     int b        = 0x07060504;
-//  *     int index    = 0x00007531;
-//  *
-//  *     int selected = PRMT(a, b, index);    // 0x07050301
-//  *
-//  * \endcode
-//  *
-//  */
+/**
+ * \brief Byte-permute. Pick four arbitrary bytes from two 32-bit registers, and reassemble them into a 32-bit destination register.  For SM2.0 or later.
+ *
+ * \par
+ * The bytes in the two source registers \p a and \p b are numbered from 0 to 7:
+ * {\p b, \p a} = {{b7, b6, b5, b4}, {b3, b2, b1, b0}}. For each of the four bytes
+ * {b3, b2, b1, b0} selected in the return value, a 4-bit selector is defined within
+ * the four lower "nibbles" of \p index: {\p index } = {n7, n6, n5, n4, n3, n2, n1, n0}
+ *
+ * \par Snippet
+ * The code snippet below illustrates byte-permute.
+ * \par
+ * \code
+ * #include <cub/cub.cuh>
+ *
+ * __global__ void ExampleKernel(...)
+ * {
+ *     int a        = 0x03020100;
+ *     int b        = 0x07060504;
+ *     int index    = 0x00007531;
+ *
+ *     int selected = PRMT(a, b, index);    // 0x07050301
+ *
+ * \endcode
+ *
+ */
 // __device__ __forceinline__ int PRMT(unsigned int a, unsigned int b, unsigned int index)
 // {
 //     int ret;
-//     // asm ("prmt.b32 %0, %1, %2, %3;" : "=r"(ret) : "r"(a), "r"(b), "r"(index));
-//     // printf("PRMT\n");
+//     asm ("prmt.b32 %0, %1, %2, %3;" : "=r"(ret) : "r"(a), "r"(b), "r"(index));
 //     return ret;
 // }
 
@@ -236,8 +229,7 @@ __device__ __forceinline__ unsigned int BFE(
 //  */
 // __device__ __forceinline__ void BAR(int count)
 // {
-//     // asm volatile("bar.sync 1, %0;" : : "r"(count));
-//     // printf("BAR\n");
+//     asm volatile("bar.sync 1, %0;" : : "r"(count));
 // }
 
 /**
@@ -272,9 +264,9 @@ __device__  __forceinline__ int CTA_SYNC_OR(int p)
  */
 __device__  __forceinline__ void WARP_SYNC(unsigned int member_mask)
 {
-// #ifdef CUB_USE_COOPERATIVE_GROUPS
+#ifdef CUB_USE_COOPERATIVE_GROUPS
     __syncwarp(member_mask);
-// #endif
+#endif
 }
 
 
@@ -283,11 +275,11 @@ __device__  __forceinline__ void WARP_SYNC(unsigned int member_mask)
  */
 __device__  __forceinline__ int WARP_ANY(int predicate, unsigned int member_mask)
 {
-// #ifdef CUB_USE_COOPERATIVE_GROUPS
+#ifdef CUB_USE_COOPERATIVE_GROUPS
     return __any_sync(member_mask, predicate);
-// #else
-//     return ::__any(predicate);
-// #endif
+#else
+    return ::__any(predicate);
+#endif
 }
 
 
@@ -296,11 +288,11 @@ __device__  __forceinline__ int WARP_ANY(int predicate, unsigned int member_mask
  */
 __device__  __forceinline__ int WARP_ALL(int predicate, unsigned int member_mask)
 {
-// #ifdef CUB_USE_COOPERATIVE_GROUPS
+#ifdef CUB_USE_COOPERATIVE_GROUPS
     return __all_sync(member_mask, predicate);
-// #else
-//     return ::__all(predicate);
-// #endif
+#else
+    return ::__all(predicate);
+#endif
 }
 
 
@@ -309,11 +301,11 @@ __device__  __forceinline__ int WARP_ALL(int predicate, unsigned int member_mask
  */
 __device__  __forceinline__ int WARP_BALLOT(int predicate, unsigned int member_mask)
 {
-// #ifdef CUB_USE_COOPERATIVE_GROUPS
+#ifdef CUB_USE_COOPERATIVE_GROUPS
     return __ballot_sync(member_mask, predicate);
-// #else
-//     return __ballot(predicate);
-// #endif
+#else
+    return __ballot(predicate);
+#endif
 }
 
 
@@ -330,7 +322,6 @@ unsigned int SHFL_UP_SYNC(unsigned int word, int src_offset, int flags, unsigned
 //     asm volatile("shfl.up.b32 %0, %1, %2, %3;"
 //         : "=r"(word) : "r"(word), "r"(src_offset), "r"(flags));
 // #endif
-    // printf("SHFL_UP_SYNC\n");
     int width = 32 - (flags >> 8);
     word = __shfl_up_sync(member_mask, word, src_offset, width);
     return word;
@@ -349,7 +340,6 @@ unsigned int SHFL_DOWN_SYNC(unsigned int word, int src_offset, int flags, unsign
 //     asm volatile("shfl.down.b32 %0, %1, %2, %3;"
 //         : "=r"(word) : "r"(word), "r"(src_offset), "r"(flags));
 // #endif
-    // printf("SHFL_DOWN_SYNC\n");
     int width = 32 - (flags >> 8);
     word = __shfl_down_sync(member_mask, word, src_offset, width);
     return word;
@@ -368,7 +358,6 @@ unsigned int SHFL_IDX_SYNC(unsigned int word, int src_lane, int flags, unsigned 
 //     asm volatile("shfl.idx.b32 %0, %1, %2, %3;"
 //         : "=r"(word) : "r"(word), "r"(src_lane), "r"(flags));
 // #endif
-    // printf("SHFL_IDX_SYNC\n");
     int width = 32 - (flags >> 8);
     word = __shfl_sync(member_mask, word, src_lane, width);
     return word;
@@ -380,33 +369,31 @@ unsigned int SHFL_IDX_SYNC(unsigned int word, int src_lane, int flags, unsigned 
 __device__ __forceinline__ 
 unsigned int SHFL_IDX_SYNC(unsigned int word, int src_lane, unsigned int member_mask)
 {
-// #ifdef CUB_USE_COOPERATIVE_GROUPS
+#ifdef CUB_USE_COOPERATIVE_GROUPS
   return __shfl_sync(member_mask, word, src_lane);
-// #else
-//   return __shfl(word, src_lane);
-// #endif
+#else
+  return __shfl(word, src_lane);
+#endif
 }
 
-// /**
-//  * Floating point multiply. (Mantissa LSB rounds towards zero.)
-//  */
+/**
+ * Floating point multiply. (Mantissa LSB rounds towards zero.)
+ */
 // __device__ __forceinline__ float FMUL_RZ(float a, float b)
 // {
 //     float d;
-//     // asm ("mul.rz.f32 %0, %1, %2;" : "=f"(d) : "f"(a), "f"(b));
-//     // printf("FMUL_RZ\n");
+//     asm ("mul.rz.f32 %0, %1, %2;" : "=f"(d) : "f"(a), "f"(b));
 //     return d;
 // }
 
 
-// /**
-//  * Floating point multiply-add. (Mantissa LSB rounds towards zero.)
-//  */
+/**
+ * Floating point multiply-add. (Mantissa LSB rounds towards zero.)
+ */
 // __device__ __forceinline__ float FFMA_RZ(float a, float b, float c)
 // {
 //     float d;
-//     // asm ("fma.rz.f32 %0, %1, %2, %3;" : "=f"(d) : "f"(a), "f"(b), "f"(c));
-//     // printf("FFMA_RZ\n");
+//     asm ("fma.rz.f32 %0, %1, %2, %3;" : "=f"(d) : "f"(a), "f"(b), "f"(c));
 //     return d;
 // }
 
@@ -427,7 +414,6 @@ __device__ __forceinline__ void ThreadExit() {
  */
 __device__ __forceinline__ void ThreadTrap() {
     // asm volatile("trap;");
-    // printf("ThreadTrap\n");
 }
 
 
@@ -450,19 +436,17 @@ __device__ __forceinline__ unsigned int LaneId()
     unsigned int ret;
     // asm ("mov.u32 %0, %%laneid;" : "=r"(ret) );
     ret = __get_laneid() & 0x1f;
-    // printf("LaneId\n");
     return ret;
 }
 
 
-// /**
-//  * \brief Returns the warp ID of the calling thread.  Warp ID is guaranteed to be unique among warps, but may not correspond to a zero-based ranking within the thread block.
-//  */
+/**
+ * \brief Returns the warp ID of the calling thread.  Warp ID is guaranteed to be unique among warps, but may not correspond to a zero-based ranking within the thread block.
+ */
 // __device__ __forceinline__ unsigned int WarpId()
 // {
 //     unsigned int ret;
-//     // asm ("mov.u32 %0, %%warpid;" : "=r"(ret) );
-//     // printf("WarpId\n");
+//     asm ("mov.u32 %0, %%warpid;" : "=r"(ret) );
 //     return ret;
 // }
 
@@ -474,7 +458,6 @@ __device__ __forceinline__ unsigned int LaneMaskLt()
     unsigned int ret;
     // asm ("mov.u32 %0, %%lanemask_lt;" : "=r"(ret) );
     ret = __get_lanemask_lt();
-    // printf("LaneMaskLt\n");
     return ret;
 }
 
@@ -486,7 +469,6 @@ __device__ __forceinline__ unsigned int LaneMaskLe()
     unsigned int ret;
     // asm ("mov.u32 %0, %%lanemask_le;" : "=r"(ret) );
     ret = __get_lanemask_le();
-    // printf("LaneMaskLe\n");
     return ret;
 }
 
@@ -498,7 +480,6 @@ __device__ __forceinline__ unsigned int LaneMaskGt()
     unsigned int ret;
     // asm ("mov.u32 %0, %%lanemask_gt;" : "=r"(ret) );
     ret = __get_lanemask_gt();
-    // printf("LaneMaskGt\n");
     return ret;
 }
 
@@ -510,7 +491,6 @@ __device__ __forceinline__ unsigned int LaneMaskGe()
     unsigned int ret;
     // asm ("mov.u32 %0, %%lanemask_ge;" : "=r"(ret) );
     ret = __get_lanemask_ge();
-    // printf("LaneMaskGe\n");
     return ret;
 }
 
@@ -742,7 +722,7 @@ template <int LABEL_BITS>
 inline __device__ unsigned int MatchAny(unsigned int label)
 {
     unsigned int retval;
-    // printf("MatchAny\n");
+
     // Extract masks of common threads for each bit
     #pragma unroll
     for (int BIT = 0; BIT < LABEL_BITS; ++BIT)
@@ -771,6 +751,13 @@ inline __device__ unsigned int MatchAny(unsigned int label)
     }
 
     return retval;
+
+//  // VOLTA match
+//    unsigned int retval;
+//    asm ("{\n"
+//         "    match.any.sync.b32 %0, %1, 0xffffffff;\n"
+//         "}\n" : "=r"(retval) : "r"(label));
+//    return retval;
 
 }
 

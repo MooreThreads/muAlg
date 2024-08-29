@@ -118,9 +118,7 @@ struct BlockScanWarpScans
         linear_tid(RowMajorTid(BLOCK_DIM_X, BLOCK_DIM_Y, BLOCK_DIM_Z)),
         warp_id((WARPS == 1) ? 0 : linear_tid / WARP_THREADS),
         lane_id(LaneId())
-    {
-      // printf("BlockScanWarpScans\n");
-    }
+    {}
 
 
     //---------------------------------------------------------------------

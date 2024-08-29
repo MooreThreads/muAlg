@@ -163,7 +163,7 @@ public:
     #ifndef DOXYGEN_SHOULD_SKIP_THIS    // Do not document
 
     /// Internal specialization.  Use SHFL-based reduction if (architecture is >= SM30) and (LOGICAL_WARP_THREADS is a power-of-two)
-    typedef typename If<false, //(PTX_ARCH >= 300) && (IS_POW_OF_TWO),
+    typedef typename If<(PTX_ARCH >= 300) && (IS_POW_OF_TWO),
         WarpReduceShfl<T, LOGICAL_WARP_THREADS, PTX_ARCH>,
         WarpReduceSmem<T, LOGICAL_WARP_THREADS, PTX_ARCH> >::Type InternalWarpReduce;
 

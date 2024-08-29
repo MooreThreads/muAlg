@@ -1,3 +1,7 @@
+/****************************************************************************
+* This library contains code from cub, cub is licensed under the license below.
+* Some files of cub may have been modified by Moore Threads Technology Co., Ltd
+******************************************************************************/
 /******************************************************************************
  * Copyright (c) 2011, Duane Merrill.  All rights reserved.
  * Copyright (c) 2011-2018, NVIDIA CORPORATION.  All rights reserved.
@@ -776,7 +780,7 @@ std::ostream& operator<<(std::ostream& os, const cub::KeyValuePair<Key, Value> &
         const T &a,                                         \
         const T &b)                                         \
     {                                                       \
-        if (a.x > b.x) return true; else if (a.x < b.x) return false;   \
+        if (a.x > b.x) return true; else if (b.x > a.x) return false;   \
         return a.y > b.y;                                               \
     }                                                       \
     /* Min */                                               \
@@ -784,7 +788,7 @@ std::ostream& operator<<(std::ostream& os, const cub::KeyValuePair<Key, Value> &
         const T &a,                                         \
         const T &b)                                         \
     {                                                       \
-        if (a.x < b.x) return true; else if (a.x > b.x) return false;   \
+        if (a.x < b.x) return true; else if (b.x < a.x) return false;   \
         return a.y < b.y;                                               \
     }                                                       \
     /* Summation (non-reference addends for VS2003 -O3 warpscan workaround */                                         \
@@ -870,8 +874,8 @@ std::ostream& operator<<(std::ostream& os, const cub::KeyValuePair<Key, Value> &
         const T &a,                                         \
         const T &b)                                         \
     {                                                       \
-        if (a.x > b.x) return true; else if (a.x < b.x) return false;   \
-        if (a.y > b.y) return true; else if (a.y < b.y) return false;   \
+        if (a.x > b.x) return true; else if (b.x > a.x) return false;   \
+        if (a.y > b.y) return true; else if (b.y > a.y) return false;   \
         return a.z > b.z;                                               \
     }                                                       \
     /* Min */                                               \
@@ -879,8 +883,8 @@ std::ostream& operator<<(std::ostream& os, const cub::KeyValuePair<Key, Value> &
         const T &a,                                         \
         const T &b)                                         \
     {                                                       \
-        if (a.x < b.x) return true; else if (a.x > b.x) return false;   \
-        if (a.y < b.y) return true; else if (a.y > b.y) return false;   \
+        if (a.x < b.x) return true; else if (b.x < a.x) return false;   \
+        if (a.y < b.y) return true; else if (b.y < a.y) return false;   \
         return a.z < b.z;                                               \
     }                                                       \
     /* Summation (non-reference addends for VS2003 -O3 warpscan workaround */                                         \
@@ -972,9 +976,9 @@ std::ostream& operator<<(std::ostream& os, const cub::KeyValuePair<Key, Value> &
         const T &a,                                         \
         const T &b)                                         \
     {                                                       \
-        if (a.x > b.x) return true; else if (a.x < b.x) return false;   \
-        if (a.y > b.y) return true; else if (a.y < b.y) return false;   \
-        if (a.z > b.z) return true; else if (a.z < b.z) return false;   \
+        if (a.x > b.x) return true; else if (b.x > a.x) return false;   \
+        if (a.y > b.y) return true; else if (b.y > a.y) return false;   \
+        if (a.z > b.z) return true; else if (b.z > a.z) return false;   \
         return a.w > b.w;                                               \
     }                                                       \
     /* Min */                                               \
@@ -982,9 +986,9 @@ std::ostream& operator<<(std::ostream& os, const cub::KeyValuePair<Key, Value> &
         const T &a,                                         \
         const T &b)                                         \
     {                                                       \
-        if (a.x < b.x) return true; else if (a.x > b.x) return false;   \
-        if (a.y < b.y) return true; else if (a.y > b.y) return false;   \
-        if (a.z < b.z) return true; else if (a.z > b.z) return false;   \
+        if (a.x < b.x) return true; else if (b.x < a.x) return false;   \
+        if (a.y < b.y) return true; else if (b.y < a.y) return false;   \
+        if (a.z < b.z) return true; else if (b.z < a.z) return false;   \
         return a.w < b.w;                                               \
     }                                                       \
     /* Summation (non-reference addends for VS2003 -O3 warpscan workaround */                                         \
@@ -1112,18 +1116,18 @@ struct TestFoo
     // Less than operator
     __host__ __device__ __forceinline__ bool operator <(const TestFoo &b) const
     {
-        if (x < b.x) return true; else if (x > b.x) return false;
-        if (y < b.y) return true; else if (y > b.y) return false;
-        if (z < b.z) return true; else if (z > b.z) return false;
+        if (x < b.x) return true; else if (b.x < x) return false;
+        if (y < b.y) return true; else if (b.y < y) return false;
+        if (z < b.z) return true; else if (b.z < z) return false;
         return w < b.w;
     }
 
     // Greater than operator
     __host__ __device__ __forceinline__ bool operator >(const TestFoo &b) const
     {
-        if (x > b.x) return true; else if (x < b.x) return false;
-        if (y > b.y) return true; else if (y < b.y) return false;
-        if (z > b.z) return true; else if (z < b.z) return false;
+        if (x > b.x) return true; else if (b.x > x) return false;
+        if (y > b.y) return true; else if (b.y > y) return false;
+        if (z > b.z) return true; else if (b.z > z) return false;
         return w > b.w;
     }
 
@@ -1234,14 +1238,14 @@ struct TestBar
     // Less than operator
     __host__ __device__ __forceinline__ bool operator <(const TestBar &b) const
     {
-        if (x < b.x) return true; else if (x > b.x) return false;
+        if (x < b.x) return true; else if (b.x < x) return false;
         return y < b.y;
     }
 
     // Greater than operator
     __host__ __device__ __forceinline__ bool operator >(const TestBar &b) const
     {
-        if (x > b.x) return true; else if (x < b.x) return false;
+        if (x > b.x) return true; else if (b.x > x) return false;
         return y > b.y;
     }
 

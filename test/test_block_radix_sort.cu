@@ -1,3 +1,7 @@
+/****************************************************************************
+* This library contains code from cub, cub is licensed under the license below.
+* Some files of cub may have been modified by Moore Threads Technology Co., Ltd
+******************************************************************************/
 /******************************************************************************
  * Copyright (c) 2011, Duane Merrill.  All rights reserved.
  * Copyright (c) 2011-2018, NVIDIA CORPORATION.  All rights reserved.
@@ -74,7 +78,7 @@ __device__ __forceinline__ void TestBlockSort(
     Int2Type<true>              is_blocked_output)
 {
     BlockRadixSort(temp_storage).SortDescending(keys, values, begin_bit, end_bit);
-    // stop = clock();
+    stop = clock();
     StoreDirectBlocked(threadIdx.x, d_keys, keys);
     StoreDirectBlocked(threadIdx.x, d_values, values);
 }
@@ -94,7 +98,7 @@ __device__ __forceinline__ void TestBlockSort(
     Int2Type<false>             is_blocked_output)
 {
     BlockRadixSort(temp_storage).SortDescendingBlockedToStriped(keys, values, begin_bit, end_bit);
-    // stop = clock();
+    stop = clock();
     StoreDirectStriped<BLOCK_THREADS>(threadIdx.x, d_keys, keys);
     StoreDirectStriped<BLOCK_THREADS>(threadIdx.x, d_values, values);
 }
@@ -114,7 +118,7 @@ __device__ __forceinline__ void TestBlockSort(
     Int2Type<true>              is_blocked_output)
 {
     BlockRadixSort(temp_storage).Sort(keys, values, begin_bit, end_bit);
-    // stop = clock();
+    stop = clock();
     StoreDirectBlocked(threadIdx.x, d_keys, keys);
     StoreDirectBlocked(threadIdx.x, d_values, values);
 }
@@ -134,7 +138,7 @@ __device__ __forceinline__ void TestBlockSort(
     Int2Type<false>             is_blocked_output)
 {
     BlockRadixSort(temp_storage).SortBlockedToStriped(keys, values, begin_bit, end_bit);
-    // stop = clock();
+    stop = clock();
     StoreDirectStriped<BLOCK_THREADS>(threadIdx.x, d_keys, keys);
     StoreDirectStriped<BLOCK_THREADS>(threadIdx.x, d_values, values);
 }
@@ -187,14 +191,14 @@ __global__ void Kernel(
 
     // Start cycle timer
     clock_t stop;
-    // clock_t start = clock();
+    clock_t start = clock();
 
     TestBlockSort<BLOCK_THREADS, BlockRadixSortT>(
         temp_storage, keys, values, d_keys, d_values, begin_bit, end_bit, stop, Int2Type<DESCENDING>(), Int2Type<BLOCKED_OUTPUT>());
 
     // Store time
-    // if (threadIdx.x == 0)
-    //     *d_elapsed = (start > stop) ? start - stop : stop - start;
+    if (threadIdx.x == 0)
+        *d_elapsed = (start > stop) ? start - stop : stop - start;
 }
 
 
@@ -433,10 +437,10 @@ void TestValid(Int2Type<true> /*fits_smem_capacity*/)
                 INTEGER_SEED, 0, begin_bit, end_bit);
 
             // Iterate random with entropy_reduction
-            // for (int entropy_reduction = 0; entropy_reduction <= 9; entropy_reduction += 3)
+            for (int entropy_reduction = 0; entropy_reduction <= 9; entropy_reduction += 3)
             {
                 TestDriver<BLOCK_THREADS, ITEMS_PER_THREAD, RADIX_BITS, MEMOIZE_OUTER_SCAN, INNER_SCAN_ALGORITHM, SMEM_CONFIG, DESCENDING, BLOCKED_OUTPUT, Key, Value>(
-                    RANDOM, 0, begin_bit, end_bit);
+                    RANDOM, entropy_reduction, begin_bit, end_bit);
             }
 
             // For floating-point keys, test random keys mixed with -0.0 and +0.0
@@ -489,7 +493,7 @@ void Test()
 #if defined(SM100) || defined(SM110) || defined(SM130)
     Int2Type<sizeof(typename BlockRadixSortT::TempStorage) <= 16 * 1024> fits_smem_capacity;
 #else
-    Int2Type<(sizeof(typename BlockRadixSortT::TempStorage) <= 28 * 1024)> fits_smem_capacity;
+    Int2Type<(sizeof(typename BlockRadixSortT::TempStorage) <= 16 * 1024)> fits_smem_capacity;
 #endif
 
     // Sort-ascending, to-striped
@@ -518,9 +522,9 @@ void TestKeys()
 {
     // Test keys-only sorting with both smem configs
     Test<BLOCK_THREADS, ITEMS_PER_THREAD, RADIX_BITS, MEMOIZE_OUTER_SCAN, INNER_SCAN_ALGORITHM, musaSharedMemBankSizeFourByte, Key, NullType>();    // Keys-only (4-byte smem bank config)
-// #if !defined(SM100) && !defined(SM110) && !defined(SM130) && !defined(SM200)
+#if !defined(SM100) && !defined(SM110) && !defined(SM130) && !defined(SM200)
     Test<BLOCK_THREADS, ITEMS_PER_THREAD, RADIX_BITS, MEMOIZE_OUTER_SCAN, INNER_SCAN_ALGORITHM, musaSharedMemBankSizeEightByte, Key, NullType>();   // Keys-only (8-byte smem bank config)
-// #endif
+#endif
 }
 
 
@@ -558,7 +562,7 @@ void Test()
     int ptx_version = 0;
     CubDebugExit(PtxVersion(ptx_version));
 
-// #ifdef TEST_KEYS_ONLY
+#ifdef TEST_KEYS_ONLY
 
     // Test unsigned types with keys-only
     TestKeys<BLOCK_THREADS, ITEMS_PER_THREAD, RADIX_BITS, MEMOIZE_OUTER_SCAN, INNER_SCAN_ALGORITHM, unsigned char>();
@@ -567,7 +571,7 @@ void Test()
     TestKeys<BLOCK_THREADS, ITEMS_PER_THREAD, RADIX_BITS, MEMOIZE_OUTER_SCAN, INNER_SCAN_ALGORITHM, unsigned long>();
     TestKeys<BLOCK_THREADS, ITEMS_PER_THREAD, RADIX_BITS, MEMOIZE_OUTER_SCAN, INNER_SCAN_ALGORITHM, unsigned long long>();
 
-// #else
+#else
 
     // Test signed and fp types with paired values
     TestKeysAndPairs<BLOCK_THREADS, ITEMS_PER_THREAD, RADIX_BITS, MEMOIZE_OUTER_SCAN, INNER_SCAN_ALGORITHM, char>();
@@ -576,13 +580,13 @@ void Test()
     TestKeysAndPairs<BLOCK_THREADS, ITEMS_PER_THREAD, RADIX_BITS, MEMOIZE_OUTER_SCAN, INNER_SCAN_ALGORITHM, long>();
     TestKeysAndPairs<BLOCK_THREADS, ITEMS_PER_THREAD, RADIX_BITS, MEMOIZE_OUTER_SCAN, INNER_SCAN_ALGORITHM, long long>();
     TestKeysAndPairs<BLOCK_THREADS, ITEMS_PER_THREAD, RADIX_BITS, MEMOIZE_OUTER_SCAN, INNER_SCAN_ALGORITHM, float>();
-    // if (ptx_version > 120)
-    // {
+    if (ptx_version > 120)
+    {
         // Don't check doubles on PTX120 or below because they're down-converted
         TestKeysAndPairs<BLOCK_THREADS, ITEMS_PER_THREAD, RADIX_BITS, MEMOIZE_OUTER_SCAN, INNER_SCAN_ALGORITHM, double>();
-    // }
+    }
 
-// #endif
+#endif
 }
 
 
@@ -636,12 +640,12 @@ template <int BLOCK_THREADS>
 void Test()
 {
     Test<BLOCK_THREADS, 1>();
-// #if defined(SM100) || defined(SM110) || defined(SM130)
-//     // Open64 compiler can't handle the number of test cases
-// #else
+#if defined(SM100) || defined(SM110) || defined(SM130)
+    // Open64 compiler can't handle the number of test cases
+#else
     Test<BLOCK_THREADS, 4>();
-// #endif
-    // Test<BLOCK_THREADS, 11>();
+#endif
+    Test<BLOCK_THREADS, 11>();
 }
 
 
