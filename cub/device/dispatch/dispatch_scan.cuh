@@ -203,7 +203,7 @@ struct DeviceScanPolicy
                 BLOCK_LOAD_DIRECT,
                 LOAD_DEFAULT,
                 BLOCK_STORE_DIRECT,
-                BLOCK_SCAN_WARP_SCANS>
+                BLOCK_SCAN_RAKING>
             ScanPolicyT;
     };
     /// MaxPolicy

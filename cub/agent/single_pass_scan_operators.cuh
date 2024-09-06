@@ -119,7 +119,7 @@ enum ScanTileStatus
  */
 template <
     typename    T,
-    bool        SINGLE_WORD = Traits<T>::PRIMITIVE && (sizeof(T) < 4)>
+    bool        SINGLE_WORD = Traits<T>::PRIMITIVE && (sizeof(T) < 1)>
 struct ScanTileState;
 
 
