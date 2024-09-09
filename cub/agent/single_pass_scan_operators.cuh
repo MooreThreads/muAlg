@@ -449,7 +449,7 @@ struct ScanTileState<T, false>
 template <
     typename    ValueT,
     typename    KeyT,
-    bool        SINGLE_WORD = (Traits<ValueT>::PRIMITIVE) && (sizeof(ValueT) + sizeof(KeyT) < 8)>
+    bool        SINGLE_WORD = (Traits<ValueT>::PRIMITIVE) && (sizeof(ValueT) + sizeof(KeyT) < 1)>
 struct ReduceByKeyScanTileState;
 
 

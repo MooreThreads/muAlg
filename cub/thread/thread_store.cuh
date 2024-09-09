@@ -166,7 +166,9 @@ struct IterateThreadStore<MAX, MAX>
             "r"(val.x),                                                                     \
             "r"(val.y),                                                                     \
             "r"(val.z),                                                                     \
-            "r"(val.w));  */  *ptr = val;                                                                \
+            "r"(val.w));  */                                                                \
+        uint4 *vol_ptr = const_cast<uint4 *>(ptr);                                          \
+        *vol_ptr = val;                                                                     \
     }                                                                                       \
     template<>                                                                              \
     __device__ __forceinline__ void ThreadStore<cub_modifier, ulonglong2*, ulonglong2>(ulonglong2* ptr, ulonglong2 val)     \
@@ -174,7 +176,9 @@ struct IterateThreadStore<MAX, MAX>
       /*  asm volatile ("st."#ptx_modifier".v2.u64 [%0], {%1, %2};" : :                       \
             _CUB_ASM_PTR_(ptr),                                                             \
             "l"(val.x),                                                                     \
-            "l"(val.y));  */  *ptr = val;                                                                \
+            "l"(val.y));  */                                                                \
+        ulonglong2 *vol_ptr = const_cast<ulonglong2 *>(ptr);                                \
+        *vol_ptr = val;                                                                     \
     }
 
 
@@ -190,7 +194,9 @@ struct IterateThreadStore<MAX, MAX>
             "h"(val.x),                                                                     \
             "h"(val.y),                                                                     \
             "h"(val.z),                                                                     \
-            "h"(val.w));  */  *ptr = val;                                                                \
+            "h"(val.w));  */                                                                \
+        ushort4 *vol_ptr = const_cast<ushort4 *>(ptr);                                      \
+        *vol_ptr = val;                                                                     \
     }                                                                                       \
     template<>                                                                              \
     __device__ __forceinline__ void ThreadStore<cub_modifier, uint2*, uint2>(uint2* ptr, uint2 val)                         \
@@ -198,14 +204,18 @@ struct IterateThreadStore<MAX, MAX>
       /*  asm volatile ("st."#ptx_modifier".v2.u32 [%0], {%1, %2};" : :                       \
             _CUB_ASM_PTR_(ptr),                                                             \
             "r"(val.x),                                                                     \
-            "r"(val.y));  */  *ptr = val;                                                                \
+            "r"(val.y));  */                                                                \
+        uint2 *vol_ptr = const_cast<uint2 *>(ptr);                                          \
+        *vol_ptr = val;                                                                     \
     }                                                                                       \
     template<>                                                                              \
     __device__ __forceinline__ void ThreadStore<cub_modifier, unsigned long long*, unsigned long long>(unsigned long long* ptr, unsigned long long val)     \
     {                                                                                       \
       /*  asm volatile ("st."#ptx_modifier".u64 [%0], %1;" : :                                \
              _CUB_ASM_PTR_(ptr),                                                            \
-             "l"(val));  */  *ptr = val;                                                                 \
+             "l"(val));  */                                                                 \
+        volatile unsigned long long *vol_ptr = const_cast<unsigned long long *>(ptr);       \
+        *vol_ptr = val;                                                                     \
     }
 
 /**
@@ -217,7 +227,9 @@ struct IterateThreadStore<MAX, MAX>
     {                                                                                       \
       /*  asm volatile ("st."#ptx_modifier".u32 [%0], %1;" : :                                \
             _CUB_ASM_PTR_(ptr),                                                             \
-            "r"(val));  */  *ptr = val;                                                                  \
+            "r"(val));  */                                                                  \
+        volatile unsigned int *vol_ptr = const_cast<unsigned int *>(ptr);                   \
+        *vol_ptr = val;                                                                     \
     }
     
 
@@ -230,7 +242,9 @@ struct IterateThreadStore<MAX, MAX>
     {                                                                                       \
       /*  asm volatile ("st."#ptx_modifier".u16 [%0], %1;" : :                                \
             _CUB_ASM_PTR_(ptr),                                                             \
-            "h"(val));  */  *ptr = val;                                                                  \
+            "h"(val));  */                                                                  \
+        volatile unsigned short *vol_ptr = const_cast<unsigned short *>(ptr);               \
+        *vol_ptr = val;                                                                     \
     }
 
 
@@ -248,7 +262,9 @@ struct IterateThreadStore<MAX, MAX>
         "   st."#ptx_modifier".u8 [%0], datum;"                                             \
         "}" : :                                                                             \
             _CUB_ASM_PTR_(ptr),                                                             \
-            "h"((unsigned short) val));  */  *ptr = val;                                                 \
+            "h"((unsigned short) val));  */                                                 \
+        volatile unsigned char *vol_ptr = const_cast<unsigned char *>(ptr);                 \
+        *vol_ptr = val;                                                                     \
     }
 
 /**
