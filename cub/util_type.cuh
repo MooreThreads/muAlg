@@ -379,9 +379,10 @@ struct UnitWord
         ShuffleWord>::Type                      VolatileWord;
 
     /// Biggest memory-access word that T is a whole multiple of and is not larger than the alignment of T
-    typedef typename If<IsMultiple<longlong2>::IS_MULTIPLE,
-        ulonglong2,
-        VolatileWord>::Type                     DeviceWord;
+    // typedef typename If<IsMultiple<longlong2>::IS_MULTIPLE,
+    //     ulonglong2,
+    //     VolatileWord>::Type                     DeviceWord;
+    typedef VolatileWord DeviceWord;
 
     /// Biggest texture reference word that T is a whole multiple of and is not larger than the alignment of T
     typedef typename If<IsMultiple<int4>::IS_MULTIPLE,
@@ -417,7 +418,8 @@ struct UnitWord <float4>
     typedef uint4               DeviceWord;
 #else
     typedef unsigned long long  VolatileWord;
-    typedef ulonglong2          DeviceWord;
+    // typedef ulonglong2          DeviceWord;
+    typedef unsigned long long DeviceWord;
 #endif
     typedef float4              TextureWord;
 };
