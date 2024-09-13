@@ -1,3 +1,7 @@
+/****************************************************************************
+* This library contains code from cub, cub is licensed under the license below.
+* Some files of cub may have been modified by Moore Threads Technology Co., Ltd
+******************************************************************************/
 /******************************************************************************
  * Copyright (c) 2011, Duane Merrill.  All rights reserved.
  * Copyright (c) 2011-2018, NVIDIA CORPORATION.  All rights reserved.
@@ -570,9 +574,9 @@ void Test(
     CubDebugExit(g_allocator.DeviceAllocate((void**)&d_in, sizeof(T) * TILE_SIZE));
     CubDebugExit(g_allocator.DeviceAllocate((void**)&d_out, sizeof(T) * (TILE_SIZE + 2)));
     CubDebugExit(g_allocator.DeviceAllocate((void**)&d_aggregate, sizeof(T) * BLOCK_THREADS));
-    CubDebugExit(cudaMemcpy(d_in, h_in, sizeof(T) * TILE_SIZE, cudaMemcpyHostToDevice));
-    CubDebugExit(cudaMemset(d_out, 0, sizeof(T) * (TILE_SIZE + 1)));
-    CubDebugExit(cudaMemset(d_aggregate, 0, sizeof(T) * BLOCK_THREADS));
+    CubDebugExit(musaMemcpy(d_in, h_in, sizeof(T) * TILE_SIZE, musaMemcpyHostToDevice));
+    CubDebugExit(musaMemset(d_out, 0, sizeof(T) * (TILE_SIZE + 1)));
+    CubDebugExit(musaMemset(d_aggregate, 0, sizeof(T) * BLOCK_THREADS));
 
     // Display input problem data
     if (g_verbose)
@@ -595,8 +599,8 @@ void Test(
         initial_value,
         d_elapsed);
 
-    CubDebugExit(cudaPeekAtLastError());
-    CubDebugExit(cudaDeviceSynchronize());
+    CubDebugExit(musaPeekAtLastError());
+    CubDebugExit(musaDeviceSynchronize());
 
     // Copy out and display results
     printf("\tScan results: ");
@@ -712,7 +716,9 @@ void Test(
     Test<BLOCK_THREADS, 2, 2, ITEMS_PER_THREAD, SCAN_MODE, TEST_MODE, ALGORITHM>(gen_mode, scan_op, initial_value);
 }
 
-
+// #define TEST_RAKING 1
+// #define TEST_RAKING_MEMOIZE 1
+#define TEST_WARP_SCANS 1
 /**
  * Run test for different policy types
  */

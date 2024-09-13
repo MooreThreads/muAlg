@@ -1,3 +1,7 @@
+/****************************************************************************
+* This library contains code from cub, cub is licensed under the license below.
+* Some files of cub may have been modified by Moore Threads Technology Co., Ltd
+******************************************************************************/
 /******************************************************************************
  * Copyright (c) 2011, Duane Merrill.  All rights reserved.
  * Copyright (c) 2011-2018, NVIDIA CORPORATION.  All rights reserved.
@@ -119,24 +123,24 @@ public:
 
 
     /// This operation sets the fill-size and resets the drain counter, preparing the GridQueue for draining in the next kernel instance.  To be called by the host or by a kernel prior to that which will be draining.
-    __host__ __device__ __forceinline__ cudaError_t FillAndResetDrain(
+    __host__ __device__ __forceinline__ musaError_t FillAndResetDrain(
         OffsetT fill_size,
-        cudaStream_t stream = 0)
+        musaStream_t stream = 0)
     {
-        cudaError_t result = cudaErrorUnknown;
+        musaError_t result = musaErrorUnknown;
         if (CUB_IS_DEVICE_CODE) {
             #if CUB_INCLUDE_DEVICE_CODE
                 (void)stream;
                 d_counters[FILL] = fill_size;
                 d_counters[DRAIN] = 0;
-                result = cudaSuccess;
+                result = musaSuccess;
             #endif
         } else {
             #if CUB_INCLUDE_HOST_CODE
                 OffsetT counters[2];
                 counters[FILL] = fill_size;
                 counters[DRAIN] = 0;
-                result = CubDebug(cudaMemcpyAsync(d_counters, counters, sizeof(OffsetT) * 2, cudaMemcpyHostToDevice, stream));
+                result = CubDebug(musaMemcpyAsync(d_counters, counters, sizeof(OffsetT) * 2, musaMemcpyHostToDevice, stream));
             #endif
         }
         return result;
@@ -144,18 +148,18 @@ public:
 
 
     /// This operation resets the drain so that it may advance to meet the existing fill-size.  To be called by the host or by a kernel prior to that which will be draining.
-    __host__ __device__ __forceinline__ cudaError_t ResetDrain(cudaStream_t stream = 0)
+    __host__ __device__ __forceinline__ musaError_t ResetDrain(musaStream_t stream = 0)
     {
-        cudaError_t result = cudaErrorUnknown;
+        musaError_t result = musaErrorUnknown;
         if (CUB_IS_DEVICE_CODE) {
             #if CUB_INCLUDE_DEVICE_CODE
                 (void)stream;
                 d_counters[DRAIN] = 0;
-                result = cudaSuccess;
+                result = musaSuccess;
             #endif
         } else {
             #if CUB_INCLUDE_HOST_CODE
-                result = CubDebug(cudaMemsetAsync(d_counters + DRAIN, 0, sizeof(OffsetT), stream));
+                result = CubDebug(musaMemsetAsync(d_counters + DRAIN, 0, sizeof(OffsetT), stream));
             #endif
         }
         return result;
@@ -163,18 +167,18 @@ public:
 
 
     /// This operation resets the fill counter.  To be called by the host or by a kernel prior to that which will be filling.
-    __host__ __device__ __forceinline__ cudaError_t ResetFill(cudaStream_t stream = 0)
+    __host__ __device__ __forceinline__ musaError_t ResetFill(musaStream_t stream = 0)
     {
-        cudaError_t result = cudaErrorUnknown;
+        musaError_t result = musaErrorUnknown;
         if (CUB_IS_DEVICE_CODE) {
             #if CUB_INCLUDE_DEVICE_CODE
                 (void)stream;
                 d_counters[FILL] = 0;
-                result = cudaSuccess;
+                result = musaSuccess;
             #endif
         } else {
             #if CUB_INCLUDE_HOST_CODE
-                result = CubDebug(cudaMemsetAsync(d_counters + FILL, 0, sizeof(OffsetT), stream));
+                result = CubDebug(musaMemsetAsync(d_counters + FILL, 0, sizeof(OffsetT), stream));
             #endif
         }
         return result;
@@ -182,20 +186,20 @@ public:
 
 
     /// Returns the fill-size established by the parent or by the previous kernel.
-    __host__ __device__ __forceinline__ cudaError_t FillSize(
+    __host__ __device__ __forceinline__ musaError_t FillSize(
         OffsetT &fill_size,
-        cudaStream_t stream = 0)
+        musaStream_t stream = 0)
     {
-        cudaError_t result = cudaErrorUnknown;
+        musaError_t result = musaErrorUnknown;
         if (CUB_IS_DEVICE_CODE) {
             #if CUB_INCLUDE_DEVICE_CODE
                 (void)stream;
                 fill_size = d_counters[FILL];
-                result = cudaSuccess;
+                result = musaSuccess;
             #endif
         } else {
             #if CUB_INCLUDE_HOST_CODE
-                result = CubDebug(cudaMemcpyAsync(&fill_size, d_counters + FILL, sizeof(OffsetT), cudaMemcpyDeviceToHost, stream));
+                result = CubDebug(musaMemcpyAsync(&fill_size, d_counters + FILL, sizeof(OffsetT), musaMemcpyDeviceToHost, stream));
             #endif
         }
         return result;

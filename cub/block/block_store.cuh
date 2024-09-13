@@ -1,3 +1,7 @@
+/****************************************************************************
+* This library contains code from cub, cub is licensed under the license below.
+* Some files of cub may have been modified by Moore Threads Technology Co., Ltd
+******************************************************************************/
 /******************************************************************************
  * Copyright (c) 2011, Duane Merrill.  All rights reserved.
  * Copyright (c) 2011-2018, NVIDIA CORPORATION.  All rights reserved.
@@ -125,7 +129,7 @@ __device__ __forceinline__ void StoreDirectBlocked(
  * \blocked
  *
  * The output offset (\p block_ptr + \p block_offset) must be quad-item aligned,
- * which is the default starting offset returned by \p cudaMalloc()
+ * which is the default starting offset returned by \p musaMalloc()
  *
  * \par
  * The following conditions will prevent vectorization and storing will fall back to cub::BLOCK_STORE_DIRECT:

@@ -1,3 +1,7 @@
+/****************************************************************************
+* This library contains code from cub, cub is licensed under the license below.
+* Some files of cub may have been modified by Moore Threads Technology Co., Ltd
+******************************************************************************/
 /******************************************************************************
  * Copyright (c) 2011, Duane Merrill.  All rights reserved.
  * Copyright (c) 2011-2018, NVIDIA CORPORATION.  All rights reserved.
@@ -115,7 +119,7 @@ enum ScanTileStatus
  */
 template <
     typename    T,
-    bool        SINGLE_WORD = Traits<T>::PRIMITIVE>
+    bool        SINGLE_WORD = Traits<T>::PRIMITIVE && (sizeof(T) < 8)>
 struct ScanTileState;
 
 
@@ -175,13 +179,13 @@ struct ScanTileState<T, true>
 
     /// Initializer
     __host__ __device__ __forceinline__
-    cudaError_t Init(
+    musaError_t Init(
         int     /*num_tiles*/,                      ///< [in] Number of tiles
         void    *d_temp_storage,                    ///< [in] %Device-accessible allocation of temporary storage.  When NULL, the required allocation size is written to \p temp_storage_bytes and no work is done.
         size_t  /*temp_storage_bytes*/)             ///< [in] Size in bytes of \t d_temp_storage allocation
     {
         d_tile_descriptors = reinterpret_cast<TxnWord*>(d_temp_storage);
-        return cudaSuccess;
+        return musaSuccess;
     }
 
 
@@ -189,12 +193,12 @@ struct ScanTileState<T, true>
      * Compute device memory needed for tile status
      */
     __host__ __device__ __forceinline__
-    static cudaError_t AllocationSize(
+    static musaError_t AllocationSize(
         int     num_tiles,                          ///< [in] Number of tiles
         size_t  &temp_storage_bytes)                ///< [out] Size in bytes of \t d_temp_storage allocation
     {
         temp_storage_bytes = (num_tiles + TILE_STATUS_PADDING) * sizeof(TileDescriptor);       // bytes needed for tile status descriptors
-        return cudaSuccess;
+        return musaSuccess;
     }
 
 
@@ -311,12 +315,12 @@ struct ScanTileState<T, false>
 
     /// Initializer
     __host__ __device__ __forceinline__
-    cudaError_t Init(
+    musaError_t Init(
         int     num_tiles,                          ///< [in] Number of tiles
         void    *d_temp_storage,                    ///< [in] %Device-accessible allocation of temporary storage.  When NULL, the required allocation size is written to \p temp_storage_bytes and no work is done.
         size_t  temp_storage_bytes)                 ///< [in] Size in bytes of \t d_temp_storage allocation
     {
-        cudaError_t error = cudaSuccess;
+        musaError_t error = musaSuccess;
         do
         {
             void*   allocations[3] = {};
@@ -344,7 +348,7 @@ struct ScanTileState<T, false>
      * Compute device memory needed for tile status
      */
     __host__ __device__ __forceinline__
-    static cudaError_t AllocationSize(
+    static musaError_t AllocationSize(
         int     num_tiles,                          ///< [in] Number of tiles
         size_t  &temp_storage_bytes)                ///< [out] Size in bytes of \t d_temp_storage allocation
     {
@@ -445,7 +449,7 @@ struct ScanTileState<T, false>
 template <
     typename    ValueT,
     typename    KeyT,
-    bool        SINGLE_WORD = (Traits<ValueT>::PRIMITIVE) && (sizeof(ValueT) + sizeof(KeyT) < 16)>
+    bool        SINGLE_WORD = (Traits<ValueT>::PRIMITIVE) && (sizeof(ValueT) + sizeof(KeyT) < 8)>
 struct ReduceByKeyScanTileState;
 
 
@@ -542,13 +546,13 @@ struct ReduceByKeyScanTileState<ValueT, KeyT, true>
 
     /// Initializer
     __host__ __device__ __forceinline__
-    cudaError_t Init(
+    musaError_t Init(
         int     /*num_tiles*/,                      ///< [in] Number of tiles
         void    *d_temp_storage,                    ///< [in] %Device-accessible allocation of temporary storage.  When NULL, the required allocation size is written to \p temp_storage_bytes and no work is done.
         size_t  /*temp_storage_bytes*/)             ///< [in] Size in bytes of \t d_temp_storage allocation
     {
         d_tile_descriptors = reinterpret_cast<TxnWord*>(d_temp_storage);
-        return cudaSuccess;
+        return musaSuccess;
     }
 
 
@@ -556,12 +560,12 @@ struct ReduceByKeyScanTileState<ValueT, KeyT, true>
      * Compute device memory needed for tile status
      */
     __host__ __device__ __forceinline__
-    static cudaError_t AllocationSize(
+    static musaError_t AllocationSize(
         int     num_tiles,                          ///< [in] Number of tiles
         size_t  &temp_storage_bytes)                ///< [out] Size in bytes of \t d_temp_storage allocation
     {
         temp_storage_bytes = (num_tiles + TILE_STATUS_PADDING) * sizeof(TileDescriptor);       // bytes needed for tile status descriptors
-        return cudaSuccess;
+        return musaSuccess;
     }
 
 
@@ -745,10 +749,10 @@ struct TilePrefixCallbackOp
     {
 
         // Update our status with our tile-aggregate
-        if (threadIdx.x == 0)
+        if (threadIdx.x == 0) 
         {
-            temp_storage.block_aggregate = block_aggregate;
-            tile_status.SetPartial(tile_idx, block_aggregate);
+        temp_storage.block_aggregate = block_aggregate;
+        tile_status.SetPartial(tile_idx, block_aggregate);
         }
 
         int         predecessor_idx = tile_idx - threadIdx.x - 1;

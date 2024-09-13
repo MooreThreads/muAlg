@@ -1,3 +1,7 @@
+/****************************************************************************
+* This library contains code from cub, cub is licensed under the license below.
+* Some files of cub may have been modified by Moore Threads Technology Co., Ltd
+******************************************************************************/
 /******************************************************************************
  * Copyright (c) 2011, Duane Merrill.  All rights reserved.
  * Copyright (c) 2011-2020, NVIDIA CORPORATION.  All rights reserved.
@@ -66,7 +70,7 @@ namespace cub {
  */
 template <int ALLOCATIONS>
 __host__ __device__ __forceinline__
-cudaError_t AliasTemporaries(
+musaError_t AliasTemporaries(
     void    *d_temp_storage,                    ///< [in] %Device-accessible allocation of temporary storage.  When NULL, the required allocation size is written to \p temp_storage_bytes and no work is done.
     size_t& temp_storage_bytes,                ///< [in,out] Size in bytes of \t d_temp_storage allocation
     void*   (&allocations)[ALLOCATIONS],        ///< [in,out] Pointers to device allocations needed
@@ -90,13 +94,13 @@ cudaError_t AliasTemporaries(
     if (!d_temp_storage)
     {
         temp_storage_bytes = bytes_needed;
-        return cudaSuccess;
+        return musaSuccess;
     }
 
     // Check if enough storage provided
     if (temp_storage_bytes < bytes_needed)
     {
-        return CubDebug(cudaErrorInvalidValue);
+        return CubDebug(musaErrorInvalidValue);
     }
 
     // Alias
@@ -106,7 +110,7 @@ cudaError_t AliasTemporaries(
         allocations[i] = static_cast<char*>(d_temp_storage) + allocation_offsets[i];
     }
 
-    return cudaSuccess;
+    return musaSuccess;
 }
 
 
@@ -126,7 +130,7 @@ CUB_RUNTIME_FUNCTION inline int CurrentDevice()
 #if defined(CUB_RUNTIME_ENABLED) // Host code or device code with the CUDA runtime.
 
     int device = -1;
-    if (CubDebug(cudaGetDevice(&device))) return -1;
+    if (CubDebug(musaGetDevice(&device))) return -1;
     return device;
 
 #else // Device code without the CUDA runtime.
@@ -151,13 +155,13 @@ public:
       : old_device(CurrentDevice()), needs_reset(old_device != new_device)
     {
         if (needs_reset)
-            CubDebug(cudaSetDevice(new_device));
+            CubDebug(musaSetDevice(new_device));
     }
 
     __host__ inline ~SwitchDevice()
     {
         if (needs_reset)
-            CubDebug(cudaSetDevice(old_device));
+            CubDebug(musaSetDevice(old_device));
     }
 };
 
@@ -170,9 +174,9 @@ CUB_RUNTIME_FUNCTION inline int DeviceCountUncached()
 #if defined(CUB_RUNTIME_ENABLED) // Host code or device code with the CUDA runtime.
 
     int count = -1;
-    if (CubDebug(cudaGetDeviceCount(&count)))
+    if (CubDebug(musaGetDeviceCount(&count)))
         // CUDA makes no guarantees about the state of the output parameter if
-        // `cudaGetDeviceCount` fails; in practice, they don't, but out of
+        // `musaGetDeviceCount` fails; in practice, they don't, but out of
         // paranoia we'll reset `count` to `-1`.
         count = -1;
     return count;
@@ -254,7 +258,7 @@ struct PerDeviceAttributeCache
     struct DevicePayload
     {
         int         attribute;
-        cudaError_t error;
+        musaError_t error;
     };
 
     // Each entry starts in the `DeviceEntryEmpty` state, then proceeds to the
@@ -296,7 +300,7 @@ public:
     __host__ DevicePayload operator()(Invocable&& f, int device)
     {
         if (device >= DeviceCount())
-            return DevicePayload{0, cudaErrorInvalidDevice};
+            return DevicePayload{0, musaErrorInvalidDevice};
 
         auto& entry   = entries_[device];
         auto& flag    = entry.flag;
@@ -325,7 +329,7 @@ public:
                     // Clear the global CUDA error state which may have been
                     // set by the last call. Otherwise, errors may "leak" to
                     // unrelated kernel launches.
-                    cudaGetLastError();
+                    musaGetLastError();
 
                 // Release the lock by setting the state to `DeviceEntryReady`.
                 flag.store(DeviceEntryReady, std::memory_order_release);
@@ -359,7 +363,7 @@ public:
 /**
  * \brief Retrieves the PTX version that will be used on the current device (major * 100 + minor * 10).
  */
-CUB_RUNTIME_FUNCTION inline cudaError_t PtxVersionUncached(int& ptx_version)
+CUB_RUNTIME_FUNCTION inline musaError_t PtxVersionUncached(int& ptx_version)
 {
     // Instantiate `EmptyKernel<void>` in both host and device code to ensure
     // it can be called.
@@ -370,18 +374,27 @@ CUB_RUNTIME_FUNCTION inline cudaError_t PtxVersionUncached(int& ptx_version)
     // usual syntax of (void)empty_kernel; was not sufficient on MSVC2015.
     (void)reinterpret_cast<void*>(empty_kernel);
 
-    cudaError_t result = cudaSuccess;
+    musaError_t result = musaSuccess;
     if (CUB_IS_HOST_CODE) {
        #if CUB_INCLUDE_HOST_CODE
-            cudaFuncAttributes empty_kernel_attrs;
+            // musaFuncAttributes empty_kernel_attrs;
 
+            // do {
+            //     if (CubDebug(result = musaFuncGetAttributes(&empty_kernel_attrs, empty_kernel)))
+            //         break;
+            // }
+            // while(0);
+
+            // ptx_version = empty_kernel_attrs.ptxVersion * 10;
+
+            musaDeviceProp deviceProp;
             do {
-                if (CubDebug(result = cudaFuncGetAttributes(&empty_kernel_attrs, empty_kernel)))
+                if (CubDebug(result = musaGetDeviceProperties(&(deviceProp), CurrentDevice())))
                     break;
             }
             while(0);
+            ptx_version = 100 * deviceProp.major + deviceProp.minor * 10;
 
-            ptx_version = empty_kernel_attrs.ptxVersion * 10;
         #endif
     } else {
         #if CUB_INCLUDE_DEVICE_CODE
@@ -399,7 +412,7 @@ CUB_RUNTIME_FUNCTION inline cudaError_t PtxVersionUncached(int& ptx_version)
 /**
  * \brief Retrieves the PTX version that will be used on \p device (major * 100 + minor * 10).
  */
-__host__ inline cudaError_t PtxVersionUncached(int& ptx_version, int device)
+__host__ inline musaError_t PtxVersionUncached(int& ptx_version, int device)
 {
     SwitchDevice sd(device);
     return PtxVersionUncached(ptx_version);
@@ -425,7 +438,7 @@ struct SmVersionCacheTag {};
  *
  * \note This function is thread safe.
  */
-__host__ inline cudaError_t PtxVersion(int& ptx_version, int device)
+__host__ inline musaError_t PtxVersion(int& ptx_version, int device)
 {
 #if CUB_CPP_DIALECT >= 2011 // C++11 and later.
 
@@ -454,9 +467,9 @@ __host__ inline cudaError_t PtxVersion(int& ptx_version, int device)
  *
  * \note This function is thread safe.
  */
-CUB_RUNTIME_FUNCTION inline cudaError_t PtxVersion(int& ptx_version)
+CUB_RUNTIME_FUNCTION inline musaError_t PtxVersion(int& ptx_version)
 {
-    cudaError_t result = cudaErrorUnknown;
+    musaError_t result = musaErrorUnknown;
     if (CUB_IS_HOST_CODE) {
         #if CUB_INCLUDE_HOST_CODE
             #if CUB_CPP_DIALECT >= 2011
@@ -490,16 +503,16 @@ CUB_RUNTIME_FUNCTION inline cudaError_t PtxVersion(int& ptx_version)
 /**
  * \brief Retrieves the SM version of \p device (major * 100 + minor * 10)
  */
-CUB_RUNTIME_FUNCTION inline cudaError_t SmVersionUncached(int& sm_version, int device = CurrentDevice())
+CUB_RUNTIME_FUNCTION inline musaError_t SmVersionUncached(int& sm_version, int device = CurrentDevice())
 {
 #if defined(CUB_RUNTIME_ENABLED) // Host code or device code with the CUDA runtime.
 
-    cudaError_t error = cudaSuccess;
+    musaError_t error = musaSuccess;
     do
     {
         int major = 0, minor = 0;
-        if (CubDebug(error = cudaDeviceGetAttribute(&major, cudaDevAttrComputeCapabilityMajor, device))) break;
-        if (CubDebug(error = cudaDeviceGetAttribute(&minor, cudaDevAttrComputeCapabilityMinor, device))) break;
+        if (CubDebug(error = musaDeviceGetAttribute(&major, musaDevAttrComputeCapabilityMajor, device))) break;
+        if (CubDebug(error = musaDeviceGetAttribute(&minor, musaDevAttrComputeCapabilityMinor, device))) break;
         sm_version = major * 100 + minor * 10;
     }
     while (0);
@@ -512,7 +525,7 @@ CUB_RUNTIME_FUNCTION inline cudaError_t SmVersionUncached(int& sm_version, int d
     (void)device;
 
     // CUDA API calls are not supported from this device.
-    return CubDebug(cudaErrorInvalidConfiguration);
+    return CubDebug(musaErrorInvalidConfiguration);
 
 #endif
 }
@@ -524,9 +537,9 @@ CUB_RUNTIME_FUNCTION inline cudaError_t SmVersionUncached(int& sm_version, int d
  *
  * \note This function is thread safe.
  */
-CUB_RUNTIME_FUNCTION inline cudaError_t SmVersion(int& sm_version, int device = CurrentDevice())
+CUB_RUNTIME_FUNCTION inline musaError_t SmVersion(int& sm_version, int device = CurrentDevice())
 {
-    cudaError_t result = cudaErrorUnknown;
+    musaError_t result = musaErrorUnknown;
     if (CUB_IS_HOST_CODE) {
         #if CUB_INCLUDE_HOST_CODE
             #if CUB_CPP_DIALECT >= 2011
@@ -557,23 +570,23 @@ CUB_RUNTIME_FUNCTION inline cudaError_t SmVersion(int& sm_version, int device = 
 /**
  * Synchronize the specified \p stream.
  */
-CUB_RUNTIME_FUNCTION inline cudaError_t SyncStream(cudaStream_t stream)
+CUB_RUNTIME_FUNCTION inline musaError_t SyncStream(musaStream_t stream)
 {
-    cudaError_t result = cudaErrorUnknown;
+    musaError_t result = musaErrorUnknown;
     if (CUB_IS_HOST_CODE) {
         #if CUB_INCLUDE_HOST_CODE
-            result = CubDebug(cudaStreamSynchronize(stream));
+            result = CubDebug(musaStreamSynchronize(stream));
         #endif
     } else {
         #if CUB_INCLUDE_DEVICE_CODE
             #if defined(CUB_RUNTIME_ENABLED) // Device code with the CUDA runtime.
                 (void)stream;
                 // Device can't yet sync on a specific stream
-                result = CubDebug(cudaDeviceSynchronize());
+                result = CubDebug(musaDeviceSynchronize());
             #else // Device code without the CUDA runtime.
                 (void)stream;
                 // CUDA API calls are not supported from this device.
-                result = CubDebug(cudaErrorInvalidConfiguration);
+                result = CubDebug(musaErrorInvalidConfiguration);
             #endif
         #endif
     }
@@ -614,7 +627,7 @@ CUB_RUNTIME_FUNCTION inline cudaError_t SyncStream(cudaStream_t stream)
  */
 template <typename KernelPtr>
 CUB_RUNTIME_FUNCTION inline
-cudaError_t MaxSmOccupancy(
+musaError_t MaxSmOccupancy(
     int&                max_sm_occupancy,          ///< [out] maximum number of thread blocks that can reside on a single SM
     KernelPtr           kernel_ptr,                 ///< [in] Kernel pointer for which to compute SM occupancy
     int                 block_threads,              ///< [in] Number of threads per thread block
@@ -628,11 +641,11 @@ cudaError_t MaxSmOccupancy(
     (void)max_sm_occupancy;
 
     // CUDA API calls not supported from this device
-    return CubDebug(cudaErrorInvalidConfiguration);
+    return CubDebug(musaErrorInvalidConfiguration);
 
 #else
 
-    return CubDebug(cudaOccupancyMaxActiveBlocksPerMultiprocessor(
+    return CubDebug(musaOccupancyMaxActiveBlocksPerMultiprocessor(
         &max_sm_occupancy,
         kernel_ptr,
         block_threads,
@@ -661,12 +674,12 @@ struct KernelConfig
 
     template <typename AgentPolicyT, typename KernelPtrT>
     CUB_RUNTIME_FUNCTION __forceinline__
-    cudaError_t Init(KernelPtrT kernel_ptr)
+    musaError_t Init(KernelPtrT kernel_ptr)
     {
         block_threads        = AgentPolicyT::BLOCK_THREADS;
         items_per_thread     = AgentPolicyT::ITEMS_PER_THREAD;
         tile_size            = block_threads * items_per_thread;
-        cudaError_t retval   = MaxSmOccupancy(sm_occupancy, kernel_ptr, block_threads);
+        musaError_t retval   = MaxSmOccupancy(sm_occupancy, kernel_ptr, block_threads);
         return retval;
     }
 };
@@ -683,7 +696,7 @@ struct ChainedPolicy
    /// Specializes and dispatches op in accordance to the first policy in the chain of adequate PTX version
    template <typename FunctorT>
    CUB_RUNTIME_FUNCTION __forceinline__
-   static cudaError_t Invoke(int ptx_version, FunctorT& op)
+   static musaError_t Invoke(int ptx_version, FunctorT& op)
    {
        if (ptx_version < PTX_VERSION) {
            return PrevPolicyT::Invoke(ptx_version, op);
@@ -702,7 +715,7 @@ struct ChainedPolicy<PTX_VERSION, PolicyT, PolicyT>
     /// Specializes and dispatches op in accordance to the first policy in the chain of adequate PTX version
     template <typename FunctorT>
     CUB_RUNTIME_FUNCTION __forceinline__
-    static cudaError_t Invoke(int /*ptx_version*/, FunctorT& op) {
+    static musaError_t Invoke(int /*ptx_version*/, FunctorT& op) {
         return op.template Invoke<PolicyT>();
     }
 };

@@ -1,3 +1,7 @@
+/****************************************************************************
+* This library contains code from cub, cub is licensed under the license below.
+* Some files of cub may have been modified by Moore Threads Technology Co., Ltd
+******************************************************************************/
 /******************************************************************************
  * Copyright (c) 2011, Duane Merrill.  All rights reserved.
  * Copyright (c) 2011-2018, NVIDIA CORPORATION.  All rights reserved.
@@ -32,7 +36,7 @@
  * isolating all maximal, non-trivial (having length > 1) "runs" of duplicates.
  *
  * To compile using the command line:
- *   nvcc -arch=sm_XX example_device_sort_find_non_trivial_runs.cu -I../.. -lcudart -O3
+ *   nvcc -arch=sm_XX example_device_sort_find_non_trivial_runs.mu -I../.. -lcudart -O3
  *
  ******************************************************************************/
 
@@ -264,8 +268,8 @@ int main(int argc, char** argv)
         CubDebugExit(g_allocator.DeviceAllocate((void**)&d_values.d_buffers[0], sizeof(Value) * num_items));
         CubDebugExit(g_allocator.DeviceAllocate((void**)&d_values.d_buffers[1], sizeof(Value) * num_items));
 
-        CubDebugExit(cudaMemcpy(d_keys.d_buffers[d_keys.selector], h_keys, sizeof(float) * num_items, cudaMemcpyHostToDevice));
-        CubDebugExit(cudaMemcpy(d_values.d_buffers[d_values.selector], h_values, sizeof(int) * num_items, cudaMemcpyHostToDevice));
+        CubDebugExit(musaMemcpy(d_keys.d_buffers[d_keys.selector], h_keys, sizeof(float) * num_items, musaMemcpyHostToDevice));
+        CubDebugExit(musaMemcpy(d_values.d_buffers[d_values.selector], h_values, sizeof(int) * num_items, musaMemcpyHostToDevice));
 
         // Start timer
         gpu_timer.Start();

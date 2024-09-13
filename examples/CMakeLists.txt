@@ -29,7 +29,7 @@ function(cub_add_example target_name_var example_name example_src cub_target)
   set(config_meta_target ${config_prefix}.examples)
   set(example_meta_target cub.all.example.${example_name})
 
-  add_executable(${example_target} "${example_src}")
+  musa_add_executable(${example_target} "${example_src}")
   target_link_libraries(${example_target} ${cub_target})
   cub_clone_target_properties(${example_target} ${cub_target})
   target_include_directories(${example_target} PRIVATE "${CUB_SOURCE_DIR}/examples")

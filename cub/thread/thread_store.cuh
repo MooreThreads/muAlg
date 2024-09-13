@@ -1,3 +1,7 @@
+/****************************************************************************
+* This library contains code from cub, cub is licensed under the license below.
+* Some files of cub may have been modified by Moore Threads Technology Co., Ltd
+******************************************************************************/
 /******************************************************************************
  * Copyright (c) 2011, Duane Merrill.  All rights reserved.
  * Copyright (c) 2011-2018, NVIDIA CORPORATION.  All rights reserved.
@@ -157,20 +161,24 @@ struct IterateThreadStore<MAX, MAX>
     template<>                                                                              \
     __device__ __forceinline__ void ThreadStore<cub_modifier, uint4*, uint4>(uint4* ptr, uint4 val)                         \
     {                                                                                       \
-        asm volatile ("st."#ptx_modifier".v4.u32 [%0], {%1, %2, %3, %4};" : :               \
+      /*  asm volatile ("st."#ptx_modifier".v4.u32 [%0], {%1, %2, %3, %4};" : :               \
             _CUB_ASM_PTR_(ptr),                                                             \
             "r"(val.x),                                                                     \
             "r"(val.y),                                                                     \
             "r"(val.z),                                                                     \
-            "r"(val.w));                                                                    \
+            "r"(val.w));  */                                                                \
+        uint4 *vol_ptr = const_cast<uint4 *>(ptr);                                          \
+        *vol_ptr = val;                                                                     \
     }                                                                                       \
     template<>                                                                              \
     __device__ __forceinline__ void ThreadStore<cub_modifier, ulonglong2*, ulonglong2>(ulonglong2* ptr, ulonglong2 val)     \
     {                                                                                       \
-        asm volatile ("st."#ptx_modifier".v2.u64 [%0], {%1, %2};" : :                       \
+      /*  asm volatile ("st."#ptx_modifier".v2.u64 [%0], {%1, %2};" : :                       \
             _CUB_ASM_PTR_(ptr),                                                             \
             "l"(val.x),                                                                     \
-            "l"(val.y));                                                                    \
+            "l"(val.y));  */                                                                \
+        ulonglong2 *vol_ptr = const_cast<ulonglong2 *>(ptr);                                \
+        *vol_ptr = val;                                                                     \
     }
 
 
@@ -181,27 +189,33 @@ struct IterateThreadStore<MAX, MAX>
     template<>                                                                              \
     __device__ __forceinline__ void ThreadStore<cub_modifier, ushort4*, ushort4>(ushort4* ptr, ushort4 val)                 \
     {                                                                                       \
-        asm volatile ("st."#ptx_modifier".v4.u16 [%0], {%1, %2, %3, %4};" : :               \
+      /*  asm volatile ("st."#ptx_modifier".v4.u16 [%0], {%1, %2, %3, %4};" : :               \
             _CUB_ASM_PTR_(ptr),                                                             \
             "h"(val.x),                                                                     \
             "h"(val.y),                                                                     \
             "h"(val.z),                                                                     \
-            "h"(val.w));                                                                    \
+            "h"(val.w));  */                                                                \
+        ushort4 *vol_ptr = const_cast<ushort4 *>(ptr);                                      \
+        *vol_ptr = val;                                                                     \
     }                                                                                       \
     template<>                                                                              \
     __device__ __forceinline__ void ThreadStore<cub_modifier, uint2*, uint2>(uint2* ptr, uint2 val)                         \
     {                                                                                       \
-        asm volatile ("st."#ptx_modifier".v2.u32 [%0], {%1, %2};" : :                       \
+      /*  asm volatile ("st."#ptx_modifier".v2.u32 [%0], {%1, %2};" : :                       \
             _CUB_ASM_PTR_(ptr),                                                             \
             "r"(val.x),                                                                     \
-            "r"(val.y));                                                                    \
+            "r"(val.y));  */                                                                \
+        uint2 *vol_ptr = const_cast<uint2 *>(ptr);                                          \
+        *vol_ptr = val;                                                                     \
     }                                                                                       \
     template<>                                                                              \
     __device__ __forceinline__ void ThreadStore<cub_modifier, unsigned long long*, unsigned long long>(unsigned long long* ptr, unsigned long long val)     \
     {                                                                                       \
-        asm volatile ("st."#ptx_modifier".u64 [%0], %1;" : :                                \
-            _CUB_ASM_PTR_(ptr),                                                             \
-            "l"(val));                                                                      \
+      /*  asm volatile ("st."#ptx_modifier".u64 [%0], %1;" : :                                \
+             _CUB_ASM_PTR_(ptr),                                                            \
+             "l"(val));  */                                                                 \
+        volatile unsigned long long *vol_ptr = const_cast<unsigned long long *>(ptr);       \
+        *vol_ptr = val;                                                                     \
     }
 
 /**
@@ -211,11 +225,13 @@ struct IterateThreadStore<MAX, MAX>
     template<>                                                                              \
     __device__ __forceinline__ void ThreadStore<cub_modifier, unsigned int*, unsigned int>(unsigned int* ptr, unsigned int val)                             \
     {                                                                                       \
-        asm volatile ("st."#ptx_modifier".u32 [%0], %1;" : :                                \
+      /*  asm volatile ("st."#ptx_modifier".u32 [%0], %1;" : :                                \
             _CUB_ASM_PTR_(ptr),                                                             \
-            "r"(val));                                                                      \
+            "r"(val));  */                                                                  \
+        volatile unsigned int *vol_ptr = const_cast<unsigned int *>(ptr);                   \
+        *vol_ptr = val;                                                                     \
     }
-
+    
 
 /**
  * Define a unsigned short (2B) ThreadStore specialization for the given Cache load modifier
@@ -224,9 +240,11 @@ struct IterateThreadStore<MAX, MAX>
     template<>                                                                              \
     __device__ __forceinline__ void ThreadStore<cub_modifier, unsigned short*, unsigned short>(unsigned short* ptr, unsigned short val)                     \
     {                                                                                       \
-        asm volatile ("st."#ptx_modifier".u16 [%0], %1;" : :                                \
+      /*  asm volatile ("st."#ptx_modifier".u16 [%0], %1;" : :                                \
             _CUB_ASM_PTR_(ptr),                                                             \
-            "h"(val));                                                                      \
+            "h"(val));  */                                                                  \
+        volatile unsigned short *vol_ptr = const_cast<unsigned short *>(ptr);               \
+        *vol_ptr = val;                                                                     \
     }
 
 
@@ -237,14 +255,16 @@ struct IterateThreadStore<MAX, MAX>
     template<>                                                                              \
     __device__ __forceinline__ void ThreadStore<cub_modifier, unsigned char*, unsigned char>(unsigned char* ptr, unsigned char val)                         \
     {                                                                                       \
-        asm volatile (                                                                      \
+      /*  asm volatile (                                                                      \
         "{"                                                                                 \
         "   .reg .u8 datum;"                                                                \
         "   cvt.u8.u16 datum, %1;"                                                          \
         "   st."#ptx_modifier".u8 [%0], datum;"                                             \
         "}" : :                                                                             \
             _CUB_ASM_PTR_(ptr),                                                             \
-            "h"((unsigned short) val));                                                               \
+            "h"((unsigned short) val));  */                                                 \
+        volatile unsigned char *vol_ptr = const_cast<unsigned char *>(ptr);                 \
+        *vol_ptr = val;                                                                     \
     }
 
 /**

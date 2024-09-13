@@ -1,3 +1,7 @@
+/****************************************************************************
+* This library contains code from cub, cub is licensed under the license below.
+* Some files of cub may have been modified by Moore Threads Technology Co., Ltd
+******************************************************************************/
 /******************************************************************************
  * Copyright (c) 2011, Duane Merrill.  All rights reserved.
  * Copyright (c) 2011-2018, NVIDIA CORPORATION.  All rights reserved.
@@ -30,7 +34,7 @@
  * Simple demonstration of cub::BlockRadixSort
  *
  * To compile using the command line:
- *   nvcc -arch=sm_XX example_block_radix_sort.cu -I../.. -lcudart -O3
+ *   nvcc -arch=sm_XX example_block_radix_sort.mu -I../.. -lcudart -O3
  *
  ******************************************************************************/
 
@@ -187,9 +191,9 @@ void Test()
     Key *d_in       = NULL;
     Key *d_out      = NULL;
     clock_t *d_elapsed  = NULL;
-    CubDebugExit(cudaMalloc((void**)&d_in,          sizeof(Key) * TILE_SIZE * g_grid_size));
-    CubDebugExit(cudaMalloc((void**)&d_out,         sizeof(Key) * TILE_SIZE * g_grid_size));
-    CubDebugExit(cudaMalloc((void**)&d_elapsed,     sizeof(clock_t) * g_grid_size));
+    CubDebugExit(musaMalloc((void**)&d_in,          sizeof(Key) * TILE_SIZE * g_grid_size));
+    CubDebugExit(musaMalloc((void**)&d_out,         sizeof(Key) * TILE_SIZE * g_grid_size));
+    CubDebugExit(musaMalloc((void**)&d_elapsed,     sizeof(clock_t) * g_grid_size));
 
     // Display input problem data
     if (g_verbose)
@@ -205,7 +209,7 @@ void Test()
     CubDebugExit(MaxSmOccupancy(max_sm_occupancy, BlockSortKernel<Key, BLOCK_THREADS, ITEMS_PER_THREAD>, BLOCK_THREADS));
 
     // Copy problem to device
-    CubDebugExit(cudaMemcpy(d_in, h_in, sizeof(Key) * TILE_SIZE * g_grid_size, cudaMemcpyHostToDevice));
+    CubDebugExit(musaMemcpy(d_in, h_in, sizeof(Key) * TILE_SIZE * g_grid_size, musaMemcpyHostToDevice));
 
     printf("BlockRadixSort %d items (%d timing iterations, %d blocks, %d threads, %d items per thread, %d SM occupancy):\n",
         TILE_SIZE * g_grid_size, g_timing_iterations, g_grid_size, BLOCK_THREADS, ITEMS_PER_THREAD, max_sm_occupancy);
@@ -218,8 +222,8 @@ void Test()
         d_elapsed);
 
     // Check for kernel errors and STDIO from the kernel, if any
-    CubDebugExit(cudaPeekAtLastError());
-    CubDebugExit(cudaDeviceSynchronize());
+    CubDebugExit(musaPeekAtLastError());
+    CubDebugExit(musaDeviceSynchronize());
 
     // Check results
     printf("\tOutput items: ");
@@ -247,7 +251,7 @@ void Test()
         elapsed_millis += timer.ElapsedMillis();
 
         // Copy clocks from device
-        CubDebugExit(cudaMemcpy(h_elapsed, d_elapsed, sizeof(clock_t) * g_grid_size, cudaMemcpyDeviceToHost));
+        CubDebugExit(musaMemcpy(h_elapsed, d_elapsed, sizeof(clock_t) * g_grid_size, musaMemcpyDeviceToHost));
         for (int j = 0; j < g_grid_size; j++)
         {
             elapsed_clocks += h_elapsed[j];
@@ -255,7 +259,7 @@ void Test()
     }
 
     // Check for kernel errors and STDIO from the kernel, if any
-    CubDebugExit(cudaDeviceSynchronize());
+    CubDebugExit(musaDeviceSynchronize());
 
     // Display timing results
     float avg_millis            = elapsed_millis / g_timing_iterations;
@@ -273,9 +277,9 @@ void Test()
     if (h_in) delete[] h_in;
     if (h_reference) delete[] h_reference;
     if (h_elapsed) delete[] h_elapsed;
-    if (d_in) CubDebugExit(cudaFree(d_in));
-    if (d_out) CubDebugExit(cudaFree(d_out));
-    if (d_elapsed) CubDebugExit(cudaFree(d_elapsed));
+    if (d_in) CubDebugExit(musaFree(d_in));
+    if (d_out) CubDebugExit(musaFree(d_out));
+    if (d_elapsed) CubDebugExit(musaFree(d_elapsed));
 }
 
 

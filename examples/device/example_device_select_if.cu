@@ -1,3 +1,7 @@
+/****************************************************************************
+* This library contains code from cub, cub is licensed under the license below.
+* Some files of cub may have been modified by Moore Threads Technology Co., Ltd
+******************************************************************************/
 /******************************************************************************
  * Copyright (c) 2011, Duane Merrill.  All rights reserved.
  * Copyright (c) 2011-2018, NVIDIA CORPORATION.  All rights reserved.
@@ -33,7 +37,7 @@
  * section functor (greater-than)
  *
  * To compile using the command line:
- *   nvcc -arch=sm_XX example_device_select_if.cu -I../.. -lcudart -O3
+ *   nvcc -arch=sm_XX example_device_select_if.mu -I../.. -lcudart -O3
  *
  ******************************************************************************/
 
@@ -203,7 +207,7 @@ int main(int argc, char** argv)
     CubDebugExit(g_allocator.DeviceAllocate((void**)&d_in, sizeof(int) * num_items));
 
     // Initialize device input
-    CubDebugExit(cudaMemcpy(d_in, h_in, sizeof(int) * num_items, cudaMemcpyHostToDevice));
+    CubDebugExit(musaMemcpy(d_in, h_in, sizeof(int) * num_items, musaMemcpyHostToDevice));
 
     // Allocate device output array and num selected
     int     *d_out            = NULL;

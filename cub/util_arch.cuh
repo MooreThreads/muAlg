@@ -1,3 +1,7 @@
+/****************************************************************************
+* This library contains code from cub, cub is licensed under the license below.
+* Some files of cub may have been modified by Moore Threads Technology Co., Ltd
+******************************************************************************/
 /******************************************************************************
  * Copyright (c) 2011, Duane Merrill.  All rights reserved.
  * Copyright (c) 2011-2018, NVIDIA CORPORATION.  All rights reserved.
@@ -45,11 +49,12 @@ namespace cub {
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS    // Do not document
 
-#if ((__CUDACC_VER_MAJOR__ >= 9) || defined(__NVCOMPILER_CUDA__) ||            \
-     CUDA_VERSION >= 9000) &&                                                  \
-  !defined(CUB_USE_COOPERATIVE_GROUPS)
+// in MUSA, always use COOPERATIVE_GROUPS
+// #if ((__CUDACC_VER_MAJOR__ >= 9) || defined(__NVCOMPILER_CUDA__) ||            \
+//      MUSA_VERSION >= 9000) &&                                                  \
+//   !defined(CUB_USE_COOPERATIVE_GROUPS)
 #define CUB_USE_COOPERATIVE_GROUPS
-#endif
+// #endif
 
 /// In device code, CUB_PTX_ARCH expands to the PTX version for which we are
 /// compiling. In host code, CUB_PTX_ARCH's value is implementation defined.
@@ -59,10 +64,10 @@ namespace cub {
         // when compiling both host code and device code. Currently, only one
         // PTX version can be targeted.
         #define CUB_PTX_ARCH __NVCOMPILER_CUDA_ARCH__
-    #elif !defined(__CUDA_ARCH__)
+    #elif !defined(__MUSA_ARCH__)
         #define CUB_PTX_ARCH 0
     #else
-        #define CUB_PTX_ARCH __CUDA_ARCH__
+        #define CUB_PTX_ARCH __MUSA_ARCH__
     #endif
 #endif
 
@@ -96,7 +101,7 @@ namespace cub {
 
 /// Whether or not the source targeted by the active compiler pass is allowed to  invoke device kernels or methods from the CUDA runtime API.
 #ifndef CUB_RUNTIME_FUNCTION
-    #if !defined(__CUDA_ARCH__) || (__CUDA_ARCH__>= 350 && defined(__CUDACC_RDC__))
+    #if !defined(__MUSA_ARCH__) || (__MUSA_ARCH__>= 350 && defined(__MUSACC_RDC__))
         #define CUB_RUNTIME_ENABLED
         #define CUB_RUNTIME_FUNCTION __host__ __device__
     #else

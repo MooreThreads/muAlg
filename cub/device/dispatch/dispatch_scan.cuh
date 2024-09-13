@@ -1,3 +1,7 @@
+/****************************************************************************
+* This library contains code from cub, cub is licensed under the license below.
+* Some files of cub may have been modified by Moore Threads Technology Co., Ltd
+******************************************************************************/
 
 /******************************************************************************
  * Copyright (c) 2011, Duane Merrill.  All rights reserved.
@@ -45,7 +49,7 @@
 #include "../../util_device.cuh"
 #include "../../util_math.cuh"
 
-#include <thrust/system/cuda/detail/core/triple_chevron_launch.h>
+#include <thrust/system/musa/detail/core/triple_chevron_launch.h>
 
 /// Optional outer namespace(s)
 CUB_NS_PREFIX
@@ -190,8 +194,20 @@ struct DeviceScanPolicy
             ScanPolicyT;
     };
 
+    /// MUSA mp_21
+    struct Policy210 : ChainedPolicy<210, Policy210, Policy210>
+    {
+        typedef AgentScanPolicy<
+                128, 12,                                        ///< Threads per block, items per thread
+                OutputT,
+                BLOCK_LOAD_DIRECT,
+                LOAD_DEFAULT,
+                BLOCK_STORE_DIRECT,
+                BLOCK_SCAN_RAKING>
+            ScanPolicyT;
+    };
     /// MaxPolicy
-    typedef Policy600 MaxPolicy;
+    typedef Policy210 MaxPolicy;
 };
 
 
@@ -242,7 +258,7 @@ struct DispatchScan:
     ScanOpT         scan_op;                ///< [in] Binary scan functor
     InitValueT      init_value;             ///< [in] Initial value to seed the exclusive scan
     OffsetT         num_items;              ///< [in] Total number of input items (i.e., the length of \p d_in)
-    cudaStream_t    stream;                 ///< [in] <b>[optional]</b> CUDA stream to launch kernels within.  Default is stream<sub>0</sub>.
+    musaStream_t    stream;                 ///< [in] <b>[optional]</b> CUDA stream to launch kernels within.  Default is stream<sub>0</sub>.
     bool            debug_synchronous;
     int             ptx_version;
 
@@ -255,7 +271,7 @@ struct DispatchScan:
         OffsetT         num_items,              ///< [in] Total number of input items (i.e., the length of \p d_in)
         ScanOpT         scan_op,                ///< [in] Binary scan functor
         InitValueT      init_value,             ///< [in] Initial value to seed the exclusive scan
-        cudaStream_t    stream,                 ///< [in] <b>[optional]</b> CUDA stream to launch kernels within.  Default is stream<sub>0</sub>.
+        musaStream_t    stream,                 ///< [in] <b>[optional]</b> CUDA stream to launch kernels within.  Default is stream<sub>0</sub>.
         bool            debug_synchronous,
         int             ptx_version
     ):
@@ -273,7 +289,7 @@ struct DispatchScan:
 
     template <typename ActivePolicyT, typename InitKernel, typename ScanKernel>
     CUB_RUNTIME_FUNCTION __host__  __forceinline__
-    cudaError_t Invoke(InitKernel init_kernel, ScanKernel scan_kernel)
+    musaError_t Invoke(InitKernel init_kernel, ScanKernel scan_kernel)
     {
 #ifndef CUB_RUNTIME_ENABLED
 
@@ -281,19 +297,19 @@ struct DispatchScan:
         (void)scan_kernel;
 
         // Kernel launch not supported from this device
-        return CubDebug(cudaErrorNotSupported);
+        return CubDebug(musaErrorNotSupported);
 
 #else
 
         typedef typename ActivePolicyT::ScanPolicyT Policy;
         typedef typename cub::ScanTileState<OutputT> ScanTileStateT;
 
-        cudaError error = cudaSuccess;
+        musaError error = musaSuccess;
         do
         {
             // Get device ordinal
             int device_ordinal;
-            if (CubDebug(error = cudaGetDevice(&device_ordinal))) break;
+            if (CubDebug(error = musaGetDevice(&device_ordinal))) break;
 
             // Number of input tiles
             int tile_size = Policy::BLOCK_THREADS * Policy::ITEMS_PER_THREAD;
@@ -332,7 +348,7 @@ struct DispatchScan:
                 num_tiles);
 
             // Check for failure to launch
-            if (CubDebug(error = cudaPeekAtLastError())) break;
+            if (CubDebug(error = musaPeekAtLastError())) break;
 
             // Sync the stream if specified to flush runtime errors
             if (debug_synchronous && (CubDebug(error = SyncStream(stream)))) break;
@@ -347,7 +363,7 @@ struct DispatchScan:
 
             // Get max x-dimension of grid
             int max_dim_x;
-            if (CubDebug(error = cudaDeviceGetAttribute(&max_dim_x, cudaDevAttrMaxGridDimX, device_ordinal))) break;;
+            if (CubDebug(error = musaDeviceGetAttribute(&max_dim_x, musaDevAttrMaxGridDimX, device_ordinal))) break;;
 
             // Run grids in epochs (in case number of tiles exceeds max x-dimension
             int scan_grid_size = CUB_MIN(num_tiles, max_dim_x);
@@ -370,7 +386,7 @@ struct DispatchScan:
                     num_items);
 
                 // Check for failure to launch
-                if (CubDebug(error = cudaPeekAtLastError())) break;
+                if (CubDebug(error = musaPeekAtLastError())) break;
 
                 // Sync the stream if specified to flush runtime errors
                 if (debug_synchronous && (CubDebug(error = SyncStream(stream)))) break;
@@ -385,7 +401,7 @@ struct DispatchScan:
 
     template <typename ActivePolicyT>
     CUB_RUNTIME_FUNCTION __host__  __forceinline__
-    cudaError_t Invoke()
+    musaError_t Invoke()
     {
         typedef typename ActivePolicyT::ScanPolicyT Policy;
         typedef typename cub::ScanTileState<OutputT> ScanTileStateT;
@@ -401,7 +417,7 @@ struct DispatchScan:
      * Internal dispatch routine
      */
     CUB_RUNTIME_FUNCTION __forceinline__
-    static cudaError_t Dispatch(
+    static musaError_t Dispatch(
         void*           d_temp_storage,         ///< [in] %Device-accessible allocation of temporary storage.  When NULL, the required allocation size is written to \p temp_storage_bytes and no work is done.
         size_t&         temp_storage_bytes,     ///< [in,out] Reference to size in bytes of \p d_temp_storage allocation
         InputIteratorT  d_in,                   ///< [in] Pointer to the input sequence of data items
@@ -409,12 +425,12 @@ struct DispatchScan:
         ScanOpT         scan_op,                ///< [in] Binary scan functor
         InitValueT      init_value,             ///< [in] Initial value to seed the exclusive scan
         OffsetT         num_items,              ///< [in] Total number of input items (i.e., the length of \p d_in)
-        cudaStream_t    stream,                 ///< [in] <b>[optional]</b> CUDA stream to launch kernels within.  Default is stream<sub>0</sub>.
+        musaStream_t    stream,                 ///< [in] <b>[optional]</b> CUDA stream to launch kernels within.  Default is stream<sub>0</sub>.
         bool            debug_synchronous)      ///< [in] <b>[optional]</b> Whether or not to synchronize the stream after every kernel launch to check for errors.  Also causes launch configurations to be printed to the console.  Default is \p false.
     {
         typedef typename DispatchScan::MaxPolicy MaxPolicyT;
 
-        cudaError_t error;
+        musaError_t error;
         do
         {
             // Get PTX version

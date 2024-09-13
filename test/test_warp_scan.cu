@@ -1,3 +1,7 @@
+/****************************************************************************
+* This library contains code from cub, cub is licensed under the license below.
+* Some files of cub may have been modified by Moore Threads Technology Co., Ltd
+******************************************************************************/
 /******************************************************************************
  * Copyright (c) 2011, Duane Merrill.  All rights reserved.
  * Copyright (c) 2011-2018, NVIDIA CORPORATION.  All rights reserved.
@@ -444,9 +448,9 @@ void Test(
     CubDebugExit(g_allocator.DeviceAllocate((void**)&d_out, sizeof(T) * (TOTAL_ITEMS + 1)));
     CubDebugExit(g_allocator.DeviceAllocate((void**)&d_aggregate, sizeof(T) * TOTAL_ITEMS));
     CubDebugExit(g_allocator.DeviceAllocate((void**)&d_elapsed, sizeof(clock_t)));
-    CubDebugExit(cudaMemcpy(d_in, h_in, sizeof(T) * TOTAL_ITEMS, cudaMemcpyHostToDevice));
-    CubDebugExit(cudaMemset(d_out, 0, sizeof(T) * (TOTAL_ITEMS + 1)));
-    CubDebugExit(cudaMemset(d_aggregate, 0, sizeof(T) * TOTAL_ITEMS));
+    CubDebugExit(musaMemcpy(d_in, h_in, sizeof(T) * TOTAL_ITEMS, musaMemcpyHostToDevice));
+    CubDebugExit(musaMemset(d_out, 0, sizeof(T) * (TOTAL_ITEMS + 1)));
+    CubDebugExit(musaMemset(d_aggregate, 0, sizeof(T) * TOTAL_ITEMS));
 
     // Run kernel
     printf("Test-mode %d (%s), gen-mode %d (%s), %s warpscan, %d warp threads, %s (%d bytes) elements:\n",
@@ -470,8 +474,8 @@ void Test(
     printf("\tElapsed clocks: ");
     DisplayDeviceResults(d_elapsed, 1);
 
-    CubDebugExit(cudaPeekAtLastError());
-    CubDebugExit(cudaDeviceSynchronize());
+    CubDebugExit(musaPeekAtLastError());
+    CubDebugExit(musaDeviceSynchronize());
 
     // Copy out and display results
     printf("\tScan results: ");
@@ -533,7 +537,7 @@ void Test(GenMode gen_mode)
 {
     // Get device ordinal
     int device_ordinal;
-    CubDebugExit(cudaGetDevice(&device_ordinal));
+    CubDebugExit(musaGetDevice(&device_ordinal));
 
     // Get ptx version
     int ptx_version = 0;

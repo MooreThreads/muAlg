@@ -1,3 +1,7 @@
+/****************************************************************************
+* This library contains code from cub, cub is licensed under the license below.
+* Some files of cub may have been modified by Moore Threads Technology Co., Ltd
+******************************************************************************/
 /******************************************************************************
  * Copyright (c) 2011, Duane Merrill.  All rights reserved.
  * Copyright (c) 2011-2018, NVIDIA CORPORATION.  All rights reserved.
@@ -35,7 +39,7 @@
 
 #include <stdio.h>
 
-#include <cuda_runtime_api.h>
+#include <musa_runtime_api.h>
 #include <typeinfo>
 
 #include <cub/block/block_reduce.cuh>
@@ -349,8 +353,8 @@ void TestFullTile(
     CubDebugExit(g_allocator.DeviceAllocate((void**)&d_elapsed, sizeof(unsigned long long)));
     CubDebugExit(g_allocator.DeviceAllocate((void**)&d_in, sizeof(T) * num_items));
     CubDebugExit(g_allocator.DeviceAllocate((void**)&d_out, sizeof(T) * 1));
-    CubDebugExit(cudaMemcpy(d_in, h_in, sizeof(T) * num_items, cudaMemcpyHostToDevice));
-    CubDebugExit(cudaMemset(d_out, 0, sizeof(T) * 1));
+    CubDebugExit(musaMemcpy(d_in, h_in, sizeof(T) * num_items, musaMemcpyHostToDevice));
+    CubDebugExit(musaMemset(d_out, 0, sizeof(T) * 1));
 
     // Test multi-tile (unguarded)
     printf("TestFullTile %s, %s, gen-mode %d, num_items(%d), BLOCK_THREADS(%d) (%d,%d,%d), ITEMS_PER_THREAD(%d), tiles(%d), %s (%d bytes) elements:\n",
@@ -373,8 +377,8 @@ void TestFullTile(
         tiles,
         d_elapsed);
 
-    CubDebugExit(cudaPeekAtLastError());
-    CubDebugExit(cudaDeviceSynchronize());
+    CubDebugExit(musaPeekAtLastError());
+    CubDebugExit(musaDeviceSynchronize());
 
     // Copy out and display results
     printf("\tReduction results: ");
@@ -433,7 +437,7 @@ void TestFullTile(
 
     enum
     {
-        sufficient_smem       = (sizeof(typename BlockReduceT::TempStorage) <= 48 * 1024),
+        sufficient_smem       = (sizeof(typename BlockReduceT::TempStorage) <= 16 * 1024),
         sufficient_threads    = ((BLOCK_DIM_X * BLOCK_DIM_Y * BLOCK_DIM_Z) <= 1024),
     };
 
@@ -533,8 +537,8 @@ void TestPartialTile(
     CubDebugExit(g_allocator.DeviceAllocate((void**)&d_elapsed, sizeof(unsigned long long)));
     CubDebugExit(g_allocator.DeviceAllocate((void**)&d_in, sizeof(T) * TILE_SIZE));
     CubDebugExit(g_allocator.DeviceAllocate((void**)&d_out, sizeof(T) * 1));
-    CubDebugExit(cudaMemcpy(d_in, h_in, sizeof(T) * num_items, cudaMemcpyHostToDevice));
-    CubDebugExit(cudaMemset(d_out, 0, sizeof(T) * 1));
+    CubDebugExit(musaMemcpy(d_in, h_in, sizeof(T) * num_items, musaMemcpyHostToDevice));
+    CubDebugExit(musaMemset(d_out, 0, sizeof(T) * 1));
 
     printf("TestPartialTile %s, gen-mode %d, num_items(%d), BLOCK_THREADS(%d) (%d,%d,%d), %s (%d bytes) elements:\n",
         (ALGORITHM == BLOCK_REDUCE_RAKING) ? "BLOCK_REDUCE_RAKING" : (ALGORITHM == BLOCK_REDUCE_RAKING_COMMUTATIVE_ONLY) ? "BLOCK_REDUCE_RAKING_COMMUTATIVE_ONLY" : "BLOCK_REDUCE_WARP_REDUCTIONS",
@@ -553,8 +557,8 @@ void TestPartialTile(
         reduction_op,
         d_elapsed);
 
-    CubDebugExit(cudaPeekAtLastError());
-    CubDebugExit(cudaDeviceSynchronize());
+    CubDebugExit(musaPeekAtLastError());
+    CubDebugExit(musaDeviceSynchronize());
 
     // Copy out and display results
     printf("\tReduction results: ");
@@ -612,7 +616,7 @@ void TestPartialTile(
 
     enum
     {
-        sufficient_smem       = sizeof(typename BlockReduceT::TempStorage)  <= 48 * 1024,
+        sufficient_smem       = sizeof(typename BlockReduceT::TempStorage)  <= 16 * 1024,
         sufficient_threads    = (BLOCK_DIM_X * BLOCK_DIM_Y * BLOCK_DIM_Z)   <= 1024,
     };
 
@@ -674,7 +678,8 @@ void Test(
     }
 }
 
-
+// #define TEST_RAKING 1
+#define TEST_WARP_REDUCTIONS 1
 /**
  * Run battery of tests for different block-reduction algorithmic variants
  */
@@ -785,7 +790,7 @@ int main(int argc, char** argv)
         Test<int>();
         Test<long long>();
         if (ptx_version > 120)                          // Don't check doubles on PTX120 or below because they're down-converted
-            Test<double>();
+        Test<double>();
 
         Test<float>();
 

@@ -1,3 +1,7 @@
+/****************************************************************************
+* This library contains code from cub, cub is licensed under the license below.
+* Some files of cub may have been modified by Moore Threads Technology Co., Ltd
+******************************************************************************/
 /******************************************************************************
  * Copyright (c) 2011, Duane Merrill.  All rights reserved.
  * Copyright (c) 2011-2018, NVIDIA CORPORATION.  All rights reserved.
@@ -43,7 +47,7 @@
 #include "../config.cuh"
 
 // This class needs to go through a deprecation cycle and be removed, as the
-// underlying cudaBindTexture / cudaUnbindTexture APIs are deprecated.
+// underlying musaBindTexture / musaUnbindTexture APIs are deprecated.
 // See issue NVIDIA/cub#191.
 // Turn off deprecation warnings when compiling this file until then.
 #if CUB_HOST_COMPILER == CUB_HOST_COMPILER_MSVC
@@ -54,7 +58,7 @@
 #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
 #endif
 
-#if (CUDART_VERSION >= 5050) || defined(DOXYGEN_ACTIVE)  // This iterator is compatible with CUDA 5.5 and newer
+#if (MUSART_VERSION >= 5050) || defined(DOXYGEN_ACTIVE)  // This iterator is compatible with CUDA 5.5 and newer
 
 #if (THRUST_VERSION >= 100700)    // This iterator is compatible with Thrust API 1.7 and newer
     #include <thrust/iterator/iterator_facade.h>
@@ -102,22 +106,22 @@ struct IteratorTexRef
         static TexRef ref;
 
         /// Bind texture
-        static cudaError_t BindTexture(void *d_in, size_t &offset)
+        static musaError_t BindTexture(void *d_in, size_t &offset)
         {
             if (d_in)
             {
-                cudaChannelFormatDesc tex_desc = cudaCreateChannelDesc<TextureWord>();
+                musaChannelFormatDesc tex_desc = musaCreateChannelDesc<TextureWord>();
                 ref.channelDesc = tex_desc;
-                return (CubDebug(cudaBindTexture(&offset, ref, d_in)));
+                return (CubDebug(musaBindTexture(&offset, ref, d_in)));
             }
 
-            return cudaSuccess;
+            return musaSuccess;
         }
 
         /// Unbind texture
-        static cudaError_t UnbindTexture()
+        static musaError_t UnbindTexture()
         {
-            return CubDebug(cudaUnbindTexture(ref));
+            return CubDebug(musaUnbindTexture(ref));
         }
 
         /// Fetch element
@@ -254,20 +258,20 @@ public:
 */
     /// Use this iterator to bind \p ptr with a texture reference
     template <typename QualifiedT>
-    cudaError_t BindTexture(
-        QualifiedT      *ptr,                   ///< Native pointer to wrap that is aligned to cudaDeviceProp::textureAlignment
+    musaError_t BindTexture(
+        QualifiedT      *ptr,                   ///< Native pointer to wrap that is aligned to musaDeviceProp::textureAlignment
         size_t          /*bytes*/ = size_t(-1), ///< Number of bytes in the range
         size_t          tex_offset = 0)         ///< OffsetT (in items) from \p ptr denoting the position of the iterator
     {
         this->ptr = const_cast<typename RemoveQualifiers<QualifiedT>::Type *>(ptr);
         size_t offset;
-        cudaError_t retval = TexId::BindTexture(this->ptr + tex_offset, offset);
+        musaError_t retval = TexId::BindTexture(this->ptr + tex_offset, offset);
         this->tex_offset = (difference_type) (offset / sizeof(QualifiedT));
         return retval;
     }
 
     /// Unbind this iterator from its texture reference
-    cudaError_t UnbindTexture()
+    musaError_t UnbindTexture()
     {
         return TexId::UnbindTexture();
     }
@@ -388,7 +392,7 @@ public:
 }               // CUB namespace
 CUB_NS_POSTFIX  // Optional outer namespace(s)
 
-#endif // CUDART_VERSION
+#endif // MUSART_VERSION
 
 // Re-enable deprecation warnings:
 #if CUB_HOST_COMPILER == CUB_HOST_COMPILER_MSVC

@@ -1,3 +1,7 @@
+/****************************************************************************
+* This library contains code from cub, cub is licensed under the license below.
+* Some files of cub may have been modified by Moore Threads Technology Co., Ltd
+******************************************************************************/
 /******************************************************************************
  * Copyright (c) 2020, NVIDIA CORPORATION.  All rights reserved.
  *
@@ -63,7 +67,7 @@
 #endif // CUB_HOST_COMPILER
 
 // figure out which device compiler we're using
-#if defined(__CUDACC__) || defined(__NVCOMPILER_CUDA__)
+#if defined(__MUSACC__) || defined(__NVCOMPILER_CUDA__)
 #  define CUB_DEVICE_COMPILER CUB_DEVICE_COMPILER_NVCC
 #elif CUB_HOST_COMPILER == CUB_HOST_COMPILER_MSVC
 #  define CUB_DEVICE_COMPILER CUB_DEVICE_COMPILER_MSVC
@@ -71,7 +75,7 @@
 #  define CUB_DEVICE_COMPILER CUB_DEVICE_COMPILER_GCC
 #elif CUB_HOST_COMPILER == CUB_HOST_COMPILER_CLANG
 // CUDA-capable clang should behave similar to NVCC.
-#  if defined(__CUDA__)
+#  if defined(__MUSA__)
 #    define CUB_DEVICE_COMPILER CUB_DEVICE_COMPILER_NVCC
 #  else
 #    define CUB_DEVICE_COMPILER CUB_DEVICE_COMPILER_CLANG

@@ -1,3 +1,7 @@
+/****************************************************************************
+* This library contains code from cub, cub is licensed under the license below.
+* Some files of cub may have been modified by Moore Threads Technology Co., Ltd
+******************************************************************************/
 /******************************************************************************
  * Copyright (c) 2011, Duane Merrill.  All rights reserved.
  * Copyright (c) 2011-2018, NVIDIA CORPORATION.  All rights reserved.
@@ -95,13 +99,13 @@ struct LessThan
  */
 template <typename InputIteratorT, typename FlagIteratorT, typename SelectOpT, typename OutputIteratorT, typename NumSelectedIteratorT, typename OffsetT>
 CUB_RUNTIME_FUNCTION __forceinline__
-cudaError_t Dispatch(
+musaError_t Dispatch(
     Int2Type<CUB>               /*dispatch_to*/,
     Int2Type<false>             /*is_flagged*/,
     Int2Type<false>             /*is_partition*/,
     int                         timing_timing_iterations,
     size_t*                     /*d_temp_storage_bytes*/,
-    cudaError_t*                /*d_cdp_error*/,
+    musaError_t*                /*d_cdp_error*/,
 
     void*                       d_temp_storage,
     size_t&                     temp_storage_bytes,
@@ -111,10 +115,10 @@ cudaError_t Dispatch(
     NumSelectedIteratorT        d_num_selected_out,
     OffsetT                     num_items,
     SelectOpT                   select_op,
-    cudaStream_t                stream,
+    musaStream_t                stream,
     bool                        debug_synchronous)
 {
-    cudaError_t error = cudaSuccess;
+    musaError_t error = musaSuccess;
     for (int i = 0; i < timing_timing_iterations; ++i)
     {
         error = DeviceSelect::If(d_temp_storage, temp_storage_bytes, d_in, d_out, d_num_selected_out, num_items, select_op, stream, debug_synchronous);
@@ -128,13 +132,13 @@ cudaError_t Dispatch(
  */
 template <typename InputIteratorT, typename FlagIteratorT, typename SelectOpT, typename OutputIteratorT, typename NumSelectedIteratorT, typename OffsetT>
 CUB_RUNTIME_FUNCTION __forceinline__
-cudaError_t Dispatch(
+musaError_t Dispatch(
     Int2Type<CUB>               /*dispatch_to*/,
     Int2Type<false>             /*is_flagged*/,
     Int2Type<true>              /*is_partition*/,
     int                         timing_timing_iterations,
     size_t*                     /*d_temp_storage_bytes*/,
-    cudaError_t*                /*d_cdp_error*/,
+    musaError_t*                /*d_cdp_error*/,
 
     void*                       d_temp_storage,
     size_t&                     temp_storage_bytes,
@@ -144,10 +148,10 @@ cudaError_t Dispatch(
     NumSelectedIteratorT        d_num_selected_out,
     OffsetT                     num_items,
     SelectOpT                   select_op,
-    cudaStream_t                stream,
+    musaStream_t                stream,
     bool                        debug_synchronous)
 {
-    cudaError_t error = cudaSuccess;
+    musaError_t error = musaSuccess;
     for (int i = 0; i < timing_timing_iterations; ++i)
     {
         error = DevicePartition::If(d_temp_storage, temp_storage_bytes, d_in, d_out, d_num_selected_out, num_items, select_op, stream, debug_synchronous);
@@ -161,13 +165,13 @@ cudaError_t Dispatch(
  */
 template <typename InputIteratorT, typename FlagIteratorT, typename SelectOpT, typename OutputIteratorT, typename NumSelectedIteratorT, typename OffsetT>
 CUB_RUNTIME_FUNCTION __forceinline__
-cudaError_t Dispatch(
+musaError_t Dispatch(
     Int2Type<CUB>               /*dispatch_to*/,
     Int2Type<true>              /*is_flagged*/,
     Int2Type<false>             /*partition*/,
     int                         timing_timing_iterations,
     size_t*                     /*d_temp_storage_bytes*/,
-    cudaError_t*                /*d_cdp_error*/,
+    musaError_t*                /*d_cdp_error*/,
 
     void*                       d_temp_storage,
     size_t&                     temp_storage_bytes,
@@ -177,10 +181,10 @@ cudaError_t Dispatch(
     NumSelectedIteratorT        d_num_selected_out,
     OffsetT                     num_items,
     SelectOpT                   /*select_op*/,
-    cudaStream_t                stream,
+    musaStream_t                stream,
     bool                        debug_synchronous)
 {
-    cudaError_t error = cudaSuccess;
+    musaError_t error = musaSuccess;
     for (int i = 0; i < timing_timing_iterations; ++i)
     {
         error = DeviceSelect::Flagged(d_temp_storage, temp_storage_bytes, d_in, d_flags, d_out, d_num_selected_out, num_items, stream, debug_synchronous);
@@ -194,13 +198,13 @@ cudaError_t Dispatch(
  */
 template <typename InputIteratorT, typename FlagIteratorT, typename SelectOpT, typename OutputIteratorT, typename NumSelectedIteratorT, typename OffsetT>
 CUB_RUNTIME_FUNCTION __forceinline__
-cudaError_t Dispatch(
+musaError_t Dispatch(
     Int2Type<CUB>               /*dispatch_to*/,
     Int2Type<true>              /*is_flagged*/,
     Int2Type<true>              /*partition*/,
     int                         timing_timing_iterations,
     size_t*                     /*d_temp_storage_bytes*/,
-    cudaError_t*                /*d_cdp_error*/,
+    musaError_t*                /*d_cdp_error*/,
 
     void*                       d_temp_storage,
     size_t&                     temp_storage_bytes,
@@ -210,10 +214,10 @@ cudaError_t Dispatch(
     NumSelectedIteratorT        d_num_selected_out,
     OffsetT                     num_items,
     SelectOpT                   /*select_op*/,
-    cudaStream_t                stream,
+    musaStream_t                stream,
     bool                        debug_synchronous)
 {
-    cudaError_t error = cudaSuccess;
+    musaError_t error = musaSuccess;
     for (int i = 0; i < timing_timing_iterations; ++i)
     {
         error = DevicePartition::Flagged(d_temp_storage, temp_storage_bytes, d_in, d_flags, d_out, d_num_selected_out, num_items, stream, debug_synchronous);
@@ -231,13 +235,13 @@ cudaError_t Dispatch(
  */
 template <typename InputIteratorT, typename FlagIteratorT, typename SelectOpT, typename OutputIteratorT, typename NumSelectedIteratorT, typename OffsetT>
 __host__ __forceinline__
-cudaError_t Dispatch(
+musaError_t Dispatch(
     Int2Type<THRUST>            /*dispatch_to*/,
     Int2Type<false>             /*is_flagged*/,
     Int2Type<false>             /*is_partition*/,
     int                         timing_timing_iterations,
     size_t*                     /*d_temp_storage_bytes*/,
-    cudaError_t*                /*d_cdp_error*/,
+    musaError_t*                /*d_cdp_error*/,
 
     void*                       d_temp_storage,
     size_t&                     temp_storage_bytes,
@@ -247,7 +251,7 @@ cudaError_t Dispatch(
     NumSelectedIteratorT        d_num_selected_out,
     OffsetT                     num_items,
     SelectOpT                   select_op,
-    cudaStream_t                /*stream*/,
+    musaStream_t                /*stream*/,
     bool                        /*debug_synchronous*/)
 {
     // The input value type
@@ -274,10 +278,10 @@ cudaError_t Dispatch(
         }
 
         OffsetT num_selected = OffsetT(d_out_wrapper_end - d_out_wrapper);
-        CubDebugExit(cudaMemcpy(d_num_selected_out, &num_selected, sizeof(OffsetT), cudaMemcpyHostToDevice));
+        CubDebugExit(musaMemcpy(d_num_selected_out, &num_selected, sizeof(OffsetT), musaMemcpyHostToDevice));
     }
 
-    return cudaSuccess;
+    return musaSuccess;
 }
 
 
@@ -286,13 +290,13 @@ cudaError_t Dispatch(
  */
 template <typename InputIteratorT, typename FlagIteratorT, typename SelectOpT, typename OutputIteratorT, typename NumSelectedIteratorT, typename OffsetT>
 __host__ __forceinline__
-cudaError_t Dispatch(
+musaError_t Dispatch(
     Int2Type<THRUST>            /*dispatch_to*/,
     Int2Type<false>             /*is_flagged*/,
     Int2Type<true>              /*is_partition*/,
     int                         timing_timing_iterations,
     size_t*                     /*d_temp_storage_bytes*/,
-    cudaError_t*                /*d_cdp_error*/,
+    musaError_t*                /*d_cdp_error*/,
 
     void*                       d_temp_storage,
     size_t&                     temp_storage_bytes,
@@ -302,7 +306,7 @@ cudaError_t Dispatch(
     NumSelectedIteratorT        d_num_selected_out,
     OffsetT                     num_items,
     SelectOpT                   select_op,
-    cudaStream_t                /*stream*/,
+    musaStream_t                /*stream*/,
     bool                        /*debug_synchronous*/)
 {
     // The input value type
@@ -339,10 +343,10 @@ cudaError_t Dispatch(
         }
 
         OffsetT num_selected = OffsetT(d_out_wrapper_end.first - d_out_wrapper);
-        CubDebugExit(cudaMemcpy(d_num_selected_out, &num_selected, sizeof(OffsetT), cudaMemcpyHostToDevice));
+        CubDebugExit(musaMemcpy(d_num_selected_out, &num_selected, sizeof(OffsetT), musaMemcpyHostToDevice));
     }
 
-    return cudaSuccess;
+    return musaSuccess;
 }
 
 
@@ -351,13 +355,13 @@ cudaError_t Dispatch(
  */
 template <typename InputIteratorT, typename FlagIteratorT, typename SelectOpT, typename OutputIteratorT, typename NumSelectedIteratorT, typename OffsetT>
 __host__ __forceinline__
-cudaError_t Dispatch(
+musaError_t Dispatch(
     Int2Type<THRUST>            /*dispatch_to*/,
     Int2Type<true>              /*is_flagged*/,
     Int2Type<false>             /*is_partition*/,
     int                         timing_timing_iterations,
     size_t*                     /*d_temp_storage_bytes*/,
-    cudaError_t*                /*d_cdp_error*/,
+    musaError_t*                /*d_cdp_error*/,
 
     void*                       d_temp_storage,
     size_t&                     temp_storage_bytes,
@@ -367,7 +371,7 @@ cudaError_t Dispatch(
     NumSelectedIteratorT        d_num_selected_out,
     OffsetT                     num_items,
     SelectOpT                   /*select_op*/,
-    cudaStream_t                /*stream*/,
+    musaStream_t                /*stream*/,
     bool                        /*debug_synchronous*/)
 {
     // The flag type
@@ -398,10 +402,10 @@ cudaError_t Dispatch(
         }
 
         OffsetT num_selected = OffsetT(d_out_wrapper_end - d_out_wrapper);
-        CubDebugExit(cudaMemcpy(d_num_selected_out, &num_selected, sizeof(OffsetT), cudaMemcpyHostToDevice));
+        CubDebugExit(musaMemcpy(d_num_selected_out, &num_selected, sizeof(OffsetT), musaMemcpyHostToDevice));
     }
 
-    return cudaSuccess;
+    return musaSuccess;
 }
 
 
@@ -410,13 +414,13 @@ cudaError_t Dispatch(
  */
 template <typename InputIteratorT, typename FlagIteratorT, typename SelectOpT, typename OutputIteratorT, typename NumSelectedIteratorT, typename OffsetT>
 __host__ __forceinline__
-cudaError_t Dispatch(
+musaError_t Dispatch(
     Int2Type<THRUST>            /*dispatch_to*/,
     Int2Type<true>              /*is_flagged*/,
     Int2Type<true>              /*is_partition*/,
     int                         timing_timing_iterations,
     size_t*                     /*d_temp_storage_bytes*/,
-    cudaError_t*                /*d_cdp_error*/,
+    musaError_t*                /*d_cdp_error*/,
 
     void*                       d_temp_storage,
     size_t&                     temp_storage_bytes,
@@ -426,7 +430,7 @@ cudaError_t Dispatch(
     NumSelectedIteratorT        d_num_selected_out,
     OffsetT                     num_items,
     SelectOpT                   /*select_op*/,
-    cudaStream_t                /*stream*/,
+    musaStream_t                /*stream*/,
     bool                        /*debug_synchronous*/)
 {
     // The flag type
@@ -467,10 +471,10 @@ cudaError_t Dispatch(
         }
 
         OffsetT num_selected = OffsetT(d_out_wrapper_end.first - d_out_wrapper);
-        CubDebugExit(cudaMemcpy(d_num_selected_out, &num_selected, sizeof(OffsetT), cudaMemcpyHostToDevice));
+        CubDebugExit(musaMemcpy(d_num_selected_out, &num_selected, sizeof(OffsetT), musaMemcpyHostToDevice));
     }
 
-    return cudaSuccess;
+    return musaSuccess;
 }
 
 
@@ -487,7 +491,7 @@ __global__ void CnpDispatchKernel(
     IsPartitionTag              is_partition,
     int                         timing_timing_iterations,
     size_t*                     d_temp_storage_bytes,
-    cudaError_t*                d_cdp_error,
+    musaError_t*                d_cdp_error,
 
     void*                       d_temp_storage,
     size_t                      temp_storage_bytes,
@@ -514,7 +518,7 @@ __global__ void CnpDispatchKernel(
     (void)num_items;
     (void)select_op;
     (void)debug_synchronous;
-    *d_cdp_error = cudaErrorNotSupported;
+    *d_cdp_error = musaErrorNotSupported;
 #else
     *d_cdp_error = Dispatch(Int2Type<CUB>(), is_flagged, is_partition, timing_timing_iterations, d_temp_storage_bytes, d_cdp_error,
         d_temp_storage, temp_storage_bytes, d_in, d_flags, d_out, d_num_selected_out, num_items, select_op, 0, debug_synchronous);
@@ -527,13 +531,13 @@ __global__ void CnpDispatchKernel(
  * Dispatch to CDP kernel
  */
 template <typename InputIteratorT, typename FlagIteratorT, typename SelectOpT, typename OutputIteratorT, typename NumSelectedIteratorT, typename OffsetT, typename IsFlaggedTag, typename IsPartitionTag>
-cudaError_t Dispatch(
+musaError_t Dispatch(
     Int2Type<CDP>               dispatch_to,
     IsFlaggedTag                is_flagged,
     IsPartitionTag              is_partition,
     int                         timing_timing_iterations,
     size_t*                     d_temp_storage_bytes,
-    cudaError_t*                d_cdp_error,
+    musaError_t*                d_cdp_error,
 
     void*                       d_temp_storage,
     size_t&                     temp_storage_bytes,
@@ -543,7 +547,7 @@ cudaError_t Dispatch(
     NumSelectedIteratorT        d_num_selected_out,
     OffsetT                     num_items,
     SelectOpT                   select_op,
-    cudaStream_t                stream,
+    musaStream_t                stream,
     bool                        debug_synchronous)
 {
     // Invoke kernel to invoke device-side dispatch
@@ -551,11 +555,11 @@ cudaError_t Dispatch(
         d_temp_storage, temp_storage_bytes, d_in, d_flags, d_out, d_num_selected_out, num_items, select_op, debug_synchronous);
 
     // Copy out temp_storage_bytes
-    CubDebugExit(cudaMemcpy(&temp_storage_bytes, d_temp_storage_bytes, sizeof(size_t) * 1, cudaMemcpyDeviceToHost));
+    CubDebugExit(musaMemcpy(&temp_storage_bytes, d_temp_storage_bytes, sizeof(size_t) * 1, musaMemcpyDeviceToHost));
 
     // Copy out error
-    cudaError_t retval;
-    CubDebugExit(cudaMemcpy(&retval, d_cdp_error, sizeof(cudaError_t) * 1, cudaMemcpyDeviceToHost));
+    musaError_t retval;
+    CubDebugExit(musaMemcpy(&retval, d_cdp_error, sizeof(musaError_t) * 1, musaMemcpyDeviceToHost));
     return retval;
 }
 
@@ -656,9 +660,9 @@ void Test(
 
     // Allocate CDP device arrays
     size_t*         d_temp_storage_bytes = NULL;
-    cudaError_t*    d_cdp_error = NULL;
+    musaError_t*    d_cdp_error = NULL;
     CubDebugExit(g_allocator.DeviceAllocate((void**)&d_temp_storage_bytes,  sizeof(size_t) * 1));
-    CubDebugExit(g_allocator.DeviceAllocate((void**)&d_cdp_error,           sizeof(cudaError_t) * 1));
+    CubDebugExit(g_allocator.DeviceAllocate((void**)&d_cdp_error,           sizeof(musaError_t) * 1));
 
     // Allocate temporary storage
     void            *d_temp_storage = NULL;
@@ -668,9 +672,9 @@ void Test(
     CubDebugExit(g_allocator.DeviceAllocate(&d_temp_storage, temp_storage_bytes));
 
     // Copy flags and clear device output array
-    CubDebugExit(cudaMemcpy(d_flags, h_flags, sizeof(FlagT) * num_items, cudaMemcpyHostToDevice));
-    CubDebugExit(cudaMemset(d_out, 0, sizeof(T) * num_items));
-    CubDebugExit(cudaMemset(d_num_selected_out, 0, sizeof(int)));
+    CubDebugExit(musaMemcpy(d_flags, h_flags, sizeof(FlagT) * num_items, musaMemcpyHostToDevice));
+    CubDebugExit(musaMemset(d_out, 0, sizeof(T) * num_items));
+    CubDebugExit(musaMemset(d_num_selected_out, 0, sizeof(int)));
 
     // Run warmup/correctness iteration
     CubDebugExit(Dispatch(Int2Type<BACKEND>(), Int2Type<IS_FLAGGED>(), Int2Type<IS_PARTITION>(), 1, d_temp_storage_bytes, d_cdp_error,
@@ -776,7 +780,7 @@ void TestPointer(
     CubDebugExit(g_allocator.DeviceAllocate((void**)&d_in, sizeof(T) * num_items));
 
     // Initialize device input
-    CubDebugExit(cudaMemcpy(d_in, h_in, sizeof(T) * num_items, cudaMemcpyHostToDevice));
+    CubDebugExit(musaMemcpy(d_in, h_in, sizeof(T) * num_items, musaMemcpyHostToDevice));
 
     // Run Test
     Test<BACKEND, IS_FLAGGED, IS_PARTITION>(d_in, h_flags, select_op, h_reference, num_selected, num_items);
@@ -1000,7 +1004,7 @@ int main(int argc, char** argv)
 
     // Get device ordinal
     int device_ordinal;
-    CubDebugExit(cudaGetDevice(&device_ordinal));
+    CubDebugExit(musaGetDevice(&device_ordinal));
 
     // Get device SM version
     int sm_version = 0;

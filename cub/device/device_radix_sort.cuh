@@ -1,3 +1,7 @@
+/****************************************************************************
+* This library contains code from cub, cub is licensed under the license below.
+* Some files of cub may have been modified by Moore Threads Technology Co., Ltd
+******************************************************************************/
 
 /******************************************************************************
  * Copyright (c) 2011, Duane Merrill.  All rights reserved.
@@ -128,7 +132,7 @@ struct DeviceRadixSort
      *     d_keys_in, d_keys_out, d_values_in, d_values_out, num_items);
      *
      * // Allocate temporary storage
-     * cudaMalloc(&d_temp_storage, temp_storage_bytes);
+     * musaMalloc(&d_temp_storage, temp_storage_bytes);
      *
      * // Run sorting operation
      * cub::DeviceRadixSort::SortPairs(d_temp_storage, temp_storage_bytes,
@@ -146,7 +150,7 @@ struct DeviceRadixSort
         typename            KeyT,
         typename            ValueT>
     CUB_RUNTIME_FUNCTION
-    static cudaError_t SortPairs(
+    static musaError_t SortPairs(
         void                *d_temp_storage,                        ///< [in] %Device-accessible allocation of temporary storage.  When NULL, the required allocation size is written to \p temp_storage_bytes and no work is done.
         size_t              &temp_storage_bytes,                    ///< [in,out] Reference to size in bytes of \p d_temp_storage allocation
         const KeyT          *d_keys_in,                             ///< [in] Pointer to the input data of key data to sort
@@ -156,7 +160,7 @@ struct DeviceRadixSort
         int                 num_items,                              ///< [in] Number of items to sort
         int                 begin_bit           = 0,                ///< [in] <b>[optional]</b> The least-significant bit index (inclusive)  needed for key comparison
         int                 end_bit             = sizeof(KeyT) * 8, ///< [in] <b>[optional]</b> The most-significant bit index (exclusive) needed for key comparison (e.g., sizeof(unsigned int) * 8)
-        cudaStream_t        stream              = 0,                ///< [in] <b>[optional]</b> CUDA stream to launch kernels within.  Default is stream<sub>0</sub>.
+        musaStream_t        stream              = 0,                ///< [in] <b>[optional]</b> CUDA stream to launch kernels within.  Default is stream<sub>0</sub>.
         bool                debug_synchronous   = false)            ///< [in] <b>[optional]</b> Whether or not to synchronize the stream after every kernel launch to check for errors.  Also causes launch configurations to be printed to the console.  Default is \p false.
     {
         // Signed integer type for global offsets
@@ -230,7 +234,7 @@ struct DeviceRadixSort
      * cub::DeviceRadixSort::SortPairs(d_temp_storage, temp_storage_bytes, d_keys, d_values, num_items);
      *
      * // Allocate temporary storage
-     * cudaMalloc(&d_temp_storage, temp_storage_bytes);
+     * musaMalloc(&d_temp_storage, temp_storage_bytes);
      *
      * // Run sorting operation
      * cub::DeviceRadixSort::SortPairs(d_temp_storage, temp_storage_bytes, d_keys, d_values, num_items);
@@ -247,7 +251,7 @@ struct DeviceRadixSort
         typename            KeyT,
         typename            ValueT>
     CUB_RUNTIME_FUNCTION
-    static cudaError_t SortPairs(
+    static musaError_t SortPairs(
         void                    *d_temp_storage,                        ///< [in] %Device-accessible allocation of temporary storage.  When NULL, the required allocation size is written to \p temp_storage_bytes and no work is done.
         size_t                  &temp_storage_bytes,                    ///< [in,out] Reference to size in bytes of \p d_temp_storage allocation
         DoubleBuffer<KeyT>      &d_keys,                                ///< [in,out] Reference to the double-buffer of keys whose "current" device-accessible buffer contains the unsorted input keys and, upon return, is updated to point to the sorted output keys
@@ -255,7 +259,7 @@ struct DeviceRadixSort
         int                     num_items,                              ///< [in] Number of items to sort
         int                     begin_bit           = 0,                ///< [in] <b>[optional]</b> The least-significant bit index (inclusive)  needed for key comparison
         int                     end_bit             = sizeof(KeyT) * 8, ///< [in] <b>[optional]</b> The most-significant bit index (exclusive) needed for key comparison (e.g., sizeof(unsigned int) * 8)
-        cudaStream_t            stream              = 0,                ///< [in] <b>[optional]</b> CUDA stream to launch kernels within.  Default is stream<sub>0</sub>.
+        musaStream_t            stream              = 0,                ///< [in] <b>[optional]</b> CUDA stream to launch kernels within.  Default is stream<sub>0</sub>.
         bool                    debug_synchronous   = false)            ///< [in] <b>[optional]</b> Whether or not to synchronize the stream after every kernel launch to check for errors.  Also causes launch configurations to be printed to the console.  Default is \p false.
     {
         // Signed integer type for global offsets
@@ -309,7 +313,7 @@ struct DeviceRadixSort
      *     d_keys_in, d_keys_out, d_values_in, d_values_out, num_items);
      *
      * // Allocate temporary storage
-     * cudaMalloc(&d_temp_storage, temp_storage_bytes);
+     * musaMalloc(&d_temp_storage, temp_storage_bytes);
      *
      * // Run sorting operation
      * cub::DeviceRadixSort::SortPairsDescending(d_temp_storage, temp_storage_bytes,
@@ -327,7 +331,7 @@ struct DeviceRadixSort
         typename            KeyT,
         typename            ValueT>
     CUB_RUNTIME_FUNCTION
-    static cudaError_t SortPairsDescending(
+    static musaError_t SortPairsDescending(
         void                *d_temp_storage,                        ///< [in] %Device-accessible allocation of temporary storage.  When NULL, the required allocation size is written to \p temp_storage_bytes and no work is done.
         size_t              &temp_storage_bytes,                    ///< [in,out] Reference to size in bytes of \p d_temp_storage allocation
         const KeyT          *d_keys_in,                             ///< [in] Pointer to the input data of key data to sort
@@ -337,7 +341,7 @@ struct DeviceRadixSort
         int                 num_items,                              ///< [in] Number of items to sort
         int                 begin_bit           = 0,                ///< [in] <b>[optional]</b> The least-significant bit index (inclusive)  needed for key comparison
         int                 end_bit             = sizeof(KeyT) * 8, ///< [in] <b>[optional]</b> The most-significant bit index (exclusive) needed for key comparison (e.g., sizeof(unsigned int) * 8)
-        cudaStream_t        stream              = 0,                ///< [in] <b>[optional]</b> CUDA stream to launch kernels within.  Default is stream<sub>0</sub>.
+        musaStream_t        stream              = 0,                ///< [in] <b>[optional]</b> CUDA stream to launch kernels within.  Default is stream<sub>0</sub>.
         bool                debug_synchronous   = false)            ///< [in] <b>[optional]</b> Whether or not to synchronize the stream after every kernel launch to check for errors.  Also causes launch configurations to be printed to the console.  Default is \p false.
     {
         // Signed integer type for global offsets
@@ -406,7 +410,7 @@ struct DeviceRadixSort
      * cub::DeviceRadixSort::SortPairsDescending(d_temp_storage, temp_storage_bytes, d_keys, d_values, num_items);
      *
      * // Allocate temporary storage
-     * cudaMalloc(&d_temp_storage, temp_storage_bytes);
+     * musaMalloc(&d_temp_storage, temp_storage_bytes);
      *
      * // Run sorting operation
      * cub::DeviceRadixSort::SortPairsDescending(d_temp_storage, temp_storage_bytes, d_keys, d_values, num_items);
@@ -423,7 +427,7 @@ struct DeviceRadixSort
         typename            KeyT,
         typename            ValueT>
     CUB_RUNTIME_FUNCTION
-    static cudaError_t SortPairsDescending(
+    static musaError_t SortPairsDescending(
         void                    *d_temp_storage,                        ///< [in] %Device-accessible allocation of temporary storage.  When NULL, the required allocation size is written to \p temp_storage_bytes and no work is done.
         size_t                  &temp_storage_bytes,                    ///< [in,out] Reference to size in bytes of \p d_temp_storage allocation
         DoubleBuffer<KeyT>      &d_keys,                                ///< [in,out] Reference to the double-buffer of keys whose "current" device-accessible buffer contains the unsorted input keys and, upon return, is updated to point to the sorted output keys
@@ -431,7 +435,7 @@ struct DeviceRadixSort
         int                     num_items,                              ///< [in] Number of items to sort
         int                     begin_bit           = 0,                ///< [in] <b>[optional]</b> The least-significant bit index (inclusive)  needed for key comparison
         int                     end_bit             = sizeof(KeyT) * 8, ///< [in] <b>[optional]</b> The most-significant bit index (exclusive) needed for key comparison (e.g., sizeof(unsigned int) * 8)
-        cudaStream_t            stream              = 0,                ///< [in] <b>[optional]</b> CUDA stream to launch kernels within.  Default is stream<sub>0</sub>.
+        musaStream_t            stream              = 0,                ///< [in] <b>[optional]</b> CUDA stream to launch kernels within.  Default is stream<sub>0</sub>.
         bool                    debug_synchronous   = false)            ///< [in] <b>[optional]</b> Whether or not to synchronize the stream after every kernel launch to check for errors.  Also causes launch configurations to be printed to the console.  Default is \p false.
     {
         // Signed integer type for global offsets
@@ -492,7 +496,7 @@ struct DeviceRadixSort
      * cub::DeviceRadixSort::SortKeys(d_temp_storage, temp_storage_bytes, d_keys_in, d_keys_out, num_items);
      *
      * // Allocate temporary storage
-     * cudaMalloc(&d_temp_storage, temp_storage_bytes);
+     * musaMalloc(&d_temp_storage, temp_storage_bytes);
      *
      * // Run sorting operation
      * cub::DeviceRadixSort::SortKeys(d_temp_storage, temp_storage_bytes, d_keys_in, d_keys_out, num_items);
@@ -505,7 +509,7 @@ struct DeviceRadixSort
      */
     template <typename KeyT>
     CUB_RUNTIME_FUNCTION
-    static cudaError_t SortKeys(
+    static musaError_t SortKeys(
         void                *d_temp_storage,                        ///< [in] %Device-accessible allocation of temporary storage.  When NULL, the required allocation size is written to \p temp_storage_bytes and no work is done.
         size_t              &temp_storage_bytes,                    ///< [in,out] Reference to size in bytes of \p d_temp_storage allocation
         const KeyT          *d_keys_in,                             ///< [in] Pointer to the input data of key data to sort
@@ -513,7 +517,7 @@ struct DeviceRadixSort
         int                 num_items,                              ///< [in] Number of items to sort
         int                 begin_bit           = 0,                ///< [in] <b>[optional]</b> The least-significant bit index (inclusive)  needed for key comparison
         int                 end_bit             = sizeof(KeyT) * 8, ///< [in] <b>[optional]</b> The most-significant bit index (exclusive) needed for key comparison (e.g., sizeof(unsigned int) * 8)
-        cudaStream_t        stream              = 0,                ///< [in] <b>[optional]</b> CUDA stream to launch kernels within.  Default is stream<sub>0</sub>.
+        musaStream_t        stream              = 0,                ///< [in] <b>[optional]</b> CUDA stream to launch kernels within.  Default is stream<sub>0</sub>.
         bool                debug_synchronous   = false)            ///< [in] <b>[optional]</b> Whether or not to synchronize the stream after every kernel launch to check for errors.  Also causes launch configurations to be printed to the console.  Default is \p false.
     {
         // Signed integer type for global offsets
@@ -581,7 +585,7 @@ struct DeviceRadixSort
      * cub::DeviceRadixSort::SortKeys(d_temp_storage, temp_storage_bytes, d_keys, num_items);
      *
      * // Allocate temporary storage
-     * cudaMalloc(&d_temp_storage, temp_storage_bytes);
+     * musaMalloc(&d_temp_storage, temp_storage_bytes);
      *
      * // Run sorting operation
      * cub::DeviceRadixSort::SortKeys(d_temp_storage, temp_storage_bytes, d_keys, num_items);
@@ -594,14 +598,14 @@ struct DeviceRadixSort
      */
     template <typename KeyT>
     CUB_RUNTIME_FUNCTION
-    static cudaError_t SortKeys(
+    static musaError_t SortKeys(
         void                *d_temp_storage,                        ///< [in] %Device-accessible allocation of temporary storage.  When NULL, the required allocation size is written to \p temp_storage_bytes and no work is done.
         size_t              &temp_storage_bytes,                    ///< [in,out] Reference to size in bytes of \p d_temp_storage allocation
         DoubleBuffer<KeyT>  &d_keys,                                ///< [in,out] Reference to the double-buffer of keys whose "current" device-accessible buffer contains the unsorted input keys and, upon return, is updated to point to the sorted output keys
         int                 num_items,                              ///< [in] Number of items to sort
         int                 begin_bit           = 0,                ///< [in] <b>[optional]</b> The least-significant bit index (inclusive)  needed for key comparison
         int                 end_bit             = sizeof(KeyT) * 8, ///< [in] <b>[optional]</b> The most-significant bit index (exclusive) needed for key comparison (e.g., sizeof(unsigned int) * 8)
-        cudaStream_t        stream              = 0,                ///< [in] <b>[optional]</b> CUDA stream to launch kernels within.  Default is stream<sub>0</sub>.
+        musaStream_t        stream              = 0,                ///< [in] <b>[optional]</b> CUDA stream to launch kernels within.  Default is stream<sub>0</sub>.
         bool                debug_synchronous   = false)            ///< [in] <b>[optional]</b> Whether or not to synchronize the stream after every kernel launch to check for errors.  Also causes launch configurations to be printed to the console.  Default is \p false.
     {
         // Signed integer type for global offsets
@@ -656,7 +660,7 @@ struct DeviceRadixSort
      * cub::DeviceRadixSort::SortKeysDescending(d_temp_storage, temp_storage_bytes, d_keys_in, d_keys_out, num_items);
      *
      * // Allocate temporary storage
-     * cudaMalloc(&d_temp_storage, temp_storage_bytes);
+     * musaMalloc(&d_temp_storage, temp_storage_bytes);
      *
      * // Run sorting operation
      * cub::DeviceRadixSort::SortKeysDescending(d_temp_storage, temp_storage_bytes, d_keys_in, d_keys_out, num_items);
@@ -669,7 +673,7 @@ struct DeviceRadixSort
      */
     template <typename KeyT>
     CUB_RUNTIME_FUNCTION
-    static cudaError_t SortKeysDescending(
+    static musaError_t SortKeysDescending(
         void                *d_temp_storage,                        ///< [in] %Device-accessible allocation of temporary storage.  When NULL, the required allocation size is written to \p temp_storage_bytes and no work is done.
         size_t              &temp_storage_bytes,                    ///< [in,out] Reference to size in bytes of \p d_temp_storage allocation
         const KeyT          *d_keys_in,                             ///< [in] Pointer to the input data of key data to sort
@@ -677,7 +681,7 @@ struct DeviceRadixSort
         int                 num_items,                              ///< [in] Number of items to sort
         int                 begin_bit           = 0,                ///< [in] <b>[optional]</b> The least-significant bit index (inclusive)  needed for key comparison
         int                 end_bit             = sizeof(KeyT) * 8, ///< [in] <b>[optional]</b> The most-significant bit index (exclusive) needed for key comparison (e.g., sizeof(unsigned int) * 8)
-        cudaStream_t        stream              = 0,                ///< [in] <b>[optional]</b> CUDA stream to launch kernels within.  Default is stream<sub>0</sub>.
+        musaStream_t        stream              = 0,                ///< [in] <b>[optional]</b> CUDA stream to launch kernels within.  Default is stream<sub>0</sub>.
         bool                debug_synchronous   = false)            ///< [in] <b>[optional]</b> Whether or not to synchronize the stream after every kernel launch to check for errors.  Also causes launch configurations to be printed to the console.  Default is \p false.
     {
         // Signed integer type for global offsets
@@ -740,7 +744,7 @@ struct DeviceRadixSort
      * cub::DeviceRadixSort::SortKeysDescending(d_temp_storage, temp_storage_bytes, d_keys, num_items);
      *
      * // Allocate temporary storage
-     * cudaMalloc(&d_temp_storage, temp_storage_bytes);
+     * musaMalloc(&d_temp_storage, temp_storage_bytes);
      *
      * // Run sorting operation
      * cub::DeviceRadixSort::SortKeysDescending(d_temp_storage, temp_storage_bytes, d_keys, num_items);
@@ -753,14 +757,14 @@ struct DeviceRadixSort
      */
     template <typename KeyT>
     CUB_RUNTIME_FUNCTION
-    static cudaError_t SortKeysDescending(
+    static musaError_t SortKeysDescending(
         void                *d_temp_storage,                        ///< [in] %Device-accessible allocation of temporary storage.  When NULL, the required allocation size is written to \p temp_storage_bytes and no work is done.
         size_t              &temp_storage_bytes,                    ///< [in,out] Reference to size in bytes of \p d_temp_storage allocation
         DoubleBuffer<KeyT>  &d_keys,                                ///< [in,out] Reference to the double-buffer of keys whose "current" device-accessible buffer contains the unsorted input keys and, upon return, is updated to point to the sorted output keys
         int                 num_items,                              ///< [in] Number of items to sort
         int                 begin_bit           = 0,                ///< [in] <b>[optional]</b> The least-significant bit index (inclusive)  needed for key comparison
         int                 end_bit             = sizeof(KeyT) * 8, ///< [in] <b>[optional]</b> The most-significant bit index (exclusive) needed for key comparison (e.g., sizeof(unsigned int) * 8)
-        cudaStream_t        stream              = 0,                ///< [in] <b>[optional]</b> CUDA stream to launch kernels within.  Default is stream<sub>0</sub>.
+        musaStream_t        stream              = 0,                ///< [in] <b>[optional]</b> CUDA stream to launch kernels within.  Default is stream<sub>0</sub>.
         bool                debug_synchronous   = false)            ///< [in] <b>[optional]</b> Whether or not to synchronize the stream after every kernel launch to check for errors.  Also causes launch configurations to be printed to the console.  Default is \p false.
     {
         // Signed integer type for global offsets
@@ -789,7 +793,7 @@ struct DeviceRadixSort
 };
 
 /**
- * \example example_device_radix_sort.cu
+ * \example example_device_radix_sort.mu
  */
 
 }               // CUB namespace

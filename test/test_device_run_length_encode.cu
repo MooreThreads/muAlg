@@ -1,3 +1,7 @@
+/****************************************************************************
+* This library contains code from cub, cub is licensed under the license below.
+* Some files of cub may have been modified by Moore Threads Technology Co., Ltd
+******************************************************************************/
 /******************************************************************************
  * Copyright (c) 2011, Duane Merrill.  All rights reserved.
  * Copyright (c) 2011-2018, NVIDIA CORPORATION.  All rights reserved.
@@ -93,12 +97,12 @@ template <
     typename                    NumRunsIterator,
     typename                    OffsetT>
 CUB_RUNTIME_FUNCTION __forceinline__
-cudaError_t Dispatch(
+musaError_t Dispatch(
     Int2Type<RLE>               /*method*/,
     Int2Type<CUB>               /*dispatch_to*/,
     int                         timing_timing_iterations,
     size_t                      */*d_temp_storage_bytes*/,
-    cudaError_t                 */*d_cdp_error*/,
+    musaError_t                 */*d_cdp_error*/,
 
     void*               d_temp_storage,
     size_t                      &temp_storage_bytes,
@@ -109,10 +113,10 @@ cudaError_t Dispatch(
     NumRunsIterator             d_num_runs,
     cub::Equality               /*equality_op*/,
     OffsetT                     num_items,
-    cudaStream_t                stream,
+    musaStream_t                stream,
     bool                        debug_synchronous)
 {
-    cudaError_t error = cudaSuccess;
+    musaError_t error = musaSuccess;
     for (int i = 0; i < timing_timing_iterations; ++i)
     {
         error = DeviceRunLengthEncode::Encode(
@@ -141,12 +145,12 @@ template <
     typename                    NumRunsIterator,
     typename                    OffsetT>
 CUB_RUNTIME_FUNCTION __forceinline__
-cudaError_t Dispatch(
+musaError_t Dispatch(
     Int2Type<NON_TRIVIAL>       /*method*/,
     Int2Type<CUB>               /*dispatch_to*/,
     int                         timing_timing_iterations,
     size_t                      */*d_temp_storage_bytes*/,
-    cudaError_t                 */*d_cdp_error*/,
+    musaError_t                 */*d_cdp_error*/,
 
     void*               d_temp_storage,
     size_t                      &temp_storage_bytes,
@@ -157,10 +161,10 @@ cudaError_t Dispatch(
     NumRunsIterator             d_num_runs,
     cub::Equality               /*equality_op*/,
     OffsetT                     num_items,
-    cudaStream_t                stream,
+    musaStream_t                stream,
     bool                        debug_synchronous)
 {
-    cudaError_t error = cudaSuccess;
+    musaError_t error = musaSuccess;
     for (int i = 0; i < timing_timing_iterations; ++i)
     {
         error = DeviceRunLengthEncode::NonTrivialRuns(
@@ -193,12 +197,12 @@ template <
     typename                    LengthsOutputIteratorT,
     typename                    NumRunsIterator,
     typename                    OffsetT>
-cudaError_t Dispatch(
+musaError_t Dispatch(
     Int2Type<RLE>               /*method*/,
     Int2Type<THRUST>            /*dispatch_to*/,
     int                         timing_timing_iterations,
     size_t                      */*d_temp_storage_bytes*/,
-    cudaError_t                 */*d_cdp_error*/,
+    musaError_t                 */*d_cdp_error*/,
 
     void                        *d_temp_storage,
     size_t                      &temp_storage_bytes,
@@ -209,7 +213,7 @@ cudaError_t Dispatch(
     NumRunsIterator             d_num_runs,
     cub::Equality               /*equality_op*/,
     OffsetT                     num_items,
-    cudaStream_t                /*stream*/,
+    musaStream_t                /*stream*/,
     bool                        /*debug_synchronous*/)
 {
     // The input value type
@@ -252,10 +256,10 @@ cudaError_t Dispatch(
         }
 
         OffsetT num_runs = OffsetT(d_out_ends.first - d_unique_out_wrapper);
-        CubDebugExit(cudaMemcpy(d_num_runs, &num_runs, sizeof(OffsetT), cudaMemcpyHostToDevice));
+        CubDebugExit(musaMemcpy(d_num_runs, &num_runs, sizeof(OffsetT), musaMemcpyHostToDevice));
     }
 
-    return cudaSuccess;
+    return musaSuccess;
 }
 
 
@@ -280,7 +284,7 @@ __global__ void CnpDispatchKernel(
     Int2Type<RLE_METHOD>            method,
     int                         timing_timing_iterations,
     size_t                      *d_temp_storage_bytes,
-    cudaError_t                 *d_cdp_error,
+    musaError_t                 *d_cdp_error,
 
     void*               d_temp_storage,
     size_t                      temp_storage_bytes,
@@ -291,12 +295,12 @@ __global__ void CnpDispatchKernel(
     NumRunsIterator             d_num_runs,
     cub::Equality               equality_op,
     OffsetT                     num_items,
-    cudaStream_t                stream,
+    musaStream_t                stream,
     bool                        debug_synchronous)
 {
 
 #ifndef CUB_CDP
-    *d_cdp_error = cudaErrorNotSupported;
+    *d_cdp_error = musaErrorNotSupported;
 #else
     *d_cdp_error = Dispatch(method, Int2Type<CUB>(), timing_timing_iterations, d_temp_storage_bytes, d_cdp_error,
         d_temp_storage, temp_storage_bytes, d_in, d_unique_out, d_offsets_out, d_lengths_out, d_num_runs, equality_op, num_items, 0, debug_synchronous);
@@ -319,12 +323,12 @@ template <
     typename                    EqualityOp,
     typename                    OffsetT>
 CUB_RUNTIME_FUNCTION __forceinline__
-cudaError_t Dispatch(
+musaError_t Dispatch(
     Int2Type<RLE_METHOD>        method,
     Int2Type<CDP>               dispatch_to,
     int                         timing_timing_iterations,
     size_t                      *d_temp_storage_bytes,
-    cudaError_t                 *d_cdp_error,
+    musaError_t                 *d_cdp_error,
 
     void*               d_temp_storage,
     size_t                      &temp_storage_bytes,
@@ -335,7 +339,7 @@ cudaError_t Dispatch(
     NumRunsIterator             d_num_runs,
     EqualityOp                  equality_op,
     OffsetT                     num_items,
-    cudaStream_t                stream,
+    musaStream_t                stream,
     bool                        debug_synchronous)
 {
     // Invoke kernel to invoke device-side dispatch
@@ -343,11 +347,11 @@ cudaError_t Dispatch(
         d_temp_storage, temp_storage_bytes, d_in, d_unique_out, d_offsets_out, d_lengths_out, d_num_runs, equality_op, num_items, 0, debug_synchronous);
 
     // Copy out temp_storage_bytes
-    CubDebugExit(cudaMemcpy(&temp_storage_bytes, d_temp_storage_bytes, sizeof(size_t) * 1, cudaMemcpyDeviceToHost));
+    CubDebugExit(musaMemcpy(&temp_storage_bytes, d_temp_storage_bytes, sizeof(size_t) * 1, musaMemcpyDeviceToHost));
 
     // Copy out error
-    cudaError_t retval;
-    CubDebugExit(cudaMemcpy(&retval, d_cdp_error, sizeof(cudaError_t) * 1, cudaMemcpyDeviceToHost));
+    musaError_t retval;
+    CubDebugExit(musaMemcpy(&retval, d_cdp_error, sizeof(musaError_t) * 1, musaMemcpyDeviceToHost));
     return retval;
 }
 
@@ -508,9 +512,9 @@ void Test(
 
     // Allocate CDP device arrays
     size_t*          d_temp_storage_bytes = NULL;
-    cudaError_t*     d_cdp_error = NULL;
+    musaError_t*     d_cdp_error = NULL;
     CubDebugExit(g_allocator.DeviceAllocate((void**)&d_temp_storage_bytes,  sizeof(size_t) * 1));
-    CubDebugExit(g_allocator.DeviceAllocate((void**)&d_cdp_error,           sizeof(cudaError_t) * 1));
+    CubDebugExit(g_allocator.DeviceAllocate((void**)&d_cdp_error,           sizeof(musaError_t) * 1));
 
     // Allocate temporary storage
     void*           d_temp_storage = NULL;
@@ -520,11 +524,11 @@ void Test(
 
     // Clear device output arrays
     if (RLE_METHOD == RLE)
-        CubDebugExit(cudaMemset(d_unique_out,   0, sizeof(T) * num_items));
+        CubDebugExit(musaMemset(d_unique_out,   0, sizeof(T) * num_items));
     if (RLE_METHOD == NON_TRIVIAL)
-        CubDebugExit(cudaMemset(d_offsets_out,  0, sizeof(OffsetT) * num_items));
-    CubDebugExit(cudaMemset(d_lengths_out,  0, sizeof(LengthT) * num_items));
-    CubDebugExit(cudaMemset(d_num_runs,     0, sizeof(int)));
+        CubDebugExit(musaMemset(d_offsets_out,  0, sizeof(OffsetT) * num_items));
+    CubDebugExit(musaMemset(d_lengths_out,  0, sizeof(LengthT) * num_items));
+    CubDebugExit(musaMemset(d_num_runs,     0, sizeof(int)));
 
     // Run warmup/correctness iteration
     CubDebugExit(Dispatch(Int2Type<RLE_METHOD>(), Int2Type<BACKEND>(), 1, d_temp_storage_bytes, d_cdp_error, d_temp_storage, temp_storage_bytes, d_in, d_unique_out, d_offsets_out, d_lengths_out, d_num_runs, equality_op, num_items, 0, true));
@@ -638,7 +642,7 @@ void TestPointer(
     CubDebugExit(g_allocator.DeviceAllocate((void**)&d_in, sizeof(T) * num_items));
 
     // Initialize device input
-    CubDebugExit(cudaMemcpy(d_in, h_in, sizeof(T) * num_items, cudaMemcpyHostToDevice));
+    CubDebugExit(musaMemcpy(d_in, h_in, sizeof(T) * num_items, musaMemcpyHostToDevice));
 
     // Run Test
     Test<RLE_METHOD, BACKEND>(d_in, h_unique_reference, h_offsets_reference, h_lengths_reference, equality_op, num_runs, num_items);

@@ -1,3 +1,7 @@
+/****************************************************************************
+* This library contains code from cub, cub is licensed under the license below.
+* Some files of cub may have been modified by Moore Threads Technology Co., Ltd
+******************************************************************************/
 /******************************************************************************
  * Copyright (c) 2011, Duane Merrill.  All rights reserved.
  * Copyright (c) 2011-2018, NVIDIA CORPORATION.  All rights reserved.
@@ -37,8 +41,8 @@
 #include <limits>
 #include <cfloat>
 
-#if (__CUDACC_VER_MAJOR__ >= 9 || CUDA_VERSION >= 9000) && !__NVCOMPILER_CUDA__
-    #include <cuda_fp16.h>
+#if (__CUDACC_VER_MAJOR__ >= 9 || MUSA_VERSION >= 9000) && !__NVCOMPILER_CUDA__
+    #include <musa_fp16.h>
 #endif
 
 #include "util_macro.cuh"
@@ -375,9 +379,10 @@ struct UnitWord
         ShuffleWord>::Type                      VolatileWord;
 
     /// Biggest memory-access word that T is a whole multiple of and is not larger than the alignment of T
-    typedef typename If<IsMultiple<longlong2>::IS_MULTIPLE,
-        ulonglong2,
-        VolatileWord>::Type                     DeviceWord;
+    // typedef typename If<IsMultiple<longlong2>::IS_MULTIPLE,
+    //     ulonglong2,
+    //     VolatileWord>::Type                     DeviceWord;
+    typedef VolatileWord DeviceWord;
 
     /// Biggest texture reference word that T is a whole multiple of and is not larger than the alignment of T
     typedef typename If<IsMultiple<int4>::IS_MULTIPLE,
@@ -413,7 +418,8 @@ struct UnitWord <float4>
     typedef uint4               DeviceWord;
 #else
     typedef unsigned long long  VolatileWord;
-    typedef ulonglong2          DeviceWord;
+    // typedef ulonglong2          DeviceWord;
+    typedef unsigned long long DeviceWord;
 #endif
     typedef float4              TextureWord;
 };
@@ -1063,7 +1069,7 @@ struct FpLimits<double>
 };
 
 
-#if (__CUDACC_VER_MAJOR__ >= 9 || CUDA_VERSION >= 9000) && !__NVCOMPILER_CUDA__
+#if (__CUDACC_VER_MAJOR__ >= 9 || MUSA_VERSION >= 9000) && !__NVCOMPILER_CUDA__
 template <>
 struct FpLimits<__half>
 {
@@ -1143,7 +1149,7 @@ template <> struct NumericTraits<unsigned long long> :  BaseTraits<UNSIGNED_INTE
 
 template <> struct NumericTraits<float> :               BaseTraits<FLOATING_POINT, true, false, unsigned int, float> {};
 template <> struct NumericTraits<double> :              BaseTraits<FLOATING_POINT, true, false, unsigned long long, double> {};
-#if (__CUDACC_VER_MAJOR__ >= 9 || CUDA_VERSION >= 9000) && !__NVCOMPILER_CUDA__
+#if (__CUDACC_VER_MAJOR__ >= 9 || MUSA_VERSION >= 9000) && !__NVCOMPILER_CUDA__
     template <> struct NumericTraits<__half> :          BaseTraits<FLOATING_POINT, true, false, unsigned short, __half> {};
 #endif
 

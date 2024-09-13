@@ -1,3 +1,7 @@
+/****************************************************************************
+* This library contains code from cub, cub is licensed under the license below.
+* Some files of cub may have been modified by Moore Threads Technology Co., Ltd
+******************************************************************************/
 /******************************************************************************
  * Copyright (c) 2011, Duane Merrill.  All rights reserved.
  * Copyright (c) 2011-2018, NVIDIA CORPORATION.  All rights reserved.
@@ -98,11 +102,11 @@ struct CustomMax
  */
 template <typename InputIteratorT, typename OutputIteratorT, typename OffsetIteratorT, typename ReductionOpT>
 CUB_RUNTIME_FUNCTION __forceinline__
-cudaError_t Dispatch(
+musaError_t Dispatch(
     Int2Type<CUB>       /*dispatch_to*/,
     int                 timing_iterations,
     size_t              */*d_temp_storage_bytes*/,
-    cudaError_t         */*d_cdp_error*/,
+    musaError_t         */*d_cdp_error*/,
 
     void*               d_temp_storage,
     size_t&             temp_storage_bytes,
@@ -112,7 +116,7 @@ cudaError_t Dispatch(
     int                 /*max_segments*/,
     OffsetIteratorT     /*d_segment_offsets*/,
     ReductionOpT        reduction_op,
-    cudaStream_t        stream,
+    musaStream_t        stream,
     bool                debug_synchronous)
 {
     typedef typename std::iterator_traits<InputIteratorT>::value_type InputT;
@@ -126,7 +130,7 @@ cudaError_t Dispatch(
     OutputT identity = Traits<InputT>::Lowest(); // replace with std::numeric_limits<OutputT>::lowest() when C++ support is more prevalent
 
     // Invoke kernel to device reduction directly
-    cudaError_t error = cudaSuccess;
+    musaError_t error = musaSuccess;
     for (int i = 0; i < timing_iterations; ++i)
     {
         error = DeviceReduce::Reduce(d_temp_storage, temp_storage_bytes,
@@ -142,11 +146,11 @@ cudaError_t Dispatch(
  */
 template <typename InputIteratorT, typename OutputIteratorT, typename OffsetIteratorT>
 CUB_RUNTIME_FUNCTION __forceinline__
-cudaError_t Dispatch(
+musaError_t Dispatch(
     Int2Type<CUB>       /*dispatch_to*/,
     int                 timing_iterations,
     size_t              */*d_temp_storage_bytes*/,
-    cudaError_t         */*d_cdp_error*/,
+    musaError_t         */*d_cdp_error*/,
 
     void*               d_temp_storage,
     size_t&             temp_storage_bytes,
@@ -156,11 +160,11 @@ cudaError_t Dispatch(
     int                 /*max_segments*/,
     OffsetIteratorT     /*d_segment_offsets*/,
     cub::Sum            /*reduction_op*/,
-    cudaStream_t        stream,
+    musaStream_t        stream,
     bool                debug_synchronous)
 {
     // Invoke kernel to device reduction directly
-    cudaError_t error = cudaSuccess;
+    musaError_t error = musaSuccess;
     for (int i = 0; i < timing_iterations; ++i)
     {
         error = DeviceReduce::Sum(d_temp_storage, temp_storage_bytes, d_in, d_out, num_items, stream, debug_synchronous);
@@ -174,11 +178,11 @@ cudaError_t Dispatch(
  */
 template <typename InputIteratorT, typename OutputIteratorT, typename OffsetIteratorT>
 CUB_RUNTIME_FUNCTION __forceinline__
-cudaError_t Dispatch(
+musaError_t Dispatch(
     Int2Type<CUB>       /*dispatch_to*/,
     int                 timing_iterations,
     size_t              */*d_temp_storage_bytes*/,
-    cudaError_t         */*d_cdp_error*/,
+    musaError_t         */*d_cdp_error*/,
 
     void*               d_temp_storage,
     size_t&             temp_storage_bytes,
@@ -188,11 +192,11 @@ cudaError_t Dispatch(
     int                 /*max_segments*/,
     OffsetIteratorT     /*d_segment_offsets*/,
     cub::Min            /*reduction_op*/,
-    cudaStream_t        stream,
+    musaStream_t        stream,
     bool                debug_synchronous)
 {
     // Invoke kernel to device reduction directly
-    cudaError_t error = cudaSuccess;
+    musaError_t error = musaSuccess;
     for (int i = 0; i < timing_iterations; ++i)
     {
         error = DeviceReduce::Min(d_temp_storage, temp_storage_bytes, d_in, d_out, num_items, stream, debug_synchronous);
@@ -206,11 +210,11 @@ cudaError_t Dispatch(
  */
 template <typename InputIteratorT, typename OutputIteratorT, typename OffsetIteratorT>
 CUB_RUNTIME_FUNCTION __forceinline__
-cudaError_t Dispatch(
+musaError_t Dispatch(
     Int2Type<CUB>       /*dispatch_to*/,
     int                 timing_iterations,
     size_t              */*d_temp_storage_bytes*/,
-    cudaError_t         */*d_cdp_error*/,
+    musaError_t         */*d_cdp_error*/,
 
     void*               d_temp_storage,
     size_t&             temp_storage_bytes,
@@ -220,11 +224,11 @@ cudaError_t Dispatch(
     int                 /*max_segments*/,
     OffsetIteratorT     /*d_segment_offsets*/,
     cub::Max            /*reduction_op*/,
-    cudaStream_t        stream,
+    musaStream_t        stream,
     bool                debug_synchronous)
 {
     // Invoke kernel to device reduction directly
-    cudaError_t error = cudaSuccess;
+    musaError_t error = musaSuccess;
     for (int i = 0; i < timing_iterations; ++i)
     {
         error = DeviceReduce::Max(d_temp_storage, temp_storage_bytes, d_in, d_out, num_items, stream, debug_synchronous);
@@ -238,11 +242,11 @@ cudaError_t Dispatch(
  */
 template <typename InputIteratorT, typename OutputIteratorT, typename OffsetIteratorT>
 CUB_RUNTIME_FUNCTION __forceinline__
-cudaError_t Dispatch(
+musaError_t Dispatch(
     Int2Type<CUB>       /*dispatch_to*/,
     int                 timing_iterations,
     size_t              */*d_temp_storage_bytes*/,
-    cudaError_t         */*d_cdp_error*/,
+    musaError_t         */*d_cdp_error*/,
 
     void*               d_temp_storage,
     size_t&             temp_storage_bytes,
@@ -252,11 +256,11 @@ cudaError_t Dispatch(
     int                 /*max_segments*/,
     OffsetIteratorT     /*d_segment_offsets*/,
     cub::ArgMin         /*reduction_op*/,
-    cudaStream_t        stream,
+    musaStream_t        stream,
     bool                debug_synchronous)
 {
     // Invoke kernel to device reduction directly
-    cudaError_t error = cudaSuccess;
+    musaError_t error = musaSuccess;
     for (int i = 0; i < timing_iterations; ++i)
     {
         error = DeviceReduce::ArgMin(d_temp_storage, temp_storage_bytes, d_in, d_out, num_items, stream, debug_synchronous);
@@ -270,11 +274,11 @@ cudaError_t Dispatch(
  */
 template <typename InputIteratorT, typename OutputIteratorT, typename OffsetIteratorT>
 CUB_RUNTIME_FUNCTION __forceinline__
-cudaError_t Dispatch(
+musaError_t Dispatch(
     Int2Type<CUB>       /*dispatch_to*/,
     int                 timing_iterations,
     size_t              */*d_temp_storage_bytes*/,
-    cudaError_t         */*d_cdp_error*/,
+    musaError_t         */*d_cdp_error*/,
 
     void*               d_temp_storage,
     size_t&             temp_storage_bytes,
@@ -284,11 +288,11 @@ cudaError_t Dispatch(
     int                 /*max_segments*/,
     OffsetIteratorT     /*d_segment_offsets*/,
     cub::ArgMax         /*reduction_op*/,
-    cudaStream_t        stream,
+    musaStream_t        stream,
     bool                debug_synchronous)
 {
     // Invoke kernel to device reduction directly
-    cudaError_t error = cudaSuccess;
+    musaError_t error = musaSuccess;
     for (int i = 0; i < timing_iterations; ++i)
     {
         error = DeviceReduce::ArgMax(d_temp_storage, temp_storage_bytes, d_in, d_out, num_items, stream, debug_synchronous);
@@ -307,11 +311,11 @@ cudaError_t Dispatch(
  */
 template <typename InputIteratorT, typename OutputIteratorT, typename OffsetIteratorT, typename ReductionOpT>
 CUB_RUNTIME_FUNCTION __forceinline__
-cudaError_t Dispatch(
+musaError_t Dispatch(
     Int2Type<CUB_SEGMENTED>       /*dispatch_to*/,
     int                 timing_iterations,
     size_t              */*d_temp_storage_bytes*/,
-    cudaError_t         */*d_cdp_error*/,
+    musaError_t         */*d_cdp_error*/,
 
     void*               d_temp_storage,
     size_t&             temp_storage_bytes,
@@ -321,7 +325,7 @@ cudaError_t Dispatch(
     int                 max_segments,
     OffsetIteratorT     d_segment_offsets,
     ReductionOpT        reduction_op,
-    cudaStream_t        stream,
+    musaStream_t        stream,
     bool                debug_synchronous)
 {
     // The input value type
@@ -336,7 +340,7 @@ cudaError_t Dispatch(
     OutputT identity = Traits<InputT>::Lowest(); // replace with std::numeric_limits<OutputT>::lowest() when C++ support is more prevalent
 
     // Invoke kernel to device reduction directly
-    cudaError_t error = cudaSuccess;
+    musaError_t error = musaSuccess;
     for (int i = 0; i < timing_iterations; ++i)
     {
         error = DeviceSegmentedReduce::Reduce(d_temp_storage, temp_storage_bytes,
@@ -351,11 +355,11 @@ cudaError_t Dispatch(
  */
 template <typename InputIteratorT, typename OutputIteratorT, typename OffsetIteratorT>
 CUB_RUNTIME_FUNCTION __forceinline__
-cudaError_t Dispatch(
+musaError_t Dispatch(
     Int2Type<CUB_SEGMENTED>       /*dispatch_to*/,
     int                 timing_iterations,
     size_t              */*d_temp_storage_bytes*/,
-    cudaError_t         */*d_cdp_error*/,
+    musaError_t         */*d_cdp_error*/,
 
     void*               d_temp_storage,
     size_t&             temp_storage_bytes,
@@ -365,11 +369,11 @@ cudaError_t Dispatch(
     int                 max_segments,
     OffsetIteratorT     d_segment_offsets,
     cub::Sum            /*reduction_op*/,
-    cudaStream_t        stream,
+    musaStream_t        stream,
     bool                debug_synchronous)
 {
     // Invoke kernel to device reduction directly
-    cudaError_t error = cudaSuccess;
+    musaError_t error = musaSuccess;
     for (int i = 0; i < timing_iterations; ++i)
     {
         error = DeviceSegmentedReduce::Sum(d_temp_storage, temp_storage_bytes,
@@ -384,11 +388,11 @@ cudaError_t Dispatch(
  */
 template <typename InputIteratorT, typename OutputIteratorT, typename OffsetIteratorT>
 CUB_RUNTIME_FUNCTION __forceinline__
-cudaError_t Dispatch(
+musaError_t Dispatch(
     Int2Type<CUB_SEGMENTED>       /*dispatch_to*/,
     int                 timing_iterations,
     size_t              */*d_temp_storage_bytes*/,
-    cudaError_t         */*d_cdp_error*/,
+    musaError_t         */*d_cdp_error*/,
 
     void*               d_temp_storage,
     size_t&             temp_storage_bytes,
@@ -398,11 +402,11 @@ cudaError_t Dispatch(
     int                 max_segments,
     OffsetIteratorT     d_segment_offsets,
     cub::Min            /*reduction_op*/,
-    cudaStream_t        stream,
+    musaStream_t        stream,
     bool                debug_synchronous)
 {
     // Invoke kernel to device reduction directly
-    cudaError_t error = cudaSuccess;
+    musaError_t error = musaSuccess;
     for (int i = 0; i < timing_iterations; ++i)
     {
         error = DeviceSegmentedReduce::Min(d_temp_storage, temp_storage_bytes,
@@ -417,11 +421,11 @@ cudaError_t Dispatch(
  */
 template <typename InputIteratorT, typename OutputIteratorT, typename OffsetIteratorT>
 CUB_RUNTIME_FUNCTION __forceinline__
-cudaError_t Dispatch(
+musaError_t Dispatch(
     Int2Type<CUB_SEGMENTED>       /*dispatch_to*/,
     int                 timing_iterations,
     size_t              */*d_temp_storage_bytes*/,
-    cudaError_t         */*d_cdp_error*/,
+    musaError_t         */*d_cdp_error*/,
 
     void*               d_temp_storage,
     size_t&             temp_storage_bytes,
@@ -431,11 +435,11 @@ cudaError_t Dispatch(
     int                 max_segments,
     OffsetIteratorT     d_segment_offsets,
     cub::Max            /*reduction_op*/,
-    cudaStream_t        stream,
+    musaStream_t        stream,
     bool                debug_synchronous)
 {
     // Invoke kernel to device reduction directly
-    cudaError_t error = cudaSuccess;
+    musaError_t error = musaSuccess;
     for (int i = 0; i < timing_iterations; ++i)
     {
         error = DeviceSegmentedReduce::Max(d_temp_storage, temp_storage_bytes,
@@ -450,11 +454,11 @@ cudaError_t Dispatch(
  */
 template <typename InputIteratorT, typename OutputIteratorT, typename OffsetIteratorT>
 CUB_RUNTIME_FUNCTION __forceinline__
-cudaError_t Dispatch(
+musaError_t Dispatch(
     Int2Type<CUB_SEGMENTED>       /*dispatch_to*/,
     int                 timing_iterations,
     size_t              */*d_temp_storage_bytes*/,
-    cudaError_t         */*d_cdp_error*/,
+    musaError_t         */*d_cdp_error*/,
 
     void*               d_temp_storage,
     size_t&             temp_storage_bytes,
@@ -464,11 +468,11 @@ cudaError_t Dispatch(
     int                 max_segments,
     OffsetIteratorT     d_segment_offsets,
     cub::ArgMin         /*reduction_op*/,
-    cudaStream_t        stream,
+    musaStream_t        stream,
     bool                debug_synchronous)
 {
     // Invoke kernel to device reduction directly
-    cudaError_t error = cudaSuccess;
+    musaError_t error = musaSuccess;
     for (int i = 0; i < timing_iterations; ++i)
     {
         error = DeviceSegmentedReduce::ArgMin(d_temp_storage, temp_storage_bytes,
@@ -483,11 +487,11 @@ cudaError_t Dispatch(
  */
 template <typename InputIteratorT, typename OutputIteratorT, typename OffsetIteratorT>
 CUB_RUNTIME_FUNCTION __forceinline__
-cudaError_t Dispatch(
+musaError_t Dispatch(
     Int2Type<CUB_SEGMENTED>       /*dispatch_to*/,
     int                 timing_iterations,
     size_t              */*d_temp_storage_bytes*/,
-    cudaError_t         */*d_cdp_error*/,
+    musaError_t         */*d_cdp_error*/,
 
     void*               d_temp_storage,
     size_t&             temp_storage_bytes,
@@ -497,11 +501,11 @@ cudaError_t Dispatch(
     int                 max_segments,
     OffsetIteratorT     d_segment_offsets,
     cub::ArgMax         /*reduction_op*/,
-    cudaStream_t        stream,
+    musaStream_t        stream,
     bool                debug_synchronous)
 {
     // Invoke kernel to device reduction directly
-    cudaError_t error = cudaSuccess;
+    musaError_t error = musaSuccess;
     for (int i = 0; i < timing_iterations; ++i)
     {
         error = DeviceSegmentedReduce::ArgMax(d_temp_storage, temp_storage_bytes,
@@ -520,11 +524,11 @@ cudaError_t Dispatch(
  * Dispatch to reduction entrypoint (min or max specialization)
  */
 template <typename InputIteratorT, typename OutputIteratorT, typename OffsetIteratorT, typename ReductionOpT>
-cudaError_t Dispatch(
+musaError_t Dispatch(
     Int2Type<THRUST>    /*dispatch_to*/,
     int                 timing_iterations,
     size_t              */*d_temp_storage_bytes*/,
-    cudaError_t         */*d_cdp_error*/,
+    musaError_t         */*d_cdp_error*/,
 
     void*               d_temp_storage,
     size_t&             temp_storage_bytes,
@@ -534,7 +538,7 @@ cudaError_t Dispatch(
     int                 /*max_segments*/,
     OffsetIteratorT     /*d_segment_offsets*/,
     ReductionOpT         reduction_op,
-    cudaStream_t        /*stream*/,
+    musaStream_t        /*stream*/,
     bool                /*debug_synchronous*/)
 {
     // The output value type
@@ -549,7 +553,7 @@ cudaError_t Dispatch(
     else
     {
         OutputT init;
-        CubDebugExit(cudaMemcpy(&init, d_in + 0, sizeof(OutputT), cudaMemcpyDeviceToHost));
+        CubDebugExit(musaMemcpy(&init, d_in + 0, sizeof(OutputT), musaMemcpyDeviceToHost));
 
         thrust::device_ptr<OutputT> d_in_wrapper(d_in);
         OutputT retval;
@@ -559,21 +563,21 @@ cudaError_t Dispatch(
         }
 
         if (!Equals<OutputIteratorT, DiscardOutputIterator<int> >::VALUE)
-            CubDebugExit(cudaMemcpy(d_out, &retval, sizeof(OutputT), cudaMemcpyHostToDevice));
+            CubDebugExit(musaMemcpy(d_out, &retval, sizeof(OutputT), musaMemcpyHostToDevice));
     }
 
-    return cudaSuccess;
+    return musaSuccess;
 }
 
 /**
  * Dispatch to reduction entrypoint (sum specialization)
  */
 template <typename InputIteratorT, typename OutputIteratorT, typename OffsetIteratorT>
-cudaError_t Dispatch(
+musaError_t Dispatch(
     Int2Type<THRUST>    /*dispatch_to*/,
     int                 timing_iterations,
     size_t              */*d_temp_storage_bytes*/,
-    cudaError_t         */*d_cdp_error*/,
+    musaError_t         */*d_cdp_error*/,
 
     void*               d_temp_storage,
     size_t&             temp_storage_bytes,
@@ -583,7 +587,7 @@ cudaError_t Dispatch(
     int                 /*max_segments*/,
     OffsetIteratorT     /*d_segment_offsets*/,
     Sum                 /*reduction_op*/,
-    cudaStream_t        /*stream*/,
+    musaStream_t        /*stream*/,
     bool                /*debug_synchronous*/)
 {
     // The output value type
@@ -605,10 +609,10 @@ cudaError_t Dispatch(
         }
 
         if (!Equals<OutputIteratorT, DiscardOutputIterator<int> >::VALUE)
-            CubDebugExit(cudaMemcpy(d_out, &retval, sizeof(OutputT), cudaMemcpyHostToDevice));
+            CubDebugExit(musaMemcpy(d_out, &retval, sizeof(OutputT), musaMemcpyHostToDevice));
     }
 
-    return cudaSuccess;
+    return musaSuccess;
 }
 
 
@@ -627,7 +631,7 @@ template <
 __global__ void CnpDispatchKernel(
     int                 timing_iterations,
     size_t              *d_temp_storage_bytes,
-    cudaError_t         *d_cdp_error,
+    musaError_t         *d_cdp_error,
 
     void*               d_temp_storage,
     size_t              temp_storage_bytes,
@@ -652,7 +656,7 @@ __global__ void CnpDispatchKernel(
     (void)d_segment_offsets;
     (void)reduction_op;
     (void)debug_synchronous;
-    *d_cdp_error = cudaErrorNotSupported;
+    *d_cdp_error = musaErrorNotSupported;
 #else
     *d_cdp_error = Dispatch(Int2Type<CUB>(), timing_iterations, d_temp_storage_bytes, d_cdp_error, d_temp_storage, temp_storage_bytes,
         d_in, d_out, num_items, max_segments, d_segment_offsets, reduction_op, 0, debug_synchronous);
@@ -666,11 +670,11 @@ __global__ void CnpDispatchKernel(
  */
 template <typename InputIteratorT, typename OutputIteratorT, typename OffsetIteratorT, typename ReductionOpT>
 CUB_RUNTIME_FUNCTION __forceinline__
-cudaError_t Dispatch(
+musaError_t Dispatch(
     Int2Type<CUB_CDP>       dispatch_to,
     int                 timing_iterations,
     size_t              *d_temp_storage_bytes,
-    cudaError_t         *d_cdp_error,
+    musaError_t         *d_cdp_error,
 
     void*               d_temp_storage,
     size_t&             temp_storage_bytes,
@@ -680,7 +684,7 @@ cudaError_t Dispatch(
     int                 max_segments,
     OffsetIteratorT     d_segment_offsets,
     ReductionOpT        reduction_op,
-    cudaStream_t        stream,
+    musaStream_t        stream,
     bool                debug_synchronous)
 {
     // Invoke kernel to invoke device-side dispatch
@@ -688,11 +692,11 @@ cudaError_t Dispatch(
         d_in, d_out, num_items, max_segments, d_segment_offsets, reduction_op, debug_synchronous);
 
     // Copy out temp_storage_bytes
-    CubDebugExit(cudaMemcpy(&temp_storage_bytes, d_temp_storage_bytes, sizeof(size_t) * 1, cudaMemcpyDeviceToHost));
+    CubDebugExit(musaMemcpy(&temp_storage_bytes, d_temp_storage_bytes, sizeof(size_t) * 1, musaMemcpyDeviceToHost));
 
     // Copy out error
-    cudaError_t retval;
-    CubDebugExit(cudaMemcpy(&retval, d_cdp_error, sizeof(cudaError_t) * 1, cudaMemcpyDeviceToHost));
+    musaError_t retval;
+    CubDebugExit(musaMemcpy(&retval, d_cdp_error, sizeof(musaError_t) * 1, musaMemcpyDeviceToHost));
     return retval;
 }
 
@@ -861,9 +865,9 @@ void Test(
 
     // Allocate CUB_CDP device arrays for temp storage size and error
     size_t          *d_temp_storage_bytes = NULL;
-    cudaError_t     *d_cdp_error = NULL;
+    musaError_t     *d_cdp_error = NULL;
     CubDebugExit(g_allocator.DeviceAllocate((void**)&d_temp_storage_bytes,  sizeof(size_t) * 1));
-    CubDebugExit(g_allocator.DeviceAllocate((void**)&d_cdp_error,           sizeof(cudaError_t) * 1));
+    CubDebugExit(g_allocator.DeviceAllocate((void**)&d_cdp_error,           sizeof(musaError_t) * 1));
 
     // Inquire temp device storage
     void            *d_temp_storage = NULL;
@@ -960,7 +964,7 @@ void SolveAndTest(
     // Run with output data
     OutputT *d_out = NULL;
     CubDebugExit(g_allocator.DeviceAllocate((void**)&d_out, sizeof(OutputT) * num_segments));
-    CubDebugExit(cudaMemset(d_out, 0, sizeof(OutputT) * num_segments));
+    CubDebugExit(musaMemset(d_out, 0, sizeof(OutputT) * num_segments));
     Test(Int2Type<BACKEND>(), d_in, d_out, num_items, num_segments, d_segment_offsets, reduction_op, h_reference);
 
     // Cleanup
@@ -998,8 +1002,8 @@ void TestProblem(
     InputT  *d_in                   = NULL;
     CubDebugExit(g_allocator.DeviceAllocate((void**)&d_in,              sizeof(InputT) * num_items));
     CubDebugExit(g_allocator.DeviceAllocate((void**)&d_segment_offsets, sizeof(OffsetT) * (num_segments + 1)));
-    CubDebugExit(cudaMemcpy(d_in,               h_in,                   sizeof(InputT) * num_items, cudaMemcpyHostToDevice));
-    CubDebugExit(cudaMemcpy(d_segment_offsets,  h_segment_offsets,      sizeof(OffsetT) * (num_segments + 1), cudaMemcpyHostToDevice));
+    CubDebugExit(musaMemcpy(d_in,               h_in,                   sizeof(InputT) * num_items, musaMemcpyHostToDevice));
+    CubDebugExit(musaMemcpy(d_segment_offsets,  h_segment_offsets,      sizeof(OffsetT) * (num_segments + 1), musaMemcpyHostToDevice));
 
     SolveAndTest<BACKEND, OutputT>(h_in, d_in, num_items, num_segments, h_segment_offsets, d_segment_offsets, reduction_op);
 
@@ -1058,7 +1062,7 @@ void TestByBackend(
     OffsetT *d_segment_offsets  = NULL;
     CubDebugExit(g_allocator.DeviceAllocate((void**)&d_in, sizeof(InputT) * num_items));
     CubDebugExit(g_allocator.DeviceAllocate((void**)&d_segment_offsets, sizeof(OffsetT) * (max_segments + 1)));
-    CubDebugExit(cudaMemcpy(d_in, h_in, sizeof(InputT) * num_items, cudaMemcpyHostToDevice));
+    CubDebugExit(musaMemcpy(d_in, h_in, sizeof(InputT) * num_items, musaMemcpyHostToDevice));
 
     //
     // Test single-segment implementations
@@ -1092,7 +1096,7 @@ void TestByBackend(
     {
         // Test with segment pointer
         InitializeSegments(num_items, num_segments, h_segment_offsets, g_verbose_input);
-        CubDebugExit(cudaMemcpy(d_segment_offsets, h_segment_offsets, sizeof(OffsetT) * (num_segments + 1), cudaMemcpyHostToDevice));
+        CubDebugExit(musaMemcpy(d_segment_offsets, h_segment_offsets, sizeof(OffsetT) * (num_segments + 1), musaMemcpyHostToDevice));
         TestByOp<CUB_SEGMENTED, OutputT>(
             h_in, d_in, num_items, num_segments, h_segment_offsets, d_segment_offsets);
 
@@ -1170,7 +1174,7 @@ struct TestBySize
     {}
 
     template <typename ActivePolicyT>
-    cudaError_t Invoke()
+    musaError_t Invoke()
     {
         //
         // Black-box testing on all backends
@@ -1207,7 +1211,7 @@ struct TestBySize
         TestProblem<CUB, InputT, OutputT>(occupancy + 1, 1,   RANDOM, Sum());
         TestProblem<CUB, InputT, OutputT>(occupancy - 1, 1,   RANDOM, Sum());
 
-        return cudaSuccess;
+        return musaSuccess;
     }
 };
 

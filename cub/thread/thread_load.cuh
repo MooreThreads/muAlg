@@ -1,3 +1,7 @@
+/****************************************************************************
+* This library contains code from cub, cub is licensed under the license below.
+* Some files of cub may have been modified by Moore Threads Technology Co., Ltd
+******************************************************************************/
 /******************************************************************************
  * Copyright (c) 2011, Duane Merrill.  All rights reserved.
  * Copyright (c) 2011-2018, NVIDIA CORPORATION.  All rights reserved.
@@ -153,24 +157,28 @@ struct IterateThreadLoad<MAX, MAX>
     template<>                                                                              \
     __device__ __forceinline__ uint4 ThreadLoad<cub_modifier, uint4 const *>(uint4 const *ptr)                   \
     {                                                                                       \
-        uint4 retval;                                                                       \
+      /*  uint4 retval;                                                                       \
         asm volatile ("ld."#ptx_modifier".v4.u32 {%0, %1, %2, %3}, [%4];" :                 \
             "=r"(retval.x),                                                                 \
             "=r"(retval.y),                                                                 \
             "=r"(retval.z),                                                                 \
             "=r"(retval.w) :                                                                \
             _CUB_ASM_PTR_(ptr));                                                            \
-        return retval;                                                                      \
+        return retval;  */                                                                  \
+        uint4 *vol_ptr = const_cast<uint4 *>(ptr);                                          \
+        return *vol_ptr;                                                                    \
     }                                                                                       \
     template<>                                                                              \
     __device__ __forceinline__ ulonglong2 ThreadLoad<cub_modifier, ulonglong2 const *>(ulonglong2 const *ptr)    \
     {                                                                                       \
-        ulonglong2 retval;                                                                  \
+      /*  ulonglong2 retval;                                                                  \
         asm volatile ("ld."#ptx_modifier".v2.u64 {%0, %1}, [%2];" :                         \
             "=l"(retval.x),                                                                 \
             "=l"(retval.y) :                                                                \
             _CUB_ASM_PTR_(ptr));                                                            \
-        return retval;                                                                      \
+        return retval;  */                                                                  \
+        ulonglong2 *vol_ptr = const_cast<ulonglong2 *>(ptr);                                \
+        return *vol_ptr;                                                                    \
     }
 
 /**
@@ -180,33 +188,39 @@ struct IterateThreadLoad<MAX, MAX>
     template<>                                                                              \
     __device__ __forceinline__ ushort4 ThreadLoad<cub_modifier, ushort4 const *>(ushort4 const *ptr)             \
     {                                                                                       \
-        ushort4 retval;                                                                     \
+      /*  ushort4 retval;                                                                     \
         asm volatile ("ld."#ptx_modifier".v4.u16 {%0, %1, %2, %3}, [%4];" :                 \
             "=h"(retval.x),                                                                 \
             "=h"(retval.y),                                                                 \
             "=h"(retval.z),                                                                 \
             "=h"(retval.w) :                                                                \
             _CUB_ASM_PTR_(ptr));                                                            \
-        return retval;                                                                      \
+        return retval;  */                                                                  \
+        ushort4 *vol_ptr =const_cast<ushort4 *>(ptr);                                      \
+        return *vol_ptr;                                                                    \
     }                                                                                       \
     template<>                                                                              \
     __device__ __forceinline__ uint2 ThreadLoad<cub_modifier, uint2 const *>(uint2 const *ptr)                   \
     {                                                                                       \
-        uint2 retval;                                                                       \
+      /*  uint2 retval;                                                                       \
         asm volatile ("ld."#ptx_modifier".v2.u32 {%0, %1}, [%2];" :                         \
             "=r"(retval.x),                                                                 \
             "=r"(retval.y) :                                                                \
             _CUB_ASM_PTR_(ptr));                                                            \
-        return retval;                                                                      \
+        return retval;  */                                                                  \
+        uint2 *vol_ptr = const_cast<uint2 *>(ptr);                                          \
+        return *vol_ptr;                                                                    \
     }                                                                                       \
     template<>                                                                              \
     __device__ __forceinline__ unsigned long long ThreadLoad<cub_modifier, unsigned long long const *>(unsigned long long const *ptr)    \
     {                                                                                       \
-        unsigned long long retval;                                                          \
+      /*  unsigned long long retval;                                                          \
         asm volatile ("ld."#ptx_modifier".u64 %0, [%1];" :                                  \
             "=l"(retval) :                                                                  \
             _CUB_ASM_PTR_(ptr));                                                            \
-        return retval;                                                                      \
+        return retval;  */                                                                  \
+        volatile unsigned long long *vol_ptr = const_cast<unsigned long long *>(ptr);       \
+        return *vol_ptr;                                                                    \
     }
 
 /**
@@ -216,11 +230,13 @@ struct IterateThreadLoad<MAX, MAX>
     template<>                                                                              \
     __device__ __forceinline__ unsigned int ThreadLoad<cub_modifier, unsigned int const *>(unsigned int const *ptr)                      \
     {                                                                                       \
-        unsigned int retval;                                                                \
+      /*  unsigned int retval;                                                                \
         asm volatile ("ld."#ptx_modifier".u32 %0, [%1];" :                                  \
             "=r"(retval) :                                                                  \
             _CUB_ASM_PTR_(ptr));                                                            \
-        return retval;                                                                      \
+        return retval;  */                                                                  \
+        volatile unsigned int *vol_ptr = const_cast<unsigned int *>(ptr);                   \
+        return *vol_ptr;                                                                    \
     }
 
 
@@ -231,11 +247,13 @@ struct IterateThreadLoad<MAX, MAX>
     template<>                                                                              \
     __device__ __forceinline__ unsigned short ThreadLoad<cub_modifier, unsigned short const *>(unsigned short const *ptr)                \
     {                                                                                       \
-        unsigned short retval;                                                              \
+      /*  unsigned short retval;                                                              \
         asm volatile ("ld."#ptx_modifier".u16 %0, [%1];" :                                  \
             "=h"(retval) :                                                                  \
             _CUB_ASM_PTR_(ptr));                                                            \
-        return retval;                                                                      \
+        return retval;  */                                                                  \
+        volatile unsigned short *vol_ptr = const_cast<unsigned short *>(ptr);               \
+        return *vol_ptr;                                                                    \
     }
 
 
@@ -246,7 +264,7 @@ struct IterateThreadLoad<MAX, MAX>
     template<>                                                                              \
     __device__ __forceinline__ unsigned char ThreadLoad<cub_modifier, unsigned char const *>(unsigned char const *ptr)                   \
     {                                                                                       \
-        unsigned short retval;                                                              \
+      /*  unsigned short retval;                                                              \
         asm volatile (                                                                      \
         "{"                                                                                 \
         "   .reg .u8 datum;"                                                                \
@@ -255,7 +273,9 @@ struct IterateThreadLoad<MAX, MAX>
         "}" :                                                                               \
             "=h"(retval) :                                                                  \
             _CUB_ASM_PTR_(ptr));                                                            \
-        return (unsigned char) retval;                                                      \
+        return (unsigned char) retval;  */                                                  \
+        volatile unsigned char *vol_ptr = const_cast<unsigned char *>(ptr);                 \
+        return *vol_ptr;                                                                    \
     }
 
 

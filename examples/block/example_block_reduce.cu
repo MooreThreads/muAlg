@@ -1,3 +1,7 @@
+/****************************************************************************
+* This library contains code from cub, cub is licensed under the license below.
+* Some files of cub may have been modified by Moore Threads Technology Co., Ltd
+******************************************************************************/
 /******************************************************************************
  * Copyright (c) 2011, Duane Merrill.  All rights reserved.
  * Copyright (c) 2011-2018, NVIDIA CORPORATION.  All rights reserved.
@@ -30,7 +34,7 @@
  * Simple demonstration of cub::BlockReduce
  *
  * To compile using the command line:
- *   nvcc -arch=sm_XX example_block_reduce.cu -I../.. -lcudart -O3
+ *   nvcc -arch=sm_XX example_block_reduce.mu -I../.. -lcudart -O3
  *
  ******************************************************************************/
 
@@ -152,9 +156,9 @@ void Test()
     int *d_in           = NULL;
     int *d_out          = NULL;
     clock_t *d_elapsed  = NULL;
-    cudaMalloc((void**)&d_in,          sizeof(int) * TILE_SIZE);
-    cudaMalloc((void**)&d_out,         sizeof(int) * 1);
-    cudaMalloc((void**)&d_elapsed,     sizeof(clock_t));
+    musaMalloc((void**)&d_in,          sizeof(int) * TILE_SIZE);
+    musaMalloc((void**)&d_out,         sizeof(int) * 1);
+    musaMalloc((void**)&d_elapsed,     sizeof(clock_t));
 
     // Display input problem data
     if (g_verbose)
@@ -170,7 +174,7 @@ void Test()
     CubDebugExit(MaxSmOccupancy(max_sm_occupancy, BlockSumKernel<BLOCK_THREADS, ITEMS_PER_THREAD, ALGORITHM>, BLOCK_THREADS));
 
     // Copy problem to device
-    cudaMemcpy(d_in, h_in, sizeof(int) * TILE_SIZE, cudaMemcpyHostToDevice);
+    musaMemcpy(d_in, h_in, sizeof(int) * TILE_SIZE, musaMemcpyHostToDevice);
 
     printf("BlockReduce algorithm %s on %d items (%d timing iterations, %d blocks, %d threads, %d items per thread, %d SM occupancy):\n",
         (ALGORITHM == BLOCK_REDUCE_RAKING) ? "BLOCK_REDUCE_RAKING" : "BLOCK_REDUCE_WARP_REDUCTIONS",
@@ -196,7 +200,7 @@ void Test()
     for (int i = 0; i < g_timing_iterations; ++i)
     {
         // Copy problem to device
-        cudaMemcpy(d_in, h_in, sizeof(int) * TILE_SIZE, cudaMemcpyHostToDevice);
+        musaMemcpy(d_in, h_in, sizeof(int) * TILE_SIZE, musaMemcpyHostToDevice);
 
         timer.Start();
 
@@ -211,14 +215,14 @@ void Test()
 
         // Copy clocks from device
         clock_t clocks;
-        CubDebugExit(cudaMemcpy(&clocks, d_elapsed, sizeof(clock_t), cudaMemcpyDeviceToHost));
+        CubDebugExit(musaMemcpy(&clocks, d_elapsed, sizeof(clock_t), musaMemcpyDeviceToHost));
         elapsed_clocks += clocks;
 
     }
 
     // Check for kernel errors and STDIO from the kernel, if any
-    CubDebugExit(cudaPeekAtLastError());
-    CubDebugExit(cudaDeviceSynchronize());
+    CubDebugExit(musaPeekAtLastError());
+    CubDebugExit(musaDeviceSynchronize());
 
     // Display timing results
     float avg_millis            = elapsed_millis / g_timing_iterations;
@@ -234,9 +238,9 @@ void Test()
     // Cleanup
     if (h_in) delete[] h_in;
     if (h_gpu) delete[] h_gpu;
-    if (d_in) cudaFree(d_in);
-    if (d_out) cudaFree(d_out);
-    if (d_elapsed) cudaFree(d_elapsed);
+    if (d_in) musaFree(d_in);
+    if (d_out) musaFree(d_out);
+    if (d_elapsed) musaFree(d_elapsed);
 }
 
 

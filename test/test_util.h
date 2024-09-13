@@ -1,3 +1,7 @@
+/****************************************************************************
+* This library contains code from cub, cub is licensed under the license below.
+* Some files of cub may have been modified by Moore Threads Technology Co., Ltd
+******************************************************************************/
 /******************************************************************************
  * Copyright (c) 2011, Duane Merrill.  All rights reserved.
  * Copyright (c) 2011-2018, NVIDIA CORPORATION.  All rights reserved.
@@ -97,7 +101,7 @@ struct CommandLineArgs
     std::vector<std::string>    keys;
     std::vector<std::string>    values;
     std::vector<std::string>    args;
-    cudaDeviceProp              deviceProp;
+    musaDeviceProp              deviceProp;
     float                       device_giga_bandwidth;
     std::size_t                 device_free_physmem;
     std::size_t                 device_total_physmem;
@@ -258,14 +262,14 @@ struct CommandLineArgs
     /**
      * Initialize device
      */
-    cudaError_t DeviceInit(int dev = -1)
+    musaError_t DeviceInit(int dev = -1)
     {
-        cudaError_t error = cudaSuccess;
+        musaError_t error = musaSuccess;
 
         do
         {
             int deviceCount;
-            error = CubDebug(cudaGetDeviceCount(&deviceCount));
+            error = CubDebug(musaGetDeviceCount(&deviceCount));
             if (error) break;
 
             if (deviceCount == 0) {
@@ -281,16 +285,16 @@ struct CommandLineArgs
                 dev = 0;
             }
 
-            error = CubDebug(cudaSetDevice(dev));
+            error = CubDebug(musaSetDevice(dev));
             if (error) break;
 
-            CubDebugExit(cudaMemGetInfo(&device_free_physmem, &device_total_physmem));
+            CubDebugExit(musaMemGetInfo(&device_free_physmem, &device_total_physmem));
 
             int ptx_version = 0;
             error = CubDebug(cub::PtxVersion(ptx_version));
             if (error) break;
 
-            error = CubDebug(cudaGetDeviceProperties(&deviceProp, dev));
+            error = CubDebug(musaGetDeviceProperties(&deviceProp, dev));
             if (error) break;
 
             if (deviceProp.major < 1) {
@@ -1424,7 +1428,7 @@ int CompareDeviceResults(
     T *h_data = (T*) malloc(num_items * sizeof(T));
 
     // Copy data back
-    cudaMemcpy(h_data, d_data, sizeof(T) * num_items, cudaMemcpyDeviceToHost);
+    musaMemcpy(h_data, d_data, sizeof(T) * num_items, musaMemcpyDeviceToHost);
 
     // Display data
     if (display_data)
@@ -1469,8 +1473,8 @@ int CompareDeviceDeviceResults(
     T *h_data = (T*) malloc(num_items * sizeof(T));
 
     // Copy data back
-    cudaMemcpy(h_reference, d_reference, sizeof(T) * num_items, cudaMemcpyDeviceToHost);
-    cudaMemcpy(h_data, d_data, sizeof(T) * num_items, cudaMemcpyDeviceToHost);
+    musaMemcpy(h_reference, d_reference, sizeof(T) * num_items, musaMemcpyDeviceToHost);
+    musaMemcpy(h_data, d_data, sizeof(T) * num_items, musaMemcpyDeviceToHost);
 
     // Display data
     if (display_data) {
@@ -1536,7 +1540,7 @@ void DisplayDeviceResults(
     T *h_data = (T*) malloc(num_items * sizeof(T));
 
     // Copy data back
-    cudaMemcpy(h_data, d_data, sizeof(T) * num_items, cudaMemcpyDeviceToHost);
+    musaMemcpy(h_data, d_data, sizeof(T) * num_items, musaMemcpyDeviceToHost);
 
     DisplayResults(h_data, num_items);
 
@@ -1645,36 +1649,36 @@ struct CpuTimer
 
 struct GpuTimer
 {
-    cudaEvent_t start;
-    cudaEvent_t stop;
+    musaEvent_t start;
+    musaEvent_t stop;
 
     GpuTimer()
     {
-        cudaEventCreate(&start);
-        cudaEventCreate(&stop);
+        musaEventCreate(&start);
+        musaEventCreate(&stop);
     }
 
     ~GpuTimer()
     {
-        cudaEventDestroy(start);
-        cudaEventDestroy(stop);
+        musaEventDestroy(start);
+        musaEventDestroy(stop);
     }
 
     void Start()
     {
-        cudaEventRecord(start, 0);
+        musaEventRecord(start, 0);
     }
 
     void Stop()
     {
-        cudaEventRecord(stop, 0);
+        musaEventRecord(stop, 0);
     }
 
     float ElapsedMillis()
     {
         float elapsed;
-        cudaEventSynchronize(stop);
-        cudaEventElapsedTime(&elapsed, start, stop);
+        musaEventSynchronize(stop);
+        musaEventElapsedTime(&elapsed, start, stop);
         return elapsed;
     }
 };

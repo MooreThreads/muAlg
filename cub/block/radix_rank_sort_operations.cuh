@@ -1,3 +1,7 @@
+/****************************************************************************
+* This library contains code from cub, cub is licensed under the license below.
+* Some files of cub may have been modified by Moore Threads Technology Co., Ltd
+******************************************************************************/
 /******************************************************************************
  * Copyright (c) 2011-2020, NVIDIA CORPORATION.  All rights reserved.
  *
@@ -121,7 +125,8 @@ struct BFEDigitExtractor : BaseDigitExtractor<KeyT>
 
     __device__ __forceinline__ uint32_t Digit(UnsignedBits key)
     {
-        return BFE(ProcessFloatMinusZero(key), bit_start, num_bits);
+      return BFE(this->ProcessFloatMinusZero(key),
+                 bit_start, num_bits);
     }
 };
 
@@ -140,7 +145,9 @@ struct ShiftDigitExtractor : BaseDigitExtractor<KeyT>
 
     __device__ __forceinline__ uint32_t Digit(UnsignedBits key)
     {
-        return uint32_t(ProcessFloatMinusZero(key) >> UnsignedBits(bit_start)) & mask;
+      return uint32_t(this->ProcessFloatMinusZero(key) >>
+                      UnsignedBits(bit_start)) &
+             mask;
     }
 };
 

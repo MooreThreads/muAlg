@@ -15,7 +15,7 @@ file(GLOB_RECURSE headers
 
 set(headertest_srcs)
 foreach (header IN LISTS headers)
-  set(headertest_src "headers/${header}.cu")
+  set(headertest_src "${CMAKE_BINARY_DIR}/headers/${header}.cu")
   configure_file("${CUB_SOURCE_DIR}/cmake/header_test.in" "${headertest_src}")
   list(APPEND headertest_srcs "${headertest_src}")
 endforeach()
@@ -24,7 +24,9 @@ foreach(cub_target IN LISTS CUB_TARGETS)
   cub_get_target_property(config_prefix ${cub_target} PREFIX)
 
   set(headertest_target ${config_prefix}.headers)
-  add_library(${headertest_target} OBJECT ${headertest_srcs})
+  set(MUSA_LINK_LIBRARIES_KEYWORD PUBLIC)
+  musa_add_library(${headertest_target} ${headertest_srcs})
+  set(MUSA_LINK_LIBRARIES_KEYWORD)
   target_link_libraries(${headertest_target} PUBLIC ${cub_target})
   cub_clone_target_properties(${headertest_target} ${cub_target})
 

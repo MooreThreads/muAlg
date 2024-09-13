@@ -1,3 +1,7 @@
+/****************************************************************************
+* This library contains code from cub, cub is licensed under the license below.
+* Some files of cub may have been modified by Moore Threads Technology Co., Ltd
+******************************************************************************/
 /******************************************************************************
  * Copyright (c) 2011, Duane Merrill.  All rights reserved.
  * Copyright (c) 2011-2018, NVIDIA CORPORATION.  All rights reserved.
@@ -475,7 +479,7 @@ struct BlockScanRaking
                 T exclusive_partial, block_aggregate;
                 warp_scan.ExclusiveScan(upsweep_partial, exclusive_partial, scan_op, block_aggregate);
 
-                // Obtain block-wide prefix in lane0, then broadcast to other lanes
+                 // Obtain block-wide prefix in lane0, then broadcast to other lanes
                 T block_prefix = block_prefix_callback_op(block_aggregate);
                 block_prefix = warp_scan.Broadcast(block_prefix, 0);
 

@@ -1,3 +1,7 @@
+/****************************************************************************
+* This library contains code from cub, cub is licensed under the license below.
+* Some files of cub may have been modified by Moore Threads Technology Co., Ltd
+******************************************************************************/
 /******************************************************************************
  * Copyright (c) 2011, Duane Merrill.  All rights reserved.
  * Copyright (c) 2011-2018, NVIDIA CORPORATION.  All rights reserved.
@@ -164,8 +168,8 @@ void Test(
     CubDebugExit(g_allocator.DeviceAllocate((void**)&d_histogram,   sizeof(int) * BINS));
 
     // Initialize/clear device arrays
-    CubDebugExit(cudaMemcpy(d_samples, h_samples, sizeof(SampleT) * num_samples, cudaMemcpyHostToDevice));
-    CubDebugExit(cudaMemset(d_histogram, 0, sizeof(int) * BINS));
+    CubDebugExit(musaMemcpy(d_samples, h_samples, sizeof(SampleT) * num_samples, musaMemcpyHostToDevice));
+    CubDebugExit(musaMemset(d_histogram, 0, sizeof(int) * BINS));
 
     // Run kernel
     BlockHistogramKernel<BINS, BLOCK_THREADS, ITEMS_PER_THREAD, ALGORITHM><<<1, BLOCK_THREADS>>>(
@@ -177,8 +181,8 @@ void Test(
     printf("\t%s\n\n", compare ? "FAIL" : "PASS");
 
     // Flush any stdout/stderr
-    CubDebugExit(cudaPeekAtLastError());
-    CubDebugExit(cudaDeviceSynchronize());
+    CubDebugExit(musaPeekAtLastError());
+    CubDebugExit(musaDeviceSynchronize());
     fflush(stdout);
     fflush(stderr);
 

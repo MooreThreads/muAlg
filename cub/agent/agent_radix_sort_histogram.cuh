@@ -1,3 +1,7 @@
+/****************************************************************************
+* This library contains code from cub, cub is licensed under the license below.
+* Some files of cub may have been modified by Moore Threads Technology Co., Ltd
+******************************************************************************/
 /******************************************************************************
  * Copyright (c) 2011-2020, NVIDIA CORPORATION.  All rights reserved.
  *
@@ -192,7 +196,7 @@ struct AgentRadixSortHistogram
             for (int u = 0; u < ITEMS_PER_THREAD; ++u)
             {
                 int bin = digit_extractor.Digit(keys[u]);
-                // Using cuda::atomic<> results in lower performance on GP100,
+                // Using musa::atomic<> results in lower performance on GP100,
                 // so atomicAdd() is used instead.
                 atomicAdd(&s.bins[pass][bin][part], 1);
             }
@@ -210,11 +214,11 @@ struct AgentRadixSortHistogram
                 OffsetT count = internal::ThreadReduce(s.bins[pass][bin], Sum());
                 if (count > 0)
                 {
-                    // Using cuda::atomic<> here would also require using it in
+                    // Using musa::atomic<> here would also require using it in
                     // other kernels. However, other kernels of onesweep sorting
                     // (ExclusiveSum, Onesweep) don't need atomic
                     // access. Therefore, atomicAdd() is used, until
-                    // cuda::atomic_ref<> becomes available.
+                    // musa::atomic_ref<> becomes available.
                     atomicAdd(&d_bins_out[pass * RADIX_DIGITS + bin], count);
                 }
             }

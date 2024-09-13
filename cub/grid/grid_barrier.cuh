@@ -1,3 +1,7 @@
+/****************************************************************************
+* This library contains code from cub, cub is licensed under the license below.
+* Some files of cub may have been modified by Moore Threads Technology Co., Ltd
+******************************************************************************/
 /******************************************************************************
  * Copyright (c) 2011, Duane Merrill.  All rights reserved.
  * Copyright (c) 2011-2018, NVIDIA CORPORATION.  All rights reserved.
@@ -153,12 +157,12 @@ public:
     /**
      * DeviceFrees and resets the progress counters
      */
-    cudaError_t HostReset()
+    musaError_t HostReset()
     {
-        cudaError_t retval = cudaSuccess;
+        musaError_t retval = musaSuccess;
         if (d_sync)
         {
-            CubDebug(retval = cudaFree(d_sync));
+            CubDebug(retval = musaFree(d_sync));
             d_sync = NULL;
         }
         sync_bytes = 0;
@@ -179,23 +183,23 @@ public:
      * Sets up the progress counters for the next kernel launch (lazily
      * allocating and initializing them if necessary)
      */
-    cudaError_t Setup(int sweep_grid_size)
+    musaError_t Setup(int sweep_grid_size)
     {
-        cudaError_t retval = cudaSuccess;
+        musaError_t retval = musaSuccess;
         do {
             size_t new_sync_bytes = sweep_grid_size * sizeof(SyncFlag);
             if (new_sync_bytes > sync_bytes)
             {
                 if (d_sync)
                 {
-                    if (CubDebug(retval = cudaFree(d_sync))) break;
+                    if (CubDebug(retval = musaFree(d_sync))) break;
                 }
 
                 sync_bytes = new_sync_bytes;
 
                 // Allocate and initialize to zero
-                if (CubDebug(retval = cudaMalloc((void**) &d_sync, sync_bytes))) break;
-                if (CubDebug(retval = cudaMemset(d_sync, 0, new_sync_bytes))) break;
+                if (CubDebug(retval = musaMalloc((void**) &d_sync, sync_bytes))) break;
+                if (CubDebug(retval = musaMemset(d_sync, 0, new_sync_bytes))) break;
             }
         } while (0);
 

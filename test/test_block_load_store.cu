@@ -1,3 +1,7 @@
+/****************************************************************************
+* This library contains code from cub, cub is licensed under the license below.
+* Some files of cub may have been modified by Moore Threads Technology Co., Ltd
+******************************************************************************/
 /******************************************************************************
  * Copyright (c) 2011, Duane Merrill.  All rights reserved.
  * Copyright (c) 2011-2018, NVIDIA CORPORATION.  All rights reserved.
@@ -187,8 +191,8 @@ void TestKernel(
             d_out_guarded_itr,
             guarded_elements);
 
-    CubDebugExit(cudaPeekAtLastError());
-    CubDebugExit(cudaDeviceSynchronize());
+    CubDebugExit(musaPeekAtLastError());
+    CubDebugExit(musaDeviceSynchronize());
 
     // Check results
     compare = CompareDeviceResults(h_in, d_out_guarded_ptr, guarded_elements, g_verbose, g_verbose);
@@ -229,15 +233,15 @@ void TestNative(
     CubDebugExit(g_allocator.DeviceAllocate((void**)&d_in, sizeof(T) * unguarded_elements));
     CubDebugExit(g_allocator.DeviceAllocate((void**)&d_out_unguarded, sizeof(T) * unguarded_elements));
     CubDebugExit(g_allocator.DeviceAllocate((void**)&d_out_guarded, sizeof(T) * guarded_elements));
-    CubDebugExit(cudaMemset(d_out_unguarded, 0, sizeof(T) * unguarded_elements));
-    CubDebugExit(cudaMemset(d_out_guarded, 0, sizeof(T) * guarded_elements));
+    CubDebugExit(musaMemset(d_out_unguarded, 0, sizeof(T) * unguarded_elements));
+    CubDebugExit(musaMemset(d_out_guarded, 0, sizeof(T) * guarded_elements));
 
     // Initialize problem on host and device
     for (int i = 0; i < unguarded_elements; ++i)
     {
         InitValue(INTEGER_SEED, h_in[i], i);
     }
-    CubDebugExit(cudaMemcpy(d_in, h_in, sizeof(T) * unguarded_elements, cudaMemcpyHostToDevice));
+    CubDebugExit(musaMemcpy(d_in, h_in, sizeof(T) * unguarded_elements, musaMemcpyHostToDevice));
 
     printf("TestNative "
         "grid_size(%d) "
@@ -313,15 +317,15 @@ void TestIterator(
     CubDebugExit(g_allocator.DeviceAllocate((void**)&d_in, sizeof(T) * unguarded_elements));
     CubDebugExit(g_allocator.DeviceAllocate((void**)&d_out_unguarded, sizeof(T) * unguarded_elements));
     CubDebugExit(g_allocator.DeviceAllocate((void**)&d_out_guarded, sizeof(T) * guarded_elements));
-    CubDebugExit(cudaMemset(d_out_unguarded, 0, sizeof(T) * unguarded_elements));
-    CubDebugExit(cudaMemset(d_out_guarded, 0, sizeof(T) * guarded_elements));
+    CubDebugExit(musaMemset(d_out_unguarded, 0, sizeof(T) * unguarded_elements));
+    CubDebugExit(musaMemset(d_out_guarded, 0, sizeof(T) * guarded_elements));
 
     // Initialize problem on host and device
     for (int i = 0; i < unguarded_elements; ++i)
     {
         InitValue(INTEGER_SEED, h_in[i], i);
     }
-    CubDebugExit(cudaMemcpy(d_in, h_in, sizeof(T) * unguarded_elements, cudaMemcpyHostToDevice));
+    CubDebugExit(musaMemcpy(d_in, h_in, sizeof(T) * unguarded_elements, musaMemcpyHostToDevice));
 
     printf("TestIterator "
         "grid_size(%d) "
@@ -393,8 +397,8 @@ void TestPointerType(
     static const bool sufficient_store_smem = sizeof(typename BlockStore::TempStorage)  <= 1024 * 16;
     static const bool sufficient_threads    = BLOCK_THREADS <= 512;
 #else
-    static const bool sufficient_load_smem  = sizeof(typename BlockLoad::TempStorage)   <= 1024 * 48;
-    static const bool sufficient_store_smem = sizeof(typename BlockStore::TempStorage)  <= 1024 * 48;
+    static const bool sufficient_load_smem  = sizeof(typename BlockLoad::TempStorage)   <= 1024 * 16;
+    static const bool sufficient_store_smem = sizeof(typename BlockStore::TempStorage)  <= 1024 * 16;
     static const bool sufficient_threads    = BLOCK_THREADS <= 1024;
 #endif
 

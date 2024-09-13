@@ -1,3 +1,7 @@
+/****************************************************************************
+* This library contains code from cub, cub is licensed under the license below.
+* Some files of cub may have been modified by Moore Threads Technology Co., Ltd
+******************************************************************************/
 /******************************************************************************
  * Copyright (c) 2011, Duane Merrill.  All rights reserved.
  * Copyright (c) 2011-2018, NVIDIA CORPORATION.  All rights reserved.
@@ -69,7 +73,7 @@ __global__ void Kernel(
  */
 int main(int argc, char** argv)
 {
-    cudaError_t retval = cudaSuccess;
+    musaError_t retval = musaSuccess;
 
     // Defaults
     int iterations = 10000;
@@ -101,7 +105,7 @@ int main(int argc, char** argv)
 
     // Get device ordinal
     int device_ordinal;
-    CubDebugExit(cudaGetDevice(&device_ordinal));
+    CubDebugExit(musaGetDevice(&device_ordinal));
 
     // Get device SM version
     int sm_version = 0;
@@ -109,8 +113,8 @@ int main(int argc, char** argv)
 
     // Get SM properties
     int sm_count, max_block_threads, max_sm_occupancy;
-    CubDebugExit(cudaDeviceGetAttribute(&sm_count, cudaDevAttrMultiProcessorCount, device_ordinal));
-    CubDebugExit(cudaDeviceGetAttribute(&max_block_threads, cudaDevAttrMaxThreadsPerBlock, device_ordinal));
+    CubDebugExit(musaDeviceGetAttribute(&sm_count, musaDevAttrMultiProcessorCount, device_ordinal));
+    CubDebugExit(musaDeviceGetAttribute(&max_block_threads, musaDevAttrMaxThreadsPerBlock, device_ordinal));
     CubDebugExit(MaxSmOccupancy(max_sm_occupancy, EmptyKernel<void>, 32));
 
     // Compute grid size and occupancy
@@ -139,7 +143,7 @@ int main(int argc, char** argv)
     Kernel<<<grid_size, block_size>>>(global_barrier, iterations);
     gpu_timer.Stop();
 
-    retval = CubDebug(cudaDeviceSynchronize());
+    retval = CubDebug(musaDeviceSynchronize());
 
     // Output timing results
     float avg_elapsed = gpu_timer.ElapsedMillis() / float(iterations);

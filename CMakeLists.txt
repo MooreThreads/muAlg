@@ -8,8 +8,11 @@ if (CMAKE_VERSION VERSION_GREATER_EQUAL 3.18)
   cmake_policy(SET CMP0104 OLD)
 endif()
 
+set( CMAKE_INSTALL_PREFIX "/usr/local/musa" CACHE PATH
+    "Install path prefix, prepended onto install directories" )
+set ( VERSION_STRING "1.12.1" )
 # CXX is only needed for AppendOptionIfAvailable.
-project(CUB NONE)
+project(CUB VERSION ${VERSION_STRING})
 
 # Determine whether CUB is the top-level project or included into
 # another project via add_subdirectory().
@@ -21,6 +24,8 @@ endif()
 
 # This must be done before any languages are enabled:
 if (CUB_TOPLEVEL_PROJECT)
+  include(./module_version/generate_version_query.cmake)
+  add_version_query(${VERSION_STRING})
   include(cmake/CubCompilerHacks.cmake)
 endif()
 
@@ -75,7 +80,7 @@ endif()
 include(cmake/AppendOptionIfAvailable.cmake)
 include(cmake/CubBuildCompilerTargets.cmake)
 include(cmake/CubBuildTargetList.cmake)
-include(cmake/CubCudaConfig.cmake)
+include(cmake/CubMusaConfig.cmake)
 include(cmake/CubUtilities.cmake)
 
 if ("" STREQUAL "${CMAKE_BUILD_TYPE}")

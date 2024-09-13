@@ -1,3 +1,7 @@
+/****************************************************************************
+* This library contains code from cub, cub is licensed under the license below.
+* Some files of cub may have been modified by Moore Threads Technology Co., Ltd
+******************************************************************************/
 /******************************************************************************
  * Copyright (c) 2011, Duane Merrill.  All rights reserved.
  * Copyright (c) 2011-2018, NVIDIA CORPORATION.  All rights reserved.
@@ -493,8 +497,8 @@ void TestReduce(
     CubDebugExit(g_allocator.DeviceAllocate((void**)&d_in, sizeof(T) * BLOCK_THREADS));
     CubDebugExit(g_allocator.DeviceAllocate((void**)&d_out, sizeof(T) * BLOCK_THREADS));
     CubDebugExit(g_allocator.DeviceAllocate((void**)&d_elapsed, sizeof(clock_t)));
-    CubDebugExit(cudaMemcpy(d_in, h_in, sizeof(T) * BLOCK_THREADS, cudaMemcpyHostToDevice));
-    CubDebugExit(cudaMemset(d_out, 0, sizeof(T) * BLOCK_THREADS));
+    CubDebugExit(musaMemcpy(d_in, h_in, sizeof(T) * BLOCK_THREADS, musaMemcpyHostToDevice));
+    CubDebugExit(musaMemset(d_out, 0, sizeof(T) * BLOCK_THREADS));
 
     if (g_verbose)
     {
@@ -533,8 +537,8 @@ void TestReduce(
             valid_warp_threads);
     }
 
-    CubDebugExit(cudaPeekAtLastError());
-    CubDebugExit(cudaDeviceSynchronize());
+    CubDebugExit(musaPeekAtLastError());
+    CubDebugExit(musaDeviceSynchronize());
 
     // Copy out and display results
     printf("\tReduction results: ");
@@ -592,10 +596,10 @@ void TestSegmentedReduce(
     CubDebugExit(g_allocator.DeviceAllocate((void**)&d_head_out, sizeof(T) * BLOCK_THREADS));
     CubDebugExit(g_allocator.DeviceAllocate((void**)&d_tail_out, sizeof(T) * BLOCK_THREADS));
     CubDebugExit(g_allocator.DeviceAllocate((void**)&d_elapsed, sizeof(clock_t)));
-    CubDebugExit(cudaMemcpy(d_in, h_in, sizeof(T) * BLOCK_THREADS, cudaMemcpyHostToDevice));
-    CubDebugExit(cudaMemcpy(d_flags, h_flags, sizeof(int) * BLOCK_THREADS, cudaMemcpyHostToDevice));
-    CubDebugExit(cudaMemset(d_head_out, 0, sizeof(T) * BLOCK_THREADS));
-    CubDebugExit(cudaMemset(d_tail_out, 0, sizeof(T) * BLOCK_THREADS));
+    CubDebugExit(musaMemcpy(d_in, h_in, sizeof(T) * BLOCK_THREADS, musaMemcpyHostToDevice));
+    CubDebugExit(musaMemcpy(d_flags, h_flags, sizeof(int) * BLOCK_THREADS, musaMemcpyHostToDevice));
+    CubDebugExit(musaMemset(d_head_out, 0, sizeof(T) * BLOCK_THREADS));
+    CubDebugExit(musaMemset(d_tail_out, 0, sizeof(T) * BLOCK_THREADS));
 
     if (g_verbose)
     {
@@ -625,8 +629,8 @@ void TestSegmentedReduce(
         reduction_op,
         d_elapsed);
 
-    CubDebugExit(cudaPeekAtLastError());
-    CubDebugExit(cudaDeviceSynchronize());
+    CubDebugExit(musaPeekAtLastError());
+    CubDebugExit(musaDeviceSynchronize());
 
     // Copy out and display results
     printf("\tHead-based segmented reduction results: ");
@@ -644,8 +648,8 @@ void TestSegmentedReduce(
         reduction_op,
         d_elapsed);
 
-    CubDebugExit(cudaPeekAtLastError());
-    CubDebugExit(cudaDeviceSynchronize());
+    CubDebugExit(musaPeekAtLastError());
+    CubDebugExit(musaDeviceSynchronize());
 
     // Copy out and display results
     printf("\tTail-based segmented reduction results: ");

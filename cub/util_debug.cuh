@@ -1,3 +1,7 @@
+/****************************************************************************
+* This library contains code from cub, cub is licensed under the license below.
+* Some files of cub may have been modified by Moore Threads Technology Co., Ltd
+******************************************************************************/
 /******************************************************************************
  * Copyright (c) 2011, Duane Merrill.  All rights reserved.
  * Copyright (c) 2011-2018, NVIDIA CORPORATION.  All rights reserved.
@@ -61,12 +65,12 @@ namespace cub {
 
 
 /**
- * \brief %If \p CUB_STDERR is defined and \p error is not \p cudaSuccess, the corresponding error message is printed to \p stderr (or \p stdout in device code) along with the supplied source context.
+ * \brief %If \p CUB_STDERR is defined and \p error is not \p musaSuccess, the corresponding error message is printed to \p stderr (or \p stdout in device code) along with the supplied source context.
  *
  * \return The CUDA error.
  */
-__host__ __device__ __forceinline__ cudaError_t Debug(
-    cudaError_t     error,
+__host__ __device__ __forceinline__ musaError_t Debug(
+    musaError_t     error,
     const char*     filename,
     int             line)
 {
@@ -76,7 +80,7 @@ __host__ __device__ __forceinline__ cudaError_t Debug(
 #ifdef CUB_RUNTIME_ENABLED
     // Clear the global CUDA error state which may have been set by the last
     // call. Otherwise, errors may "leak" to unrelated kernel launches.
-    cudaGetLastError();
+    musaGetLastError();
 #endif
 
 #ifdef CUB_STDERR
@@ -84,7 +88,7 @@ __host__ __device__ __forceinline__ cudaError_t Debug(
     {
         if (CUB_IS_HOST_CODE) {
             #if CUB_INCLUDE_HOST_CODE
-                fprintf(stderr, "CUDA error %d [%s, %d]: %s\n", error, filename, line, cudaGetErrorString(error));
+                fprintf(stderr, "CUDA error %d [%s, %d]: %s\n", error, filename, line, musaGetErrorString(error));
                 fflush(stderr);
             #endif
         } else {
@@ -102,7 +106,7 @@ __host__ __device__ __forceinline__ cudaError_t Debug(
  * \brief Debug macro
  */
 #ifndef CubDebug
-    #define CubDebug(e) cub::Debug((cudaError_t) (e), __FILE__, __LINE__)
+    #define CubDebug(e) cub::Debug((musaError_t) (e), __FILE__, __LINE__)
 #endif
 
 
@@ -110,7 +114,7 @@ __host__ __device__ __forceinline__ cudaError_t Debug(
  * \brief Debug macro with exit
  */
 #ifndef CubDebugExit
-    #define CubDebugExit(e) if (cub::Debug((cudaError_t) (e), __FILE__, __LINE__)) { exit(1); }
+    #define CubDebugExit(e) if (cub::Debug((musaError_t) (e), __FILE__, __LINE__)) { exit(1); }
 #endif
 
 
@@ -124,10 +128,10 @@ __host__ __device__ __forceinline__ cudaError_t Debug(
                      blockIdx.z, blockIdx.y, blockIdx.x, \
                      threadIdx.z, threadIdx.y, threadIdx.x, __VA_ARGS__) \
             : printf(format, __VA_ARGS__));
-    #elif !(defined(__clang__) && defined(__CUDA__))
+    #elif !(defined(__clang__) && defined(__MUSA__))
         #if (CUB_PTX_ARCH == 0)
             #define _CubLog(format, ...) printf(format,__VA_ARGS__);
-        #elif (CUB_PTX_ARCH >= 200)
+        #elif (CUB_PTX_ARCH > 0)
             #define _CubLog(format, ...) printf("[block (%d,%d,%d), thread (%d,%d,%d)]: " format, blockIdx.z, blockIdx.y, blockIdx.x, threadIdx.z, threadIdx.y, threadIdx.x, __VA_ARGS__);
         #endif
     #else
@@ -139,13 +143,13 @@ __host__ __device__ __forceinline__ cudaError_t Debug(
             template <class... Args>
             inline __host__ __device__ void va_printf(char const* format, Args const&... args)
             {
-        #ifdef __CUDA_ARCH__
+        #ifdef __MUSA_ARCH__
               printf(format, blockIdx.z, blockIdx.y, blockIdx.x, threadIdx.z, threadIdx.y, threadIdx.x, args...);
         #else
               printf(format, args...);
         #endif
             }
-        #ifndef __CUDA_ARCH__
+        #ifndef __MUSA_ARCH__
             #define _CubLog(format, ...) cub::va_printf(format,__VA_ARGS__);
         #else
             #define _CubLog(format, ...) cub::va_printf("[block (%d,%d,%d), thread (%d,%d,%d)]: " format, __VA_ARGS__);
