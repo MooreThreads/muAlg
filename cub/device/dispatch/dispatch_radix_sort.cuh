@@ -961,12 +961,12 @@ struct DeviceRadixSortPolicy
         typedef AgentScanPolicy <128, 4, OffsetT, BLOCK_LOAD_VECTORIZE, LOAD_DEFAULT, BLOCK_STORE_VECTORIZE, BLOCK_SCAN_WARP_SCANS> ScanPolicy;
 
         // Keys-only downsweep policies
-        typedef AgentRadixSortDownsweepPolicy <128, 4, DominantT, BLOCK_LOAD_DIRECT, LOAD_LDG, RADIX_RANK_MEMOIZE, BLOCK_SCAN_WARP_SCANS, PRIMARY_RADIX_BITS> DownsweepPolicyKeys;
-        typedef AgentRadixSortDownsweepPolicy <128, 4, DominantT, BLOCK_LOAD_DIRECT, LOAD_LDG, RADIX_RANK_MEMOIZE, BLOCK_SCAN_WARP_SCANS, PRIMARY_RADIX_BITS - 1> AltDownsweepPolicyKeys;
+        typedef AgentRadixSortDownsweepPolicy <128, 4, DominantT, BLOCK_LOAD_DIRECT, LOAD_DEFAULT, RADIX_RANK_MEMOIZE, BLOCK_SCAN_WARP_SCANS, PRIMARY_RADIX_BITS> DownsweepPolicyKeys;
+        typedef AgentRadixSortDownsweepPolicy <128, 4, DominantT, BLOCK_LOAD_DIRECT, LOAD_DEFAULT, RADIX_RANK_MEMOIZE, BLOCK_SCAN_WARP_SCANS, PRIMARY_RADIX_BITS - 1> AltDownsweepPolicyKeys;
 
         // Key-value pairs downsweep policies
         typedef DownsweepPolicyKeys DownsweepPolicyPairs;
-        typedef AgentRadixSortDownsweepPolicy <128, 4, DominantT, BLOCK_LOAD_DIRECT, LOAD_LDG, RADIX_RANK_MEMOIZE, BLOCK_SCAN_WARP_SCANS, PRIMARY_RADIX_BITS - 1> AltDownsweepPolicyPairs;
+        typedef AgentRadixSortDownsweepPolicy <128, 4, DominantT, BLOCK_LOAD_DIRECT, LOAD_DEFAULT, RADIX_RANK_MEMOIZE, BLOCK_SCAN_WARP_SCANS, PRIMARY_RADIX_BITS - 1> AltDownsweepPolicyPairs;
 
         // Downsweep policies
         typedef typename If<KEYS_ONLY, DownsweepPolicyKeys, DownsweepPolicyPairs>::Type DownsweepPolicy;
@@ -977,7 +977,7 @@ struct DeviceRadixSortPolicy
         typedef AltDownsweepPolicy AltUpsweepPolicy;
 
         // Single-tile policy
-        typedef AgentRadixSortDownsweepPolicy <128, 4, DominantT,  BLOCK_LOAD_DIRECT, LOAD_LDG, RADIX_RANK_BASIC, BLOCK_SCAN_WARP_SCANS, PRIMARY_RADIX_BITS> SingleTilePolicy;
+        typedef AgentRadixSortDownsweepPolicy <128, 4, DominantT,  BLOCK_LOAD_DIRECT, LOAD_DEFAULT, RADIX_RANK_BASIC, BLOCK_SCAN_WARP_SCANS, PRIMARY_RADIX_BITS> SingleTilePolicy;
 
         // Segmented policies
         typedef DownsweepPolicy     SegmentedPolicy;
