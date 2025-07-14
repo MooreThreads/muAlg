@@ -986,8 +986,57 @@ struct DeviceRadixSortPolicy
 
     };
 
+    /// MUSA mp_31
+    struct Policy310 : ChainedPolicy<310, Policy310, Policy210>
+    {
+        enum {
+            PRIMARY_RADIX_BITS      = 5,
+            ONESWEEP = false,
+            ONESWEEP_RADIX_BITS = 8,
+        };
+
+        // Histogram policy
+        typedef AgentRadixSortHistogramPolicy <256, 16, 1, KeyT, ONESWEEP_RADIX_BITS> HistogramPolicy;
+
+        // Exclusive sum policy
+        typedef AgentRadixSortExclusiveSumPolicy <256, ONESWEEP_RADIX_BITS> ExclusiveSumPolicy;
+
+        // Onesweep policy
+        typedef AgentRadixSortOnesweepPolicy <256, 16, DominantT, 1,
+            RADIX_RANK_MATCH_EARLY_COUNTS_ANY, BLOCK_SCAN_WARP_SCANS, RADIX_SORT_STORE_DIRECT,
+            ONESWEEP_RADIX_BITS> OnesweepPolicy;
+
+        // Scan policy
+        typedef AgentScanPolicy <256, 16, OffsetT, BLOCK_LOAD_VECTORIZE, LOAD_DEFAULT, BLOCK_STORE_VECTORIZE, BLOCK_SCAN_WARP_SCANS> ScanPolicy;
+
+        // Keys-only downsweep policies
+        typedef AgentRadixSortDownsweepPolicy <256, 16, DominantT, BLOCK_LOAD_DIRECT, LOAD_DEFAULT, RADIX_RANK_MEMOIZE, BLOCK_SCAN_WARP_SCANS, PRIMARY_RADIX_BITS> DownsweepPolicyKeys;
+        typedef AgentRadixSortDownsweepPolicy <256, 16, DominantT, BLOCK_LOAD_DIRECT, LOAD_DEFAULT, RADIX_RANK_MEMOIZE, BLOCK_SCAN_WARP_SCANS, PRIMARY_RADIX_BITS - 1> AltDownsweepPolicyKeys;
+
+        // Key-value pairs downsweep policies
+        typedef DownsweepPolicyKeys DownsweepPolicyPairs;
+        typedef AgentRadixSortDownsweepPolicy <256, 16, DominantT, BLOCK_LOAD_DIRECT, LOAD_DEFAULT, RADIX_RANK_MEMOIZE, BLOCK_SCAN_WARP_SCANS, PRIMARY_RADIX_BITS - 1> AltDownsweepPolicyPairs;
+
+        // Downsweep policies
+        typedef typename If<KEYS_ONLY, DownsweepPolicyKeys, DownsweepPolicyPairs>::Type DownsweepPolicy;
+        typedef typename If<KEYS_ONLY, AltDownsweepPolicyKeys, AltDownsweepPolicyPairs>::Type AltDownsweepPolicy;
+
+        // Upsweep policies
+        typedef DownsweepPolicy UpsweepPolicy;
+        typedef AltDownsweepPolicy AltUpsweepPolicy;
+
+        // Single-tile policy
+        typedef AgentRadixSortDownsweepPolicy <256, 16, DominantT,  BLOCK_LOAD_DIRECT, LOAD_DEFAULT, RADIX_RANK_BASIC, BLOCK_SCAN_WARP_SCANS, PRIMARY_RADIX_BITS> SingleTilePolicy;
+
+        // Segmented policies
+        typedef DownsweepPolicy     SegmentedPolicy;
+        typedef AltDownsweepPolicy  AltSegmentedPolicy;
+
+
+    };
+
     /// MaxPolicy
-    typedef Policy210 MaxPolicy;
+    typedef Policy310 MaxPolicy;
 
 
 };
