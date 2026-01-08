@@ -1,7 +1,3 @@
-/****************************************************************************
-* This library contains code from cub, cub is licensed under the license below.
-* Some files of cub may have been modified by Moore Threads Technology Co., Ltd
-******************************************************************************/
 /******************************************************************************
  * Copyright (c) 2011, Duane Merrill.  All rights reserved.
  * Copyright (c) 2011-2018, NVIDIA CORPORATION.  All rights reserved.
@@ -37,7 +33,7 @@
  * of int keys.
  *
  * To compile using the command line:
- *   nvcc -arch=sm_XX example_device_select_unique.mu -I../.. -lcudart -O3
+ *   nvcc -arch=sm_XX example_device_select_unique.cu -I../.. -lmusart -O3
  *
  ******************************************************************************/
 

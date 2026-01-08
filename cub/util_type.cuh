@@ -64,7 +64,31 @@ namespace cub {
  */
 
 
-
+ namespace detail
+ {
+ 
+ 
+ template <bool Test, class T1, class T2>
+ using conditional_t = typename std::conditional<Test, T1, T2>::type;
+ 
+ 
+ template <typename Iterator>
+ using value_t = typename std::iterator_traits<Iterator>::value_type;
+ 
+ 
+ /**
+  * The output value type
+  * type = (if IteratorT's value type is void) ?
+  * ... then the FallbackT,
+  * ... else the IteratorT's value type
+  */
+ template <typename IteratorT, typename FallbackT>
+ using non_void_value_t =
+   cub::detail::conditional_t<std::is_same<value_t<IteratorT>, void>::value,
+                              FallbackT,
+                              value_t<IteratorT>>;
+ 
+ } // namespace detail
 /******************************************************************************
  * Type equality
  ******************************************************************************/
@@ -281,6 +305,44 @@ struct Int2Type
    enum {VALUE = A};
 };
 
+/**
+ * \brief Allows algorithms that take a value as input to take a future value that is not computed yet at launch time.
+ *
+ * Note that it is user's responsibility to ensure that the result will be ready before use via external synchronization
+ * or stream-ordering dependencies.
+ *
+ * \code
+ * int *d_intermediate_result;
+ * allocator.DeviceAllocate((void **)&d_intermediate_result, sizeof(int));
+ * compute_intermediate_result<<<blocks, threads>>>(
+ *     d_intermediate_result,  // output
+ *     arg1,                   // input
+ *     arg2);                  // input
+ * cub::FutureValue<int> init_value(d_intermediate_result);
+ * cub::DeviceScan::ExclusiveScan(
+ *     d_temp_storage,
+ *     temp_storage_bytes,
+ *     d_in,
+ *     d_out,
+ *     cub::Sum(),
+ *     init_value,
+ *     num_items);
+ * allocator.DeviceFree(d_intermediate_result);
+ * \endcode
+ */
+template <typename T, typename IterT = T*>
+struct FutureValue
+{
+    using value_type = T;
+    using iterator_type = IterT;
+    explicit __host__ __device__ __forceinline__ FutureValue(IterT iter):m_iter(iter) {}
+    __host__ __device__ __forceinline__ operator T() {
+        return *m_iter;
+    }
+
+private:
+    IterT m_iter;
+};
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS    // Do not document
 

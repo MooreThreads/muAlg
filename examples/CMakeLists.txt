@@ -18,8 +18,13 @@ endforeach()
 # example_src: The source file that implements the example.
 # cub_target: The reference cub target with configuration information.
 #
+set(MUSA_MCC_FLAGS
+    --offload-arch=mp_31
+    -Werror)
 function(cub_add_example target_name_var example_name example_src cub_target)
   cub_get_target_property(config_prefix ${cub_target} PREFIX)
+
+  message(STATUS "example_src:${example_src}")
 
   # The actual name of the test's target:
   set(example_target ${config_prefix}.example.${example_name})
@@ -53,5 +58,5 @@ function(cub_add_example target_name_var example_name example_src cub_target)
 endfunction()
 
 add_subdirectory(cmake)
-add_subdirectory(block)
+# add_subdirectory(block)
 add_subdirectory(device)

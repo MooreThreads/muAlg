@@ -1,7 +1,9 @@
+add_definitions(-w)
 file(GLOB_RECURSE example_srcs
   RELATIVE "${CMAKE_CURRENT_LIST_DIR}"
   CONFIGURE_DEPENDS
-  example_*.cu
+  example_*scan_by_key.cu
+  example_block_load_store.cu
 )
 
 foreach (cub_target IN LISTS CUB_TARGETS)

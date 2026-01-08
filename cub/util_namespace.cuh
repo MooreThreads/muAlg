@@ -1,7 +1,7 @@
 /****************************************************************************
-* This library contains code from cub, cub is licensed under the license below.
-* Some files of cub may have been modified by Moore Threads Technology Co., Ltd
-******************************************************************************/
+ * This library contains code from cub, cub is licensed under the license below.
+ * Some files of cub may have been modified by Moore Threads Technology Co., Ltd
+ ******************************************************************************/
 /******************************************************************************
  * Copyright (c) 2011, Duane Merrill.  All rights reserved.
  * Copyright (c) 2011-2018, NVIDIA CORPORATION.  All rights reserved.
@@ -17,10 +17,10 @@
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
- * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
- * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- * DISCLAIMED. IN NO EVENT SHALL NVIDIA CORPORATION BE LIABLE FOR ANY
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL NVIDIA CORPORATION BE LIABLE FOR ANY
  * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
  * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
  * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
@@ -40,8 +40,8 @@
 #include "version.cuh"
 
 // For example:
-//#define CUB_NS_PREFIX namespace thrust{ namespace detail {
-//#define CUB_NS_POSTFIX } }
+// #define CUB_NS_PREFIX namespace thrust{ namespace detail {
+// #define CUB_NS_POSTFIX } }
 
 #ifndef CUB_NS_PREFIX
 #define CUB_NS_PREFIX
@@ -51,6 +51,18 @@
 #define CUB_NS_POSTFIX
 #endif
 
+/**
+ * \def CUB_NS_QUALIFIER
+ * This macro is used to qualify members of cub:: when accessing them from
+ * outside of their namespace. By default, this is just `::cub`, and will be
+ * set appropriately when CUB_WRAPPED_NAMESPACE is defined. This macro may be
+ * defined by users, in which case CUB_NS_PREFIX, CUB_NS_POSTFIX, and
+ * CUB_NS_QUALIFIER must all be set consistently.
+ */
+#ifndef CUB_NS_QUALIFIER
+#define CUB_NS_QUALIFIER ::cub
+#endif
+
 // Declare these namespaces here for the purpose of Doxygenating them
 CUB_NS_PREFIX
 
@@ -58,9 +70,6 @@ CUB_NS_PREFIX
  *  \brief \p cub is the top-level namespace which contains all CUB
  *         functions and types.
  */
-namespace cub
-{
-
-}
+namespace cub {}
 
 CUB_NS_POSTFIX

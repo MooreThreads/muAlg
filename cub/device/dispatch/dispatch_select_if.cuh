@@ -130,7 +130,8 @@ template <
     typename    SelectOpT,                      ///< Selection operator type (NullType if selection flags or discontinuity flagging is to be used for selection)
     typename    EqualityOpT,                    ///< Equality operator type (NullType if selection functor or selection flags is to be used for selection)
     typename    OffsetT,                        ///< Signed integer type for global offsets
-    bool        KEEP_REJECTS>                   ///< Whether or not we push rejected items to the back of the output
+    bool        KEEP_REJECTS,                   ///< Whether or not we push rejected items to the back of the output
+    bool        MayAlias = false> 
 struct DispatchSelectIf
 {
     /******************************************************************************
@@ -251,7 +252,7 @@ struct DispatchSelectIf
         typename                    SelectIfKernelPtrT>             ///< Function type of cub::SelectIfKernelPtrT
     CUB_RUNTIME_FUNCTION __forceinline__
     static musaError_t Dispatch(
-        void*                       d_temp_storage,                 ///< [in] %Device-accessible allocation of temporary storage.  When NULL, the required allocation size is written to \p temp_storage_bytes and no work is done.
+        void*                       d_temp_storage,                 ///< [in] Device-accessible allocation of temporary storage.  When NULL, the required allocation size is written to \p temp_storage_bytes and no work is done.
         size_t&                     temp_storage_bytes,             ///< [in,out] Reference to size in bytes of \p d_temp_storage allocation
         InputIteratorT              d_in,                           ///< [in] Pointer to the input sequence of data items
         FlagsInputIteratorT         d_flags,                        ///< [in] Pointer to the input sequence of selection flags (if applicable)
@@ -261,33 +262,11 @@ struct DispatchSelectIf
         EqualityOpT                 equality_op,                    ///< [in] Equality operator
         OffsetT                     num_items,                      ///< [in] Total number of input items (i.e., length of \p d_in)
         musaStream_t                stream,                         ///< [in] CUDA stream to launch kernels within.  Default is stream<sub>0</sub>.
-        bool                        debug_synchronous,              ///< [in] Whether or not to synchronize the stream after every kernel launch to check for errors.  Also causes launch configurations to be printed to the console.  Default is \p false.
         int                         /*ptx_version*/,                ///< [in] PTX version of dispatch kernels
         ScanInitKernelPtrT          scan_init_kernel,               ///< [in] Kernel function pointer to parameterization of cub::DeviceScanInitKernel
         SelectIfKernelPtrT          select_if_kernel,               ///< [in] Kernel function pointer to parameterization of cub::DeviceSelectSweepKernel
         KernelConfig                select_if_config)               ///< [in] Dispatch parameters that match the policy that \p select_if_kernel was compiled for
     {
-
-#ifndef CUB_RUNTIME_ENABLED
-        (void)d_temp_storage;
-        (void)temp_storage_bytes;
-        (void)d_in;
-        (void)d_flags;
-        (void)d_selected_out;
-        (void)d_num_selected_out;
-        (void)select_op;
-        (void)equality_op;
-        (void)num_items;
-        (void)stream;
-        (void)debug_synchronous;
-        (void)scan_init_kernel;
-        (void)select_if_kernel;
-        (void)select_if_config;
-
-        // Kernel launch not supported from this device
-        return CubDebug(musaErrorNotSupported);
-
-#else
 
         musaError error = musaSuccess;
         do
@@ -323,7 +302,7 @@ struct DispatchSelectIf
 
             // Log scan_init_kernel configuration
             int init_grid_size = CUB_MAX(1, cub::DivideAndRoundUp(num_tiles, INIT_KERNEL_THREADS));
-            if (debug_synchronous) _CubLog("Invoking scan_init_kernel<<<%d, %d, 0, %lld>>>()\n", init_grid_size, INIT_KERNEL_THREADS, (long long) stream);
+            // if (debug_synchronous) _CubLog("Invoking scan_init_kernel<<<%d, %d, 0, %lld>>>()\n", init_grid_size, INIT_KERNEL_THREADS, (long long) stream);
 
             // Invoke scan_init_kernel to initialize tile descriptors
             thrust::cuda_cub::launcher::triple_chevron(
@@ -337,7 +316,8 @@ struct DispatchSelectIf
             if (CubDebug(error = musaPeekAtLastError())) break;
 
             // Sync the stream if specified to flush runtime errors
-            if (debug_synchronous && (CubDebug(error = SyncStream(stream)))) break;
+            // if (debug_synchronous && (CubDebug(error = SyncStream(stream)))) break;
+            if ((CubDebug(error = SyncStream(stream)))) break;
 
             // Return if empty problem
             if (num_items == 0)
@@ -361,8 +341,8 @@ struct DispatchSelectIf
             scan_grid_size.x = CUB_MIN(num_tiles, max_dim_x);
 
             // Log select_if_kernel configuration
-            if (debug_synchronous) _CubLog("Invoking select_if_kernel<<<{%d,%d,%d}, %d, 0, %lld>>>(), %d items per thread, %d SM occupancy\n",
-                scan_grid_size.x, scan_grid_size.y, scan_grid_size.z, select_if_config.block_threads, (long long) stream, select_if_config.items_per_thread, range_select_sm_occupancy);
+            // if (debug_synchronous) _CubLog("Invoking select_if_kernel<<<{%d,%d,%d}, %d, 0, %lld>>>(), %d items per thread, %d SM occupancy\n",
+            //     scan_grid_size.x, scan_grid_size.y, scan_grid_size.z, select_if_config.block_threads, (long long) stream, select_if_config.items_per_thread, range_select_sm_occupancy);
 
             // Invoke select_if_kernel
             thrust::cuda_cub::launcher::triple_chevron(
@@ -382,22 +362,59 @@ struct DispatchSelectIf
             if (CubDebug(error = musaPeekAtLastError())) break;
 
             // Sync the stream if specified to flush runtime errors
-            if (debug_synchronous && (CubDebug(error = SyncStream(stream)))) break;
+            // if (debug_synchronous && (CubDebug(error = SyncStream(stream)))) break;
+            if ((CubDebug(error = SyncStream(stream)))) break;
+
         }
         while (0);
 
         return error;
-
-#endif  // CUB_RUNTIME_ENABLED
     }
 
+    template <typename ScanInitKernelPtrT, typename SelectIfKernelPtrT>
+    CUB_DETAIL_RUNTIME_DEBUG_SYNC_IS_NOT_SUPPORTED
+    CUB_RUNTIME_FUNCTION __forceinline__ static musaError_t
+    Dispatch(void *d_temp_storage,
+             size_t &temp_storage_bytes,
+             InputIteratorT d_in,
+             FlagsInputIteratorT d_flags,
+             SelectedOutputIteratorT d_selected_out,
+             NumSelectedIteratorT d_num_selected_out,
+             SelectOpT select_op,
+             EqualityOpT equality_op,
+             OffsetT num_items,
+             musaStream_t stream,
+             bool debug_synchronous,
+             int ptx_version,
+             ScanInitKernelPtrT scan_init_kernel,
+             SelectIfKernelPtrT select_if_kernel,
+             KernelConfig select_if_config)
+    {
+      CUB_DETAIL_RUNTIME_DEBUG_SYNC_USAGE_LOG
+
+      return Dispatch<ScanInitKernelPtrT, SelectIfKernelPtrT>(
+        d_temp_storage,
+        temp_storage_bytes,
+        d_in,
+        d_flags,
+        d_selected_out,
+        d_num_selected_out,
+        select_op,
+        equality_op,
+        num_items,
+        stream,
+        ptx_version,
+        scan_init_kernel,
+        select_if_kernel,
+        select_if_config);
+    }
 
     /**
      * Internal dispatch routine
      */
     CUB_RUNTIME_FUNCTION __forceinline__
     static musaError_t Dispatch(
-        void*                       d_temp_storage,                 ///< [in] %Device-accessible allocation of temporary storage.  When NULL, the required allocation size is written to \p temp_storage_bytes and no work is done.
+        void*                       d_temp_storage,                 ///< [in] Device-accessible allocation of temporary storage.  When NULL, the required allocation size is written to \p temp_storage_bytes and no work is done.
         size_t&                     temp_storage_bytes,             ///< [in,out] Reference to size in bytes of \p d_temp_storage allocation
         InputIteratorT              d_in,                           ///< [in] Pointer to the input sequence of data items
         FlagsInputIteratorT         d_flags,                        ///< [in] Pointer to the input sequence of selection flags (if applicable)
@@ -406,8 +423,7 @@ struct DispatchSelectIf
         SelectOpT                   select_op,                      ///< [in] Selection operator
         EqualityOpT                 equality_op,                    ///< [in] Equality operator
         OffsetT                     num_items,                      ///< [in] Total number of input items (i.e., length of \p d_in)
-        musaStream_t                stream,                         ///< [in] <b>[optional]</b> CUDA stream to launch kernels within.  Default is stream<sub>0</sub>.
-        bool                        debug_synchronous)              ///< [in] <b>[optional]</b> Whether or not to synchronize the stream after every kernel launch to check for errors.  Also causes launch configurations to be printed to the console.  Default is \p false.
+        musaStream_t                stream)                         ///< [in] <b>[optional]</b> CUDA stream to launch kernels within.  Default is stream<sub>0</sub>.
     {
         musaError error = musaSuccess;
         do
@@ -432,7 +448,7 @@ struct DispatchSelectIf
                 equality_op,
                 num_items,
                 stream,
-                debug_synchronous,
+                // debug_synchronous,
                 ptx_version,
                 DeviceCompactInitKernel<ScanTileStateT, NumSelectedIteratorT>,
                 DeviceSelectSweepKernel<PtxSelectIfPolicyT, InputIteratorT, FlagsInputIteratorT, SelectedOutputIteratorT, NumSelectedIteratorT, ScanTileStateT, SelectOpT, EqualityOpT, OffsetT, KEEP_REJECTS>,
@@ -441,6 +457,35 @@ struct DispatchSelectIf
         while (0);
 
         return error;
+    }
+
+    CUB_DETAIL_RUNTIME_DEBUG_SYNC_IS_NOT_SUPPORTED
+    CUB_RUNTIME_FUNCTION __forceinline__
+    static musaError_t Dispatch(
+        void*                       d_temp_storage,          
+        size_t&                     temp_storage_bytes,       
+        InputIteratorT              d_in,                      
+        FlagsInputIteratorT         d_flags,                    
+        SelectedOutputIteratorT     d_selected_out,              
+        NumSelectedIteratorT        d_num_selected_out,           
+        SelectOpT                   select_op,                     
+        EqualityOpT                 equality_op,                    
+        OffsetT                     num_items,            
+        musaStream_t                stream,                
+        bool                        debug_synchronous)
+    {
+      CUB_DETAIL_RUNTIME_DEBUG_SYNC_USAGE_LOG
+
+      return Dispatch(d_temp_storage,
+                      temp_storage_bytes,
+                      d_in,
+                      d_flags,
+                      d_selected_out,
+                      d_num_selected_out,
+                      select_op,
+                      equality_op,
+                      num_items,
+                      stream);
     }
 };
 

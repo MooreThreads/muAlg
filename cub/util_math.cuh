@@ -55,6 +55,14 @@ using is_integral_or_enum =
   std::integral_constant<bool,
                          std::is_integral<T>::value || std::is_enum<T>::value>;
 
+
+__host__ __device__ __forceinline__ constexpr  std::size_t
+VshmemSize(std::size_t max_shmem,
+           std::size_t shmem_per_block,
+           std::size_t num_blocks)
+{
+  return shmem_per_block > max_shmem ? shmem_per_block * num_blocks : 0;
+}
 }
 
 /**
@@ -74,6 +82,53 @@ DivideAndRoundUp(NumeratorT n, DenominatorT d)
   // Static cast to undo integral promotion.
   return static_cast<NumeratorT>(n / d + (n % d != 0 ? 1 : 0));
 }
+
+
+constexpr __device__ __host__ int
+Nominal4BItemsToItemsCombined(int nominal_4b_items_per_thread, int combined_bytes)
+{
+  return (min)(nominal_4b_items_per_thread,
+                    (max)(1,
+                          nominal_4b_items_per_thread * 8 /
+                          combined_bytes));
+}
+
+template <typename T>
+constexpr __device__ __host__ int
+Nominal4BItemsToItems(int nominal_4b_items_per_thread)
+{
+  return (min)(nominal_4b_items_per_thread,
+                    (max)(1,
+                          nominal_4b_items_per_thread * 4 /
+                            static_cast<int>(sizeof(T))));
+}
+
+template <typename ItemT>
+constexpr __device__ __host__ int
+Nominal8BItemsToItems(int nominal_8b_items_per_thread)
+{
+  return sizeof(ItemT) <= 8u
+           ? nominal_8b_items_per_thread
+           : (min)(nominal_8b_items_per_thread,
+                        (max)(1,
+                              ((nominal_8b_items_per_thread * 8) +
+                              static_cast<int>(sizeof(ItemT)) - 1) /
+                                static_cast<int>(sizeof(ItemT))));
+}
+
+/**
+ * \brief Computes the midpoint of the integers
+ *
+ * Extra operation is performed in order to prevent overflow.
+ *
+ * \return Half the sum of \p begin and \p end
+ */
+template <typename T>
+constexpr __device__ __host__ T MidPoint(T begin, T end)
+{
+  return begin + (end - begin) / 2;
+}
+
 
 } // namespace cub
 CUB_NS_POSTFIX // Optional outer namespace(s)

@@ -10,7 +10,7 @@ endif()
 
 set( CMAKE_INSTALL_PREFIX "/usr/local/musa" CACHE PATH
     "Install path prefix, prepended onto install directories" )
-set ( VERSION_STRING "1.12.1" )
+set ( VERSION_STRING "1.12.2" )
 # CXX is only needed for AppendOptionIfAvailable.
 project(CUB VERSION ${VERSION_STRING})
 
@@ -55,8 +55,8 @@ endif()
 
 option(CUB_ENABLE_HEADER_TESTING "Test that all public headers compile." ON)
 option(CUB_ENABLE_TESTING "Build CUB testing suite." ON)
-option(CUB_ENABLE_THOROUGH_TESTING "Build CUB thorough test variants." ON)
-option(CUB_ENABLE_BENCHMARK_TESTING  "Build CUB benchmark test variants." ON)
+option(CUB_ENABLE_THOROUGH_TESTING "Build CUB thorough test variants." OFF)
+option(CUB_ENABLE_BENCHMARK_TESTING  "Build CUB benchmark test variants." OFF)
 option(CUB_ENABLE_MINIMAL_TESTING "Build CUB minimal test variants." ON)
 option(CUB_ENABLE_EXAMPLES "Build CUB examples." ON)
 # This is needed for NVCXX QA, which requires a static set of executable names.

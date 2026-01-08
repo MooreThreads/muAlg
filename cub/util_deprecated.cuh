@@ -36,15 +36,33 @@
 
 #pragma once
 
-#include "util_compiler.cuh"
+#include <cub/util_compiler.cuh>
+#include <cub/detail/type_traits.cuh>
 
 #if CUB_HOST_COMPILER == CUB_HOST_COMPILER_MSVC
 #  define CUB_DEPRECATED __declspec(deprecated)
+#  define CUB_DEPRECATED_BECAUSE(MSG) __declspec(deprecated(MSG))
 #elif CUB_HOST_COMPILER == CUB_HOST_COMPILER_CLANG
 #  define CUB_DEPRECATED __attribute__((deprecated))
+#  define CUB_DEPRECATED_BECAUSE(MSG) __attribute__((deprecated(MSG)))
 #elif CUB_HOST_COMPILER == CUB_HOST_COMPILER_GCC
 #  define CUB_DEPRECATED __attribute__((deprecated))
+#  define CUB_DEPRECATED_BECAUSE(MSG) __attribute__((deprecated(MSG)))
 #else
 #  define CUB_DEPRECATED
+#  define CUB_DEPRECATED_BECAUSE(MSG)
 #endif
 
+#define CUB_DETAIL_RUNTIME_DEBUG_SYNC_IS_NOT_SUPPORTED                         \
+  CUB_DEPRECATED_BECAUSE(                                                      \
+    "CUB no longer accepts `debug_synchronous` parameter. "                    \
+    "Define CUB_DEBUG_SYNC instead, or silence this message with "             \
+    "CUB_IGNORE_DEPRECATED_API.")
+
+#define CUB_DETAIL_RUNTIME_DEBUG_SYNC_USAGE_LOG                                \
+  if (debug_synchronous)                                                       \
+  {                                                                            \
+    printf("%s\n",                                                            \
+            "CUB no longer accepts `debug_synchronous` parameter. "            \
+            "Define CUB_DEBUG_SYNC instead.");                                 \
+  }

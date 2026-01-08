@@ -720,7 +720,49 @@ struct ChainedPolicy<PTX_VERSION, PolicyT, PolicyT>
     }
 };
 
+namespace detail
+{
 
+/**
+ * Same as SyncStream, but intended for use with the debug_synchronous flags
+ * in device algorithms. This should not be used if synchronization is required
+ * for correctness.
+ *
+ * If `debug_synchronous` is false, this function will immediately return
+ * musaSuccess. If true, one of the following will occur:
+ *
+ * If synchronization is supported by the current compilation target and
+ * settings, the sync is performed and the sync result is returned.
+ *
+ * If syncs are not supported then no sync is performed, but a message is logged
+ * via _CubLog and musaSuccess is returned.
+ */
+CUB_RUNTIME_FUNCTION inline musaError_t DebugSyncStream(musaStream_t stream)
+{
+#ifndef CUB_DETAIL_DEBUG_ENABLE_SYNC
+
+  (void)stream;
+  return musaSuccess;
+
+#else // CUB_DETAIL_DEBUG_ENABLE_SYNC:
+
+#define CUB_TMP_SYNC_AVAILABLE                                                 \
+  _CubLog("%s\n", "Synchronizing...");                                         \
+  return SyncStream(stream)
+
+#define CUB_TMP_DEVICE_SYNC_UNAVAILABLE                                        \
+  (void)stream;                                                                \
+  _CubLog("WARNING: Skipping CUB `debug_synchronous` synchronization (%s).\n", \
+          "device-side sync requires <sm_90, RDC, and CDPv1");                 \
+  return musaSuccess
+
+#undef CUB_TMP_DEVICE_SYNC_UNAVAILABLE
+#undef CUB_TMP_SYNC_AVAILABLE
+
+#endif // CUB_DETAIL_DEBUG_ENABLE_SYNC
+}
+
+} // namespace detail
 
 
 /** @} */       // end group UtilMgmt

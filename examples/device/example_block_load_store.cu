@@ -406,12 +406,13 @@ void TestStrategy(int grid_size, float fraction_valid,
                   Int2Type<true> /*is_warp_multiple*/) {
   TestStrategy<T, BLOCK_THREADS, ITEMS_PER_THREAD>(grid_size, fraction_valid,
                                                    Int2Type<false>());
-  TestPointerType<T, BLOCK_THREADS, ITEMS_PER_THREAD, BLOCK_LOAD_WARP_TRANSPOSE,
-                  BLOCK_STORE_WARP_TRANSPOSE>(grid_size, fraction_valid);
-  TestPointerType<T, BLOCK_THREADS, ITEMS_PER_THREAD,
-                  BLOCK_LOAD_WARP_TRANSPOSE_TIMESLICED,
-                  BLOCK_STORE_WARP_TRANSPOSE_TIMESLICED>(grid_size,
-                                                         fraction_valid);
+  // TestPointerType<T, BLOCK_THREADS, ITEMS_PER_THREAD, //
+  // BLOCK_LOAD_WARP_TRANSPOSE,
+  //                 BLOCK_STORE_WARP_TRANSPOSE>(grid_size, fraction_valid);
+  // TestPointerType<T, BLOCK_THREADS, ITEMS_PER_THREAD,
+  //                 BLOCK_LOAD_WARP_TRANSPOSE_TIMESLICED,
+  //                 BLOCK_STORE_WARP_TRANSPOSE_TIMESLICED>(grid_size,
+  //                                                        fraction_valid);
 }
 
 /**

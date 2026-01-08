@@ -77,8 +77,8 @@ package_func () {
       -DCUB_ENABLE_TESTING=OFF \
       -DCUB_ENABLE_EXAMPLES=OFF \
       .. 2>&1 | tee cmake.log
-    cmake --build .  2>&1 | tee build.log
-    cmake --build . --target package  2>&1 | tee package.log
+    cmake --build . -j -v 2>&1 | tee build.log
+    cmake --build . -j -v --target package  2>&1 | tee package.log
     popd
 }
 
@@ -91,11 +91,11 @@ install_func () {
       -DCUB_ENABLE_TESTING=OFF \
       -DCUB_ENABLE_EXAMPLES=OFF \
       .. 2>&1 | tee cmake.log
-    cmake --build .  2>&1 | tee build.log
+    cmake --build . -j 2>&1 | tee build.log
     if [ ! -w ${install_prefix} ]; then
-      sudo cmake --build . --target install  2>&1 | tee install.log
+      sudo cmake --build . -j --target install  2>&1 | tee install.log
     else
-      cmake --build . --target install  2>&1 | tee install.log
+      cmake --build . -j --target install  2>&1 | tee install.log
     fi
     popd
 }

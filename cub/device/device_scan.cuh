@@ -43,6 +43,7 @@
 
 #include "../config.cuh"
 #include "dispatch/dispatch_scan.cuh"
+#include "dispatch/dispatch_scan_by_key.cuh"
 
 /// Optional outer namespace(s)
 CUB_NS_PREFIX
@@ -432,6 +433,400 @@ struct DeviceScan
             debug_synchronous);
     }
 
+
+    /**
+     * \brief Computes a device-wide exclusive prefix sum-by-key with key equality
+     * defined by \p equality_op .  The value of 0 is applied as the initial value,
+     * and is assigned to the beginning of each segment in \p d_values_out .
+     *
+     * \par
+     * - Supports non-commutative sum operators.
+     * - Results are not deterministic for pseudo-associative operators (e.g.,
+     *   addition of floating-point types). Results for pseudo-associative
+     *   operators may vary from run to run. Additional details can be found in
+     *   the [decoupled look-back] description.
+     * - \devicestorage
+     *
+     * \par Snippet
+     * The code snippet below illustrates the exclusive prefix sum-by-key of an \p int device vector.
+     * \par
+     * \code
+     * #include <cub/cub.cuh>   // or equivalently <cub/device/device_scan.cuh>
+     *
+     * // Declare, allocate, and initialize device-accessible pointers for input and output
+     * int num_items;      // e.g., 7
+     * int *d_keys_in;     // e.g., [0, 0, 1, 1, 1, 2, 2]
+     * int *d_values_in;   // e.g., [8, 6, 7, 5, 3, 0, 9]
+     * int *d_values_out;  // e.g., [ ,  ,  ,  ,  ,  ,  ]
+     * ...
+     *
+     * // Determine temporary device storage requirements
+     * void     *d_temp_storage = NULL;
+     * size_t   temp_storage_bytes = 0;
+     * cub::DeviceScan::ExclusiveSumByKey(d_temp_storage, temp_storage_bytes, d_keys_in, d_values_in, d_values_out, num_items);
+     *
+     * // Allocate temporary storage
+     * musaMalloc(&d_temp_storage, temp_storage_bytes);
+     *
+     * // Run exclusive prefix sum
+     * cub::DeviceScan::ExclusiveSumByKey(d_temp_storage, temp_storage_bytes, d_keys_in, d_values_in, d_values_out, num_items);
+     *
+     * // d_values_out <-- [0, 8, 0, 7, 12, 0, 0]
+     *
+     * \endcode
+     *
+     * \tparam KeysInputIteratorT      <b>[inferred]</b> Random-access input iterator type for reading scan keys inputs \iterator
+     * \tparam ValuesInputIteratorT    <b>[inferred]</b> Random-access input iterator type for reading scan values inputs \iterator
+     * \tparam ValuesOutputIteratorT   <b>[inferred]</b> Random-access output iterator type for writing scan values outputs \iterator
+     * \tparam EqualityOpT             <b>[inferred]</b> Functor type having member <tt>T operator()(const T &a, const T &b)</tt> for binary operations that defines the equality of keys
+     *
+     * [decoupled look-back]: https://research.nvidia.com/publication/single-pass-parallel-prefix-scan-decoupled-look-back
+     */
+    template <
+        typename        KeysInputIteratorT,
+        typename        ValuesInputIteratorT,
+        typename        ValuesOutputIteratorT,
+        typename        EqualityOpT = Equality>
+    CUB_RUNTIME_FUNCTION
+    static musaError_t ExclusiveSumByKey(
+        void                  *d_temp_storage,              ///< [in] Device-accessible allocation of temporary storage.  When NULL, the required allocation size is written to \p temp_storage_bytes and no work is done.
+        size_t                &temp_storage_bytes,          ///< [in,out] Reference to size in bytes of \p d_temp_storage allocation
+        KeysInputIteratorT    d_keys_in,                    ///< [in] Random-access input iterator to the input sequence of key items
+        ValuesInputIteratorT  d_values_in,                  ///< [in] Random-access input iterator to the input sequence of value items
+        ValuesOutputIteratorT d_values_out,                 ///< [out] Random-access output iterator to the output sequence of value items
+        int                   num_items,                    ///< [in] Total number of input items (i.e., the length of \p d_keys_in and \p d_values_in)
+        EqualityOpT           equality_op = EqualityOpT(),  ///< [in] Binary functor that defines the equality of keys. Default is cub::Equality().
+        musaStream_t          stream=0,                     ///< [in] <b>[optional]</b> CUDA stream to launch kernels within.  Default is stream<sub>0</sub>.
+        bool                  debug_synchronous=false)      ///< [in] <b>[optional]</b> Whether or not to synchronize the stream after every kernel launch to check for errors.  May cause significant slowdown.  Default is \p false.
+    {
+        // Signed integer type for global offsets
+        using OffsetT = int;
+
+        // The output value type -- used as the intermediate accumulator
+        // Use the input value type per https://wg21.link/P0571
+        using OutputT = cub::detail::value_t<ValuesInputIteratorT>;
+
+        // Initial value
+        OutputT init_value = 0;
+
+        return DispatchScanByKey<
+            KeysInputIteratorT, ValuesInputIteratorT, ValuesOutputIteratorT, EqualityOpT, Sum, OutputT, OffsetT>
+        ::Dispatch(
+            d_temp_storage,
+            temp_storage_bytes,
+            d_keys_in,
+            d_values_in,
+            d_values_out,
+            equality_op,
+            Sum(),
+            init_value,
+            num_items,
+            stream,
+            debug_synchronous);
+    }
+    /**
+     * \brief Computes a device-wide exclusive prefix scan-by-key using the specified binary \p scan_op functor.
+     * The key equality is defined by \p equality_op .  The \p init_value value is applied as the initial value,
+     * and is assigned to the beginning of each segment in \p d_values_out .
+     *
+     * \par
+     * - Supports non-commutative scan operators.
+     * - Results are not deterministic for pseudo-associative operators (e.g.,
+     *   addition of floating-point types). Results for pseudo-associative
+     *   operators may vary from run to run. Additional details can be found in
+     *   the [decoupled look-back] description.
+     * - \devicestorage
+     *
+     * \par Snippet
+     * The code snippet below illustrates the exclusive prefix min-scan-by-key of an \p int device vector
+     * \par
+     * \code
+     * #include <cub/cub.cuh>   // or equivalently <cub/device/device_scan.cuh>
+     * #include <climits>       // for INT_MAX
+     *
+     * // CustomMin functor
+     * struct CustomMin
+     * {
+     *     template <typename T>
+     *     CUB_RUNTIME_FUNCTION __forceinline__
+     *     T operator()(const T &a, const T &b) const {
+     *         return (b < a) ? b : a;
+     *     }
+     * };
+     *
+     * // CustomEqual functor
+     * struct CustomEqual
+     * {
+     *     template <typename T>
+     *     CUB_RUNTIME_FUNCTION __forceinline__
+     *     T operator()(const T &a, const T &b) const {
+     *         return a == b;
+     *     }
+     * };
+     *
+     * // Declare, allocate, and initialize device-accessible pointers for input and output
+     * int          num_items;      // e.g., 7
+     * int          *d_keys_in;     // e.g., [0, 0, 1, 1, 1, 2, 2]
+     * int          *d_values_in;   // e.g., [8, 6, 7, 5, 3, 0, 9]
+     * int          *d_values_out;  // e.g., [ ,  ,  ,  ,  ,  ,  ]
+     * CustomMin    min_op;
+     * CustomEqual  equality_op;
+     * ...
+     *
+     * // Determine temporary device storage requirements for exclusive prefix scan
+     * void     *d_temp_storage = NULL;
+     * size_t   temp_storage_bytes = 0;
+     * cub::DeviceScan::ExclusiveScanByKey(d_temp_storage, temp_storage_bytes, d_keys_in, d_values_in, d_values_out, min_op, (int) INT_MAX, num_items, equality_op);
+     *
+     * // Allocate temporary storage for exclusive prefix scan
+     * musaMalloc(&d_temp_storage, temp_storage_bytes);
+     *
+     * // Run exclusive prefix min-scan
+     * cub::DeviceScan::ExclusiveScanByKey(d_temp_storage, temp_storage_bytes, d_keys_in, d_values_in, d_values_out, min_op, (int) INT_MAX, num_items, equality_op);
+     *
+     * // d_values_out <-- [2147483647, 8, 2147483647, 7, 5, 2147483647, 0]
+     *
+     * \endcode
+     *
+     * \tparam KeysInputIteratorT      <b>[inferred]</b> Random-access input iterator type for reading scan keys inputs \iterator
+     * \tparam ValuesInputIteratorT    <b>[inferred]</b> Random-access input iterator type for reading scan values inputs \iterator
+     * \tparam ValuesOutputIteratorT   <b>[inferred]</b> Random-access output iterator type for writing scan values outputs \iterator
+     * \tparam ScanOp                  <b>[inferred]</b> Binary scan functor type having member <tt>T operator()(const T &a, const T &b)</tt>
+     * \tparam InitValueT              <b>[inferred]</b> Type of the \p init_value value used in Binary scan functor type having member <tt>T operator()(const T &a, const T &b)</tt>
+     * \tparam EqualityOpT             <b>[inferred]</b> Functor type having member <tt>T operator()(const T &a, const T &b)</tt> for binary operations that defines the equality of keys
+     *
+     * [decoupled look-back]: https://research.nvidia.com/publication/single-pass-parallel-prefix-scan-decoupled-look-back
+     */
+    template <
+        typename        KeysInputIteratorT,
+        typename        ValuesInputIteratorT,
+        typename        ValuesOutputIteratorT,
+        typename        ScanOpT,
+        typename        InitValueT,
+        typename        EqualityOpT = Equality>
+    CUB_RUNTIME_FUNCTION
+    static musaError_t ExclusiveScanByKey(
+        void                  *d_temp_storage,              ///< [in] Device-accessible allocation of temporary storage.  When NULL, the required allocation size is written to \p temp_storage_bytes and no work is done.
+        size_t                &temp_storage_bytes,          ///< [in,out] Reference to size in bytes of \p d_temp_storage allocation
+        KeysInputIteratorT    d_keys_in,                    ///< [in] Random-access input iterator to the input sequence of key items
+        ValuesInputIteratorT  d_values_in,                  ///< [in] Random-access input iterator to the input sequence of value items
+        ValuesOutputIteratorT d_values_out,                 ///< [out] Random-access output iterator to the output sequence of value items
+        ScanOpT               scan_op,                      ///< [in] Binary scan functor
+        InitValueT            init_value,                   ///< [in] Initial value to seed the exclusive scan (and is assigned to the beginning of each segment in \p d_values_out)
+        int                   num_items,                    ///< [in] Total number of input items (i.e., the length of \p d_keys_in and \p d_values_in)
+        EqualityOpT           equality_op = EqualityOpT(),  ///< [in] Binary functor that defines the equality of keys. Default is cub::Equality().
+        musaStream_t          stream=0,                     ///< [in] <b>[optional]</b> CUDA stream to launch kernels within.  Default is stream<sub>0</sub>.
+        bool                  debug_synchronous=false)      ///< [in] <b>[optional]</b> Whether or not to synchronize the stream after every kernel launch to check for errors.  May cause significant slowdown.  Default is \p false.
+    {
+        // Signed integer type for global offsets
+        typedef int OffsetT;
+
+        return DispatchScanByKey<
+            KeysInputIteratorT, ValuesInputIteratorT, ValuesOutputIteratorT, EqualityOpT, ScanOpT, InitValueT, OffsetT>
+        ::Dispatch(
+            d_temp_storage,
+            temp_storage_bytes,
+            d_keys_in,
+            d_values_in,
+            d_values_out,
+            equality_op,
+            scan_op,
+            init_value,
+            num_items,
+            stream,
+            debug_synchronous);
+    }
+
+    /**
+     * \brief Computes a device-wide inclusive prefix sum-by-key with key equality defined by \p equality_op .
+     *
+     * \par
+     * - Supports non-commutative sum operators.
+     * - Results are not deterministic for pseudo-associative operators (e.g.,
+     *   addition of floating-point types). Results for pseudo-associative
+     *   operators may vary from run to run. Additional details can be found in
+     *   the [decoupled look-back] description.
+     * - \devicestorage
+     *
+     * \par Snippet
+     * The code snippet below illustrates the inclusive prefix sum-by-key of an \p int device vector.
+     * \par
+     * \code
+     * #include <cub/cub.cuh>   // or equivalently <cub/device/device_scan.cuh>
+     *
+     * // Declare, allocate, and initialize device-accessible pointers for input and output
+     * int num_items;      // e.g., 7
+     * int *d_keys_in;     // e.g., [0, 0, 1, 1, 1, 2, 2]
+     * int *d_values_in;   // e.g., [8, 6, 7, 5, 3, 0, 9]
+     * int *d_values_out;  // e.g., [ ,  ,  ,  ,  ,  ,  ]
+     * ...
+     *
+     * // Determine temporary device storage requirements for inclusive prefix sum
+     * void     *d_temp_storage = NULL;
+     * size_t   temp_storage_bytes = 0;
+     * cub::DeviceScan::InclusiveSumByKey(d_temp_storage, temp_storage_bytes, d_keys_in, d_values_in, d_values_out, num_items);
+     *
+     * // Allocate temporary storage for inclusive prefix sum
+     * musaMalloc(&d_temp_storage, temp_storage_bytes);
+     *
+     * // Run inclusive prefix sum
+     * cub::DeviceScan::InclusiveSumByKey(d_temp_storage, temp_storage_bytes, d_keys_in, d_values_in, d_values_out, num_items);
+     *
+     * // d_out <-- [8, 14, 7, 12, 15, 0, 9]
+     *
+     * \endcode
+     *
+     * \tparam KeysInputIteratorT      <b>[inferred]</b> Random-access input iterator type for reading scan keys inputs \iterator
+     * \tparam ValuesInputIteratorT    <b>[inferred]</b> Random-access input iterator type for reading scan values inputs \iterator
+     * \tparam ValuesOutputIteratorT   <b>[inferred]</b> Random-access output iterator type for writing scan values outputs \iterator
+     * \tparam EqualityOpT             <b>[inferred]</b> Functor type having member <tt>T operator()(const T &a, const T &b)</tt> for binary operations that defines the equality of keys
+     *
+     * [decoupled look-back]: https://research.nvidia.com/publication/single-pass-parallel-prefix-scan-decoupled-look-back
+     */
+    template <
+        typename        KeysInputIteratorT,
+        typename        ValuesInputIteratorT,
+        typename        ValuesOutputIteratorT,
+        typename        EqualityOpT = Equality>
+    CUB_RUNTIME_FUNCTION
+    static musaError_t InclusiveSumByKey(
+        void                  *d_temp_storage,              ///< [in] Device-accessible allocation of temporary storage.  When NULL, the required allocation size is written to \p temp_storage_bytes and no work is done.
+        size_t                &temp_storage_bytes,          ///< [in,out] Reference to size in bytes of \p d_temp_storage allocation
+        KeysInputIteratorT    d_keys_in,                    ///< [in] Random-access input iterator to the input sequence of key items
+        ValuesInputIteratorT  d_values_in,                  ///< [in] Random-access input iterator to the input sequence of value items
+        ValuesOutputIteratorT d_values_out,                 ///< [out] Random-access output iterator to the output sequence of value items
+        int                   num_items,                    ///< [in] Total number of input items (i.e., the length of \p d_keys_in and \p d_values_in)
+        EqualityOpT           equality_op = EqualityOpT(),  ///< [in] Binary functor that defines the equality of keys. Default is cub::Equality().
+        musaStream_t          stream=0,                     ///< [in] <b>[optional]</b> CUDA stream to launch kernels within.  Default is stream<sub>0</sub>.
+        bool                  debug_synchronous=false)      ///< [in] <b>[optional]</b> Whether or not to synchronize the stream after every kernel launch to check for errors.  May cause significant slowdown.  Default is \p false.
+    {
+        // Signed integer type for global offsets
+        typedef int OffsetT;
+
+        return DispatchScanByKey<
+            KeysInputIteratorT, ValuesInputIteratorT, ValuesOutputIteratorT, EqualityOpT, Sum, NullType, OffsetT>
+        ::Dispatch(
+            d_temp_storage,
+            temp_storage_bytes,
+            d_keys_in,
+            d_values_in,
+            d_values_out,
+            equality_op,
+            Sum(),
+            NullType(),
+            num_items,
+            stream,
+            debug_synchronous);
+    }
+
+    /**
+     * \brief Computes a device-wide inclusive prefix scan-by-key using the specified binary \p scan_op functor.
+     * The key equality is defined by \p equality_op .
+     *
+     * \par
+     * - Supports non-commutative scan operators.
+     * - Results are not deterministic for pseudo-associative operators (e.g.,
+     *   addition of floating-point types). Results for pseudo-associative
+     *   operators may vary from run to run. Additional details can be found in
+     *   the [decoupled look-back] description.
+     * - \devicestorage
+     *
+     * \par Snippet
+     * The code snippet below illustrates the inclusive prefix min-scan-by-key of an \p int device vector.
+     * \par
+     * \code
+     * #include <cub/cub.cuh>   // or equivalently <cub/device/device_scan.cuh>
+     * #include <climits>       // for INT_MAX
+     *
+     * // CustomMin functor
+     * struct CustomMin
+     * {
+     *     template <typename T>
+     *     CUB_RUNTIME_FUNCTION __forceinline__
+     *     T operator()(const T &a, const T &b) const {
+     *         return (b < a) ? b : a;
+     *     }
+     * };
+     *
+     * // CustomEqual functor
+     * struct CustomEqual
+     * {
+     *     template <typename T>
+     *     CUB_RUNTIME_FUNCTION __forceinline__
+     *     T operator()(const T &a, const T &b) const {
+     *         return a == b;
+     *     }
+     * };
+     *
+     * // Declare, allocate, and initialize device-accessible pointers for input and output
+     * int          num_items;      // e.g., 7
+     * int          *d_keys_in;     // e.g., [0, 0, 1, 1, 1, 2, 2]
+     * int          *d_values_in;   // e.g., [8, 6, 7, 5, 3, 0, 9]
+     * int          *d_values_out;  // e.g., [ ,  ,  ,  ,  ,  ,  ]
+     * CustomMin    min_op;
+     * CustomEqual  equality_op;
+     * ...
+     *
+     * // Determine temporary device storage requirements for inclusive prefix scan
+     * void *d_temp_storage = NULL;
+     * size_t temp_storage_bytes = 0;
+     * cub::DeviceScan::InclusiveScanByKey(d_temp_storage, temp_storage_bytes, d_keys_in, d_values_in, d_values_out, min_op, num_items, equality_op);
+     *
+     * // Allocate temporary storage for inclusive prefix scan
+     * musaMalloc(&d_temp_storage, temp_storage_bytes);
+     *
+     * // Run inclusive prefix min-scan
+     * cub::DeviceScan::InclusiveScanByKey(d_temp_storage, temp_storage_bytes, d_keys_in, d_values_in, d_values_out, min_op, num_items, equality_op);
+     *
+     * // d_out <-- [8, 6, 7, 5, 3, 0, 0]
+     *
+     * \endcode
+     *
+     * \tparam KeysInputIteratorT      <b>[inferred]</b> Random-access input iterator type for reading scan keys inputs \iterator
+     * \tparam ValuesInputIteratorT    <b>[inferred]</b> Random-access input iterator type for reading scan values inputs \iterator
+     * \tparam ValuesOutputIteratorT   <b>[inferred]</b> Random-access output iterator type for writing scan values outputs \iterator
+     * \tparam ScanOp                  <b>[inferred]</b> Binary scan functor type having member <tt>T operator()(const T &a, const T &b)</tt>
+     * \tparam EqualityOpT             <b>[inferred]</b> Functor type having member <tt>T operator()(const T &a, const T &b)</tt> for binary operations that defines the equality of keys
+     *
+     * [decoupled look-back]: https://research.nvidia.com/publication/single-pass-parallel-prefix-scan-decoupled-look-back
+     */
+    template <
+        typename        KeysInputIteratorT,
+        typename        ValuesInputIteratorT,
+        typename        ValuesOutputIteratorT,
+        typename        ScanOpT,
+        typename        EqualityOpT = Equality>
+    CUB_RUNTIME_FUNCTION
+    static musaError_t InclusiveScanByKey(
+        void                  *d_temp_storage,              ///< [in] Device-accessible allocation of temporary storage.  When NULL, the required allocation size is written to \p temp_storage_bytes and no work is done.
+        size_t                &temp_storage_bytes,          ///< [in,out] Reference to size in bytes of \p d_temp_storage allocation
+        KeysInputIteratorT    d_keys_in,                    ///< [in] Random-access input iterator to the input sequence of key items
+        ValuesInputIteratorT  d_values_in,                  ///< [in] Random-access input iterator to the input sequence of value items
+        ValuesOutputIteratorT d_values_out,                 ///< [out] Random-access output iterator to the output sequence of value items
+        ScanOpT               scan_op,                      ///< [in] Binary scan functor
+        int                   num_items,                    ///< [in] Total number of input items (i.e., the length of \p d_keys_in and \p d_values_in)
+        EqualityOpT           equality_op = EqualityOpT(),  ///< [in] Binary functor that defines the equality of keys. Default is cub::Equality().
+        musaStream_t          stream=0,                     ///< [in] <b>[optional]</b> CUDA stream to launch kernels within.  Default is stream<sub>0</sub>.
+        bool                  debug_synchronous=false)      ///< [in] <b>[optional]</b> Whether or not to synchronize the stream after every kernel launch to check for errors.  May cause significant slowdown.  Default is \p false.
+    {
+        // Signed integer type for global offsets
+        typedef int OffsetT;
+
+        return DispatchScanByKey<
+            KeysInputIteratorT, ValuesInputIteratorT, ValuesOutputIteratorT, EqualityOpT, ScanOpT, NullType, OffsetT>
+        ::Dispatch(
+            d_temp_storage,
+            temp_storage_bytes,
+            d_keys_in,
+            d_values_in,
+            d_values_out,
+            equality_op,
+            scan_op,
+            NullType(),
+            num_items,
+            stream,
+            debug_synchronous);
+    }
     //@}  end member group
 
 };
