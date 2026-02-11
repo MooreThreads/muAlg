@@ -42,6 +42,7 @@
 
 // Block
 #include "block/block_histogram.cuh"
+#include "block/block_adjacent_difference.cuh"
 #include "block/block_discontinuity.cuh"
 #include "block/block_exchange.cuh"
 #include "block/block_load.cuh"
