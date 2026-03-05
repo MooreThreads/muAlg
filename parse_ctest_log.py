@@ -95,6 +95,8 @@ def parse_log(log_path: str) -> Tuple[List[TestInfo], int]:
     summary_pattern1 = re.compile(r'^All\s+(\d+)\s+test\s+cases\s+passed')
     # Format 8: TestStats summary with test name
     summary_pattern2 = re.compile(r'^(\S+):\s+(\d+)\s+cases\s+passed')
+    # Format 9: TestStats summary with test number prefix (e.g. "74: warp_exchange: 162 cases passed")
+    summary_pattern3 = re.compile(r'^(\d+):\s+(\S+):\s+(\d+)\s+cases\s+passed')
     # Format 5 & 6: Multiple PASS/FAIL on same line (like "Keys PASS \t Values PASS \t Count PASS")
     case_pattern5 = re.compile(r'^(\d+):\s+.*\b(PASS|FAIL)\b.*\b(PASS|FAIL)\b')  # at least 2 PASS/FAIL
 
@@ -210,14 +212,25 @@ def parse_log(log_path: str) -> Tuple[List[TestInfo], int]:
                 info.passed_cases += pass_count
                 matched = True
             else:
-                # Format 8: "<test_name>: %d cases passed"
-                match = summary_pattern2.match(line)
-                if match and current_test_num > 0 and current_test_num in test_map:
-                    pass_count = int(match.group(2))
-                    info = test_map[current_test_num]
-                    info.total_cases += pass_count
-                    info.passed_cases += pass_count
-                    matched = True
+                # Format 9: "<num>: <test_name>: %d cases passed"
+                match = summary_pattern3.match(line)
+                if match:
+                    test_num = int(match.group(1))
+                    if test_num in test_map:
+                        pass_count = int(match.group(3))
+                        info = test_map[test_num]
+                        info.total_cases += pass_count
+                        info.passed_cases += pass_count
+                        matched = True
+                if not matched:
+                    # Format 8: "<test_name>: %d cases passed"
+                    match = summary_pattern2.match(line)
+                    if match and current_test_num > 0 and current_test_num in test_map:
+                        pass_count = int(match.group(2))
+                        info = test_map[current_test_num]
+                        info.total_cases += pass_count
+                        info.passed_cases += pass_count
+                        matched = True
 
         prev_line = line
         prev_test_num = test_num
