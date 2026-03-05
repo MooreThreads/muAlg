@@ -10,7 +10,7 @@ SOURCE_DIR="${CUB_DIR}"
 
 # 默认值
 JOBS=$(nproc)
-TEST_JOBS=8
+TEST_JOBS=1
 RUN_TEST=true
 TEST_VERBOSE="-V"
 MUSA_DEVICES=""  # 默认所有GPU可见
