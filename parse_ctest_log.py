@@ -84,16 +84,23 @@ def parse_log(log_path: str) -> Tuple[List[TestInfo], int]:
     # 4. Format: "47: 	PASSInvoking..."      -> <num>: PASS/FAIL<something>
     # 5. Format: "51: 	 Keys PASS 	 Values PASS 	 Count PASS"  -> multi PASS/FAIL in one line
     # 6. Format: "64: 	 Data PASS 	 Count PASS"                 -> multi PASS/FAIL in one line
+    # 7. Format: "All %d test cases passed"                       -> TestStats summary (no test num)
+    # 8. Format: "<test_name>: %d cases passed"                   -> TestStats summary with name
 
     case_pattern1 = re.compile(r'^(\d+):\s+(.+):\s+(PASS|FAIL)')  # with colon
     case_pattern2 = re.compile(r'^(\d+):\s+(PASS|FAIL)$')         # standalone PASS/FAIL
     case_pattern3 = re.compile(r'^(\d+):\s+(.+?)\s+(PASS|FAIL)$') # space separated
     case_pattern4 = re.compile(r'^(\d+):\s+(PASS|FAIL)(?=\S|$)')  # PASS/FAIL possibly followed by text
+    # Format 7: TestStats summary without test name
+    summary_pattern1 = re.compile(r'^All\s+(\d+)\s+test\s+cases\s+passed')
+    # Format 8: TestStats summary with test name
+    summary_pattern2 = re.compile(r'^(\S+):\s+(\d+)\s+cases\s+passed')
     # Format 5 & 6: Multiple PASS/FAIL on same line (like "Keys PASS \t Values PASS \t Count PASS")
     case_pattern5 = re.compile(r'^(\d+):\s+.*\b(PASS|FAIL)\b.*\b(PASS|FAIL)\b')  # at least 2 PASS/FAIL
 
     prev_line = ""
     prev_test_num = 0
+    current_test_num = 0  # Track current test for summary lines
 
     for line in lines:
         matched = False
@@ -165,6 +172,7 @@ def parse_log(log_path: str) -> Tuple[List[TestInfo], int]:
                             matched = True
 
         if matched and test_num in test_map:
+            current_test_num = test_num  # Update current test for summary lines
             info = test_map[test_num]
             if multi_case:
                 # Count all sub-tests in this line
@@ -190,6 +198,26 @@ def parse_log(log_path: str) -> Tuple[List[TestInfo], int]:
                             description=test_desc,
                             error_detail="FAIL"
                         ))
+
+        # Handle TestStats summary patterns (for tests without individual PASS/FAIL output)
+        if not matched:
+            # Format 7: "All %d test cases passed"
+            match = summary_pattern1.match(line)
+            if match and current_test_num > 0 and current_test_num in test_map:
+                pass_count = int(match.group(1))
+                info = test_map[current_test_num]
+                info.total_cases += pass_count
+                info.passed_cases += pass_count
+                matched = True
+            else:
+                # Format 8: "<test_name>: %d cases passed"
+                match = summary_pattern2.match(line)
+                if match and current_test_num > 0 and current_test_num in test_map:
+                    pass_count = int(match.group(2))
+                    info = test_map[current_test_num]
+                    info.total_cases += pass_count
+                    info.passed_cases += pass_count
+                    matched = True
 
         prev_line = line
         prev_test_num = test_num
@@ -314,7 +342,16 @@ def generate_report(tests: List[TestInfo], output_path: str, filter_tests: bool 
             rate = (t.passed_cases / t.total_cases * 100) if t.total_cases > 0 else 0
             report.append(f"| {status} | {short_name} | {t.total_cases} | {t.passed_cases} | {t.failed_cases} | {rate:.1f}% |")
         else:
-            report.append(f"| {status} | {short_name} | N/A | N/A | N/A | N/A |")
+            # No case info available - show failure reason
+            if t.result == "Timeout":
+                reason = "超时"
+            elif t.result == "Exception":
+                reason = "异常"
+            elif t.result == "Failed":
+                reason = "失败"
+            else:
+                reason = "-"
+            report.append(f"| {status} | {short_name} | - | - | - | {reason} |")
     
     report.append(f"| | **总计** | **{total_cases}** | **{passed_cases}** | **{failed_cases}** | **{case_pass_rate:.1f}%** |")
     report.append("")

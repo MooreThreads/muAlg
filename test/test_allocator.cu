@@ -449,6 +449,9 @@ int main(int argc, char** argv)
 
     printf("Success\n");
 
+    // Print test summary for parse_ctest_log.py
+    TestStats::print_summary("allocator");
+
     return 0;
 }
 

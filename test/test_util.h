@@ -77,11 +77,59 @@ T SafeBitCast(const U& in)
 }
 
 /******************************************************************************
+ * Test statistics
+ ******************************************************************************/
+
+/**
+ * Simple test statistics counter for tests that don't print individual PASS/FAIL.
+ * Usage: Call PrintTestSummary() at the end of main() to print summary.
+ */
+struct TestStats
+{
+    static int& pass_count() {
+        static int count = 0;
+        return count;
+    }
+
+    static void inc_pass() {
+        pass_count()++;
+    }
+
+    static void print_summary(const char* test_name = nullptr) {
+        int passes = pass_count();
+        if (passes > 0) {
+            if (test_name) {
+                printf("%s: %d cases passed\n", test_name, passes);
+            } else {
+                printf("All %d test cases passed\n", passes);
+            }
+        }
+    }
+};
+
+/**
+ * Log a single test case as PASS (for tests without individual PASS/FAIL output)
+ * Format: "Test case: PASS" (without test number prefix, won't be double-counted)
+ */
+#define TestLogPass()                                                          \
+    do {                                                                        \
+        TestStats::inc_pass();                                                  \
+    } while(0)
+
+/**
+ * Log a test case with description (useful for tracking test progress)
+ */
+#define TestLogPassDesc(desc)                                                   \
+    do {                                                                        \
+        TestStats::inc_pass();                                                  \
+    } while(0)
+
+/******************************************************************************
  * Assertion macros
  ******************************************************************************/
 
 /**
- * Assert equals
+ * Assert equals - auto-increment pass counter on success
  */
 #define AssertEquals(a, b)                                                     \
   if ((a) != (b))                                                              \
@@ -90,6 +138,8 @@ T SafeBitCast(const U& in)
               << __FILE__ << ": " << __LINE__                                  \
               << ": AssertEquals(" #a ", " #b ") failed.\n";                   \
     exit(1);                                                                   \
+  } else {                                                                     \
+    TestStats::inc_pass();                                                      \
   }
 
 #define AssertTrue(a)                                                          \
@@ -99,6 +149,8 @@ T SafeBitCast(const U& in)
               << __FILE__ << ": " << __LINE__                                  \
               << ": AssertTrue(" #a ") failed.\n";                             \
     exit(1);                                                                   \
+  } else {                                                                     \
+    TestStats::inc_pass();                                                      \
   }
 
 /******************************************************************************

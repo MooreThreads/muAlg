@@ -359,4 +359,9 @@ int main(int argc, char** argv)
   CubDebugExit(args.DeviceInit());
 
   Test<256>();
+
+  // Print test summary for parse_ctest_log.py
+  TestStats::print_summary("warp_load");
+
+  return 0;
 }

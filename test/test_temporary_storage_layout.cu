@@ -216,4 +216,9 @@ int main()
   Test<1>();
   Test<4>();
   Test<42>();
+
+  // Print test summary for parse_ctest_log.py
+  TestStats::print_summary("temporary_storage_layout");
+
+  return 0;
 }

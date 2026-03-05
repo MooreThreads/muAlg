@@ -142,4 +142,9 @@ int main()
 {
   TestPowersOfTwo();
   TestNonPowersOfTwo();
+
+  // Print test summary for parse_ctest_log.py
+  TestStats::print_summary("warp_mask");
+
+  return 0;
 }

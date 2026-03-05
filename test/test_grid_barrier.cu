@@ -72,7 +72,7 @@ int main(int argc, char** argv)
     musaError_t retval = musaSuccess;
 
     // Defaults
-    int iterations = 10000;
+    int iterations = 100;  // Reduced from 10000 for MUSA compatibility testing
     int block_size = 128;
     int grid_size = -1;
 

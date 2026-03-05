@@ -365,5 +365,8 @@ int main(int argc, char** argv)
     Test<2> (g_allocator);
     Test<15> (g_allocator);
 
+    // Print test summary for parse_ctest_log.py
+    TestStats::print_summary("block_shuffle");
+
     return 0;
 }

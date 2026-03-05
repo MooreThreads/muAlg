@@ -618,5 +618,8 @@ int main(int argc, char **argv)
   TestForTuningParameters<1U, 1U, 256U>();
   TestForTuningParameters<2U, 2U, 384U>();
 
+  // Print test summary for parse_ctest_log.py
+  TestStats::print_summary("block_run_length_decode");
+
   return 0;
 }
