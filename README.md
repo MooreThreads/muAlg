@@ -1,3 +1,11 @@
+# 测试方法
+
+确保有python安装和ninja安装，然后直接运行当前目录下的 `build_cub.sh` 即可，如有问题，随时联系 MingXu
+
+```
+./build_cub.sh
+```
+
 <hr>
 <h3>About CUB</h3>
 
