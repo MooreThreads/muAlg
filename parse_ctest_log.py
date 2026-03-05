@@ -77,20 +77,108 @@ def parse_log(log_path: str) -> Tuple[List[TestInfo], int]:
             test_map[test_num] = info
     
     # Parse PASS/FAIL cases for each test
-    current_test_num = 0
-    case_pattern = re.compile(r'^(\d+):\s+(.+):\s+(PASS|FAIL)')
-    current_test_info = ""
-    
+    # Support multiple formats:
+    # 1. Format: "17: 	Scan results: PASS"  -> <num>: <desc>: PASS/FAIL
+    # 2. Format: "3: 	PASS"                  -> <num>: PASS/FAIL (desc on previous line)
+    # 3. Format: "29: 	Channel 0 PASS"       -> <num>: <desc> PASS/FAIL (no colon before PASS)
+    # 4. Format: "47: 	PASSInvoking..."      -> <num>: PASS/FAIL<something>
+    # 5. Format: "51: 	 Keys PASS 	 Values PASS 	 Count PASS"  -> multi PASS/FAIL in one line
+    # 6. Format: "64: 	 Data PASS 	 Count PASS"                 -> multi PASS/FAIL in one line
+
+    case_pattern1 = re.compile(r'^(\d+):\s+(.+):\s+(PASS|FAIL)')  # with colon
+    case_pattern2 = re.compile(r'^(\d+):\s+(PASS|FAIL)$')         # standalone PASS/FAIL
+    case_pattern3 = re.compile(r'^(\d+):\s+(.+?)\s+(PASS|FAIL)$') # space separated
+    case_pattern4 = re.compile(r'^(\d+):\s+(PASS|FAIL)(?=\S|$)')  # PASS/FAIL possibly followed by text
+    # Format 5 & 6: Multiple PASS/FAIL on same line (like "Keys PASS \t Values PASS \t Count PASS")
+    case_pattern5 = re.compile(r'^(\d+):\s+.*\b(PASS|FAIL)\b.*\b(PASS|FAIL)\b')  # at least 2 PASS/FAIL
+
+    prev_line = ""
+    prev_test_num = 0
+
     for line in lines:
-        # Check for test number prefix
-        case_match = case_pattern.match(line)
-        if case_match:
-            test_num = int(case_match.group(1))
-            test_desc = case_match.group(2)
-            result = case_match.group(3)
-            
-            if test_num in test_map:
-                info = test_map[test_num]
+        matched = False
+        test_num = 0
+        test_desc = ""
+        result = ""
+        multi_case = False
+
+        # First try format 5: multi PASS/FAIL in one line
+        match = case_pattern5.match(line)
+        if match:
+            test_num = int(match.group(1))
+            # Count all PASS and FAIL in the line
+            pass_count = len(re.findall(r'\bPASS\b', line))
+            fail_count = len(re.findall(r'\bFAIL\b', line))
+            if pass_count > 0 or fail_count > 0:
+                multi_case = True
+                matched = True
+                # Get description from previous line
+                prev_match = re.match(r'^(\d+):\s+(.+)$', prev_line)
+                if prev_match and int(prev_match.group(1)) == test_num:
+                    test_desc = prev_match.group(2).strip()
+                else:
+                    test_desc = "multi-test"
+                # Treat as passed if all are PASS, failed if any FAIL
+                result = "PASS" if fail_count == 0 else "FAIL"
+
+        if not matched:
+            # Try format 1: <num>: <desc>: PASS/FAIL
+            match = case_pattern1.match(line)
+            if match:
+                test_num = int(match.group(1))
+                test_desc = match.group(2).strip()
+                result = match.group(3)
+                matched = True
+            else:
+                # Try format 4 first (more specific): <num>: PASS/FAIL followed by text
+                match = case_pattern4.match(line)
+                if match:
+                    test_num = int(match.group(1))
+                    result = match.group(2)
+                    # Try to get description from previous line
+                    prev_match = re.match(r'^(\d+):\s+(.+)$', prev_line)
+                    if prev_match and int(prev_match.group(1)) == test_num:
+                        test_desc = prev_match.group(2).strip()
+                    else:
+                        test_desc = "test"
+                    matched = True
+                else:
+                    # Try format 2: <num>: PASS/FAIL (standalone)
+                    match = case_pattern2.match(line)
+                    if match:
+                        test_num = int(match.group(1))
+                        result = match.group(2)
+                        # Get description from previous line
+                        prev_match = re.match(r'^(\d+):\s+(.+)$', prev_line)
+                        if prev_match and int(prev_match.group(1)) == test_num:
+                            test_desc = prev_match.group(2).strip()
+                        else:
+                            test_desc = "test"
+                        matched = True
+                    else:
+                        # Try format 3: <num>: <desc> PASS/FAIL
+                        match = case_pattern3.match(line)
+                        if match:
+                            test_num = int(match.group(1))
+                            test_desc = match.group(2).strip()
+                            result = match.group(3)
+                            matched = True
+
+        if matched and test_num in test_map:
+            info = test_map[test_num]
+            if multi_case:
+                # Count all sub-tests in this line
+                pass_count = len(re.findall(r'\bPASS\b', line))
+                fail_count = len(re.findall(r'\bFAIL\b', line))
+                info.total_cases += pass_count + fail_count
+                info.passed_cases += pass_count
+                info.failed_cases += fail_count
+                if fail_count > 0 and len(info.failed_details) < 10:
+                    info.failed_details.append(TestCase(
+                        description=test_desc,
+                        error_detail=f"FAIL ({fail_count}/{pass_count + fail_count})"
+                    ))
+            else:
                 info.total_cases += 1
                 if result == "PASS":
                     info.passed_cases += 1
@@ -102,7 +190,10 @@ def parse_log(log_path: str) -> Tuple[List[TestInfo], int]:
                             description=test_desc,
                             error_detail="FAIL"
                         ))
-    
+
+        prev_line = line
+        prev_test_num = test_num
+
     return tests, len(tests)
 
 def get_category(test_name: str) -> str:
