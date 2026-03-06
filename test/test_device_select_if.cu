@@ -414,6 +414,9 @@ void Test(
     d_temp_storage, temp_storage_bytes, d_in, d_flags, d_out, d_num_selected_out, num_items, select_op, 0, true));
     CubDebugExit(g_allocator.DeviceAllocate(&d_temp_storage, temp_storage_bytes));
 
+    // Clear temp storage (MUSA doesn't auto-zero allocated memory)
+    CubDebugExit(musaMemset(d_temp_storage, 0, temp_storage_bytes));
+
     // Copy flags and clear device output array
     CubDebugExit(musaMemcpy(d_flags, h_flags, sizeof(FlagT) * num_items, musaMemcpyHostToDevice));
     CubDebugExit(musaMemset(d_out, 0, sizeof(T) * num_items));

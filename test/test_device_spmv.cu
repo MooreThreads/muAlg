@@ -402,6 +402,9 @@ void compute_cub_solution(const device_csr_matrix<ValueT>& a,
 
   temp_storage.resize(temp_storage_bytes);
 
+  // Clear temp storage (MUSA doesn't auto-zero allocated memory)
+  CubDebugExit(musaMemset(thrust::raw_pointer_cast(temp_storage.data()), 0, temp_storage_bytes));
+
   err = cub::DeviceSpmv::CsrMV(thrust::raw_pointer_cast(temp_storage.data()),
                                temp_storage_bytes,
                                a.get_values(),

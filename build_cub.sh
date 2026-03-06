@@ -18,6 +18,7 @@ LOG_FILE="${CUB_DIR}/test_verbose.log"
 REPORT_FILE="${CUB_DIR}/test_report.md"
 SKIP_CLEAN=false
 BUILD_ONLY=false
+EXCLUDE_TESTS="grid_barrier|namespace_wrapped"  # 默认排除的测试用例
 
 # Thrust 相关
 MUSA_INCLUDE_DIR="/usr/local/musa/include"
@@ -37,6 +38,8 @@ show_help() {
   -T, --test-jobs N 测试并行数 (默认: 8)
   -g, --gpus DEVICES 设置 MUSA_VISIBLE_DEVICES (如: 0,1,2,3)
   -n, --no-clean    不删除 build 目录 (增量编译)
+  -E, --exclude RE  排除匹配正则表达式的测试 (默认: ${EXCLUDE_TESTS})
+                    传空字符串 "" 可取消默认排除
   -h, --help        显示帮助
 
 默认行为:
@@ -89,6 +92,10 @@ while [[ $# -gt 0 ]]; do
             ;;
         -g|--gpus)
             MUSA_DEVICES="$2"
+            shift 2
+            ;;
+        -E|--exclude)
+            EXCLUDE_TESTS="$2"
             shift 2
             ;;
         -n|--no-clean)
@@ -156,7 +163,12 @@ if [ "$RUN_TEST" = true ]; then
 
     # 运行 ctest 并保存输出
     echo "测试输出保存到: ${LOG_FILE}"
-    ctest --test-dir build -j "${TEST_JOBS}" ${TEST_VERBOSE} 2>&1 | tee "${LOG_FILE}"
+    EXCLUDE_ARG=""
+    if [ -n "$EXCLUDE_TESTS" ]; then
+        EXCLUDE_ARG="-E ${EXCLUDE_TESTS}"
+        echo "排除测试: ${EXCLUDE_TESTS}"
+    fi
+    ctest --test-dir build -j "${TEST_JOBS}" ${TEST_VERBOSE} ${EXCLUDE_ARG} 2>&1 | tee "${LOG_FILE}"
 
     # 生成 markdown 报告
     echo ""

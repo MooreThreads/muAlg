@@ -787,6 +787,9 @@ void Test(
     // Allocate temp device storage
     CubDebugExit(g_allocator.DeviceAllocate(&d_temp_storage, temp_storage_bytes));
 
+    // Clear temp storage (MUSA doesn't auto-zero allocated memory)
+    CubDebugExit(musaMemset(d_temp_storage, 0, temp_storage_bytes));
+
     // Run warmup/correctness iteration
     CubDebugExit(Dispatch(backend, 1,
         d_temp_storage_bytes, d_cdp_error, d_temp_storage, temp_storage_bytes,

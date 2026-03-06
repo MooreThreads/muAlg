@@ -428,6 +428,9 @@ void Test(
     CubDebugExit(Dispatch(Int2Type<RLE_METHOD>(), Int2Type<BACKEND>(), 1, d_temp_storage_bytes, d_cdp_error, d_temp_storage, temp_storage_bytes, d_in, d_unique_out, d_offsets_out, d_lengths_out, d_num_runs, equality_op, num_items, 0, true));
     CubDebugExit(g_allocator.DeviceAllocate(&d_temp_storage, temp_storage_bytes));
 
+    // Clear temp storage (MUSA doesn't auto-zero allocated memory)
+    CubDebugExit(musaMemset(d_temp_storage, 0, temp_storage_bytes));
+
     // Clear device output arrays
     if (RLE_METHOD == RLE)
         CubDebugExit(musaMemset(d_unique_out,   0, sizeof(T) * num_items));
