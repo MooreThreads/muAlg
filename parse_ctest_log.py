@@ -308,6 +308,10 @@ def generate_report(tests: List[TestInfo], output_path: str, filter_tests: bool 
     
     program_pass_rate = (passed_tests / total_tests * 100) if total_tests > 0 else 0
     case_pass_rate = (passed_cases / total_cases * 100) if total_cases > 0 else 0
+
+    # Cap pass rate at 99.9% if there are any failures (avoid showing 100% when there are failures)
+    if failed_cases > 0 and case_pass_rate >= 99.95:
+        case_pass_rate = 99.9
     
     # Build report
     report = []
