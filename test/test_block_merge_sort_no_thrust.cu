@@ -78,7 +78,7 @@ struct CustomLess {
     return lhs < rhs;
   }
 
-  __device__ __host__ bool operator()(const CustomType &lhs, const CustomType &rhs) const {
+  __device__ bool operator()(CustomType &lhs, CustomType &rhs) {
     return lhs.key < rhs.key;
   }
 };
@@ -355,19 +355,10 @@ void TestStability() {
   // 分配主机内存
   CustomType *h_data = new CustomType[elements];
 
-  // 初始化：每个 key 重复多次，count 递增
+  // 初始化：key = value & 0xFF (与原版一致)
+  // 注意：不洗牌，原版 NVIDIA 测试就是这样做的
   for (unsigned int i = 0; i < elements; i++) {
-    h_data[i].key = static_cast<std::uint8_t>(i % 16); // 0-15 循环
-    h_data[i].count = i;
-  }
-
-  // 按 key 洗牌（保持 count 不变）
-  srand(42);
-  for (unsigned int i = elements - 1; i > 0; i--) {
-    unsigned int j = rand() % (i + 1);
-    CustomType temp = h_data[i];
-    h_data[i] = h_data[j];
-    h_data[j] = temp;
+    h_data[i] = CustomType(i);  // key = i & 0xFF, count = i
   }
 
   // 分配设备内存
@@ -382,6 +373,7 @@ void TestStability() {
   CubDebugExit(musaMemcpy(h_data, d_data, elements * sizeof(CustomType), musaMemcpyDeviceToHost));
 
   // 检查稳定性：相同 key 的元素应该按 count 递增排列
+  // 由于原始数据中 count 是递增的，稳定排序应该保持这个顺序
   bool passed = true;
   for (unsigned int i = 1; i < elements; i++) {
     if (h_data[i].key == h_data[i - 1].key && h_data[i].count < h_data[i - 1].count) {
