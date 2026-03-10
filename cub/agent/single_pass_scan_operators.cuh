@@ -111,7 +111,7 @@ enum ScanTileStatus
  */
 template <
     typename    T,
-    bool        SINGLE_WORD = Traits<T>::PRIMITIVE>
+    bool        SINGLE_WORD = Traits<T>::PRIMITIVE && (sizeof(T) < 8)>
 struct ScanTileState;
 
 
@@ -446,7 +446,7 @@ struct ScanTileState<T, false>
 template <
     typename    ValueT,
     typename    KeyT,
-    bool        SINGLE_WORD = (Traits<ValueT>::PRIMITIVE) && (sizeof(ValueT) + sizeof(KeyT) < 16)>
+    bool        SINGLE_WORD = (Traits<ValueT>::PRIMITIVE) && (sizeof(ValueT) + sizeof(KeyT) < 8)>
 struct ReduceByKeyScanTileState;
 
 
