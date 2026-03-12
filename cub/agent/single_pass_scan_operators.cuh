@@ -749,9 +749,6 @@ struct TilePrefixCallbackOp
             tile_status.SetPartial(tile_idx, block_aggregate);
         }
 
-        // MUSA: Ensure thread 0 has completed SetPartial before other threads proceed
-        __syncwarp(0xffffffff);
-
         int         predecessor_idx = tile_idx - threadIdx.x - 1;
         StatusWord  predecessor_status;
         T           window_aggregate;

@@ -205,25 +205,16 @@ void TestPartitionIf(int num_items, SelectOp select_op, const char* description,
         h_in[i] = static_cast<T>(dist(rng));
     }
 
-    // Compute reference on host (selected first, then unselected)
+    // Compute reference on host (selected first, then unselected in reverse order)
+    // Per CUB documentation: unselected items are placed at the rear in reverse order
     int num_selected = 0;
-    int num_unselected = 0;
     for (int i = 0; i < num_items; ++i) {
         if (select_op(h_in[i])) {
+            h_reference[num_selected] = h_in[i];
             num_selected++;
         } else {
-            num_unselected++;
-        }
-    }
-
-    // Re-iterate to build reference
-    int sel_idx = 0;
-    int unsel_idx = num_selected;
-    for (int i = 0; i < num_items; ++i) {
-        if (select_op(h_in[i])) {
-            h_reference[sel_idx++] = h_in[i];
-        } else {
-            h_reference[unsel_idx++] = h_in[i];
+            // Place unselected items at the rear in reverse order
+            h_reference[num_items - (i - num_selected) - 1] = h_in[i];
         }
     }
 

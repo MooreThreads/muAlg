@@ -322,8 +322,8 @@ struct DispatchSelectIf
             // Check for failure to launch
             if (CubDebug(error = musaPeekAtLastError())) break;
 
-            // Sync the stream if specified to flush runtime errors
-            if (debug_synchronous && (CubDebug(error = SyncStream(stream)))) break;
+            // Sync the stream to flush runtime errors (MUSA requires unconditional sync)
+            if ((CubDebug(error = SyncStream(stream)))) break;
 
             // Return if empty problem
             if (num_items == 0)
@@ -379,8 +379,8 @@ struct DispatchSelectIf
             // Check for failure to launch
             if (CubDebug(error = musaPeekAtLastError())) break;
 
-            // Sync the stream if specified to flush runtime errors
-            if (debug_synchronous && (CubDebug(error = SyncStream(stream)))) break;
+            // Sync the stream to flush runtime errors (MUSA requires unconditional sync)
+            if ((CubDebug(error = SyncStream(stream)))) break;
         }
         while (0);
 

@@ -107,6 +107,11 @@ struct AgentSelectIf
     // The input value type
     using InputT = cub::detail::value_t<InputIteratorT>;
 
+    // The output value type
+    typedef typename If<(Equals<typename std::iterator_traits<SelectedOutputIteratorT>::value_type, void>::VALUE),  // OutputT =  (if output iterator's value type is void) ?
+        typename std::iterator_traits<InputIteratorT>::value_type,                                                  // ... then the input iterator's value type,
+        typename std::iterator_traits<SelectedOutputIteratorT>::value_type>::Type OutputT;                          // ... else the output iterator's value type
+
     // The flag value type
     using FlagT = cub::detail::value_t<FlagsInputIteratorT>;
 
@@ -152,7 +157,7 @@ struct AgentSelectIf
       FlagsInputIteratorT>;
 
     // Parameterized BlockLoad type for input data
-    using BlockLoadT = BlockLoad<InputT,
+    using BlockLoadT = BlockLoad<OutputT,
                                  BLOCK_THREADS,
                                  ITEMS_PER_THREAD,
                                  AgentSelectIfPolicyT::LOAD_ALGORITHM>;
@@ -164,7 +169,7 @@ struct AgentSelectIf
                                      AgentSelectIfPolicyT::LOAD_ALGORITHM>;
 
     // Parameterized BlockDiscontinuity type for items
-    using BlockDiscontinuityT = BlockDiscontinuity<InputT, BLOCK_THREADS>;
+    using BlockDiscontinuityT = BlockDiscontinuity<OutputT, BLOCK_THREADS>;
 
     // Parameterized BlockScan type
     using BlockScanT =
@@ -175,7 +180,7 @@ struct AgentSelectIf
       TilePrefixCallbackOp<OffsetT, cub::Sum, ScanTileStateT>;
 
     // Item exchange type
-    typedef InputT ItemExchangeT[TILE_ITEMS];
+    typedef OutputT ItemExchangeT[TILE_ITEMS];
 
     // Shared memory type for this thread block
     union _TempStorage
@@ -250,7 +255,7 @@ struct AgentSelectIf
     __device__ __forceinline__ void InitializeSelections(
         OffsetT                     /*tile_offset*/,
         OffsetT                     num_tile_items,
-        InputT                      (&items)[ITEMS_PER_THREAD],
+        OutputT                     (&items)[ITEMS_PER_THREAD],
         OffsetT                     (&selection_flags)[ITEMS_PER_THREAD],
         Int2Type<USE_SELECT_OP>     /*select_method*/)
     {
@@ -273,7 +278,7 @@ struct AgentSelectIf
     __device__ __forceinline__ void InitializeSelections(
         OffsetT                     tile_offset,
         OffsetT                     num_tile_items,
-        InputT                      (&/*items*/)[ITEMS_PER_THREAD],
+        OutputT                     (&/*items*/)[ITEMS_PER_THREAD],
         OffsetT                     (&selection_flags)[ITEMS_PER_THREAD],
         Int2Type<USE_SELECT_FLAGS>  /*select_method*/)
     {
@@ -295,7 +300,7 @@ struct AgentSelectIf
         #pragma unroll
         for (int ITEM = 0; ITEM < ITEMS_PER_THREAD; ++ITEM)
         {
-            selection_flags[ITEM] = static_cast<bool>(flags[ITEM]);
+            selection_flags[ITEM] = flags[ITEM];
         }
     }
 
@@ -307,7 +312,7 @@ struct AgentSelectIf
     __device__ __forceinline__ void InitializeSelections(
         OffsetT                     tile_offset,
         OffsetT                     num_tile_items,
-        InputT                      (&items)[ITEMS_PER_THREAD],
+        OutputT                     (&items)[ITEMS_PER_THREAD],
         OffsetT                     (&selection_flags)[ITEMS_PER_THREAD],
         Int2Type<USE_DISCONTINUITY> /*select_method*/)
     {
@@ -320,7 +325,7 @@ struct AgentSelectIf
         }
         else
         {
-            InputT tile_predecessor;
+            OutputT tile_predecessor;
             if (threadIdx.x == 0)
                 tile_predecessor = d_in[tile_offset - 1];
 
@@ -349,7 +354,7 @@ struct AgentSelectIf
      */
     template <bool IS_LAST_TILE, bool IS_FIRST_TILE>
     __device__ __forceinline__ void ScatterDirect(
-        InputT  (&items)[ITEMS_PER_THREAD],
+        OutputT (&items)[ITEMS_PER_THREAD],
         OffsetT (&selection_flags)[ITEMS_PER_THREAD],
         OffsetT (&selection_indices)[ITEMS_PER_THREAD],
         OffsetT num_selections)
@@ -374,7 +379,7 @@ struct AgentSelectIf
      */
     template <bool IS_LAST_TILE, bool IS_FIRST_TILE>
     __device__ __forceinline__ void ScatterTwoPhase(
-        InputT          (&items)[ITEMS_PER_THREAD],
+        OutputT         (&items)[ITEMS_PER_THREAD],
         OffsetT         (&selection_flags)[ITEMS_PER_THREAD],
         OffsetT         (&selection_indices)[ITEMS_PER_THREAD],
         int             /*num_tile_items*/,                         ///< Number of valid items in this tile
@@ -410,7 +415,7 @@ struct AgentSelectIf
      */
     template <bool IS_LAST_TILE, bool IS_FIRST_TILE>
     __device__ __forceinline__ void ScatterTwoPhase(
-        InputT          (&items)[ITEMS_PER_THREAD],
+        OutputT         (&items)[ITEMS_PER_THREAD],
         OffsetT         (&selection_flags)[ITEMS_PER_THREAD],
         OffsetT         (&selection_indices)[ITEMS_PER_THREAD],
         int             num_tile_items,                             ///< Number of valid items in this tile
@@ -450,7 +455,7 @@ struct AgentSelectIf
                                         num_items - num_rejected_prefix - rejection_idx - 1 :
                                         num_selections_prefix + selection_idx;
 
-            InputT item = temp_storage.raw_exchange.Alias()[item_idx];
+            OutputT item = temp_storage.raw_exchange.Alias()[item_idx];
 
             if (!IS_LAST_TILE || (item_idx < num_tile_items))
             {
@@ -465,7 +470,7 @@ struct AgentSelectIf
      */
     template <bool IS_LAST_TILE, bool IS_FIRST_TILE>
     __device__ __forceinline__ void Scatter(
-        InputT          (&items)[ITEMS_PER_THREAD],
+        OutputT         (&items)[ITEMS_PER_THREAD],
         OffsetT         (&selection_flags)[ITEMS_PER_THREAD],
         OffsetT         (&selection_indices)[ITEMS_PER_THREAD],
         int             num_tile_items,                             ///< Number of valid items in this tile
@@ -511,7 +516,7 @@ struct AgentSelectIf
         OffsetT             tile_offset,        ///< Tile offset
         ScanTileStateT&     tile_state)         ///< Global tile state descriptor
     {
-        InputT      items[ITEMS_PER_THREAD];
+        OutputT     items[ITEMS_PER_THREAD];
         OffsetT     selection_flags[ITEMS_PER_THREAD];
         OffsetT     selection_indices[ITEMS_PER_THREAD];
 
@@ -571,7 +576,7 @@ struct AgentSelectIf
         OffsetT             tile_offset,        ///< Tile offset
         ScanTileStateT&     tile_state)         ///< Global tile state descriptor
     {
-        InputT      items[ITEMS_PER_THREAD];
+        OutputT     items[ITEMS_PER_THREAD];
         OffsetT     selection_flags[ITEMS_PER_THREAD];
         OffsetT     selection_indices[ITEMS_PER_THREAD];
 
