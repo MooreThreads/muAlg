@@ -196,6 +196,34 @@ struct DeviceMergeSortPolicy
   // Architecture-specific tuning policies
   //----------------------------------------------------------------------------
 
+#if defined(__MUSACC_VER_MAJOR__)
+  /// MUSA MP_22 (S4000 series) - Conservative settings
+  struct Policy220 : ChainedPolicy<220, Policy220, Policy220>
+  {
+    using MergeSortPolicy =
+      AgentMergeSortPolicy<256,
+                           Nominal4BItemsToItems<KeyT>(9),
+                           cub::BLOCK_LOAD_WARP_TRANSPOSE,
+                           cub::LOAD_DEFAULT,
+                           cub::BLOCK_STORE_WARP_TRANSPOSE>;
+  };
+
+  /// MUSA MP_31 (S5000 series) - Optimized settings
+  struct Policy310 : ChainedPolicy<310, Policy310, Policy220>
+  {
+    using MergeSortPolicy =
+      AgentMergeSortPolicy<256,
+                           Nominal4BItemsToItems<KeyT>(11),
+                           cub::BLOCK_LOAD_WARP_TRANSPOSE,
+                           cub::LOAD_LDG,
+                           cub::BLOCK_STORE_WARP_TRANSPOSE>;
+  };
+
+  /// MaxPolicy for MUSA
+  using MaxPolicy = Policy310;
+
+#else // CUDA
+
   struct Policy350 : ChainedPolicy<350, Policy350, Policy350>
   {
     using MergeSortPolicy =
@@ -232,8 +260,10 @@ struct DeviceMergeSortPolicy
   };
 
 
-  /// MaxPolicy
+  /// MaxPolicy for CUDA
   using MaxPolicy = Policy600;
+
+#endif // __MUSACC_VER_MAJOR__
 };
 
 template <typename KeyInputIteratorT,

@@ -148,6 +148,38 @@ struct DeviceScanPolicy
       LargeValues ? BLOCK_STORE_WARP_TRANSPOSE_TIMESLICED
                   : BLOCK_STORE_WARP_TRANSPOSE;
 
+#if defined(__MUSACC_VER_MAJOR__)
+    /// MUSA MP_22 (S4000 series) - Conservative settings
+    struct Policy220 : ChainedPolicy<220, Policy220, Policy220>
+    {
+        typedef AgentScanPolicy<
+                128, 10,                                        ///< Threads per block, items per thread
+                OutputT,
+                BLOCK_LOAD_DIRECT,
+                LOAD_DEFAULT,
+                ScanTransposedStore,
+                BLOCK_SCAN_RAKING>
+            ScanPolicyT;
+    };
+
+    /// MUSA MP_31 (S5000 series) - Optimized settings
+    struct Policy310 : ChainedPolicy<310, Policy310, Policy220>
+    {
+        typedef AgentScanPolicy<
+                128, 12,                                        ///< Threads per block, items per thread
+                OutputT,
+                BLOCK_LOAD_DIRECT,
+                LOAD_LDG,
+                ScanTransposedStore,
+                BLOCK_SCAN_WARP_SCANS>
+            ScanPolicyT;
+    };
+
+    /// MaxPolicy for MUSA
+    typedef Policy310 MaxPolicy;
+
+#else // CUDA
+
     /// SM350
     struct Policy350 : ChainedPolicy<350, Policy350, Policy350>
     {
@@ -189,8 +221,10 @@ struct DeviceScanPolicy
             ScanPolicyT;
     };
 
-    /// MaxPolicy
+    /// MaxPolicy for CUDA
     typedef Policy600 MaxPolicy;
+
+#endif // __MUSACC_VER_MAJOR__
 };
 
 

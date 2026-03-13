@@ -19,6 +19,7 @@ REPORT_FILE="${CUB_DIR}/test_report.md"
 SKIP_CLEAN=false
 BUILD_ONLY=false
 EXCLUDE_TESTS="grid_barrier|namespace_wrapped"  # 默认排除的测试用例
+MUSA_ARCH="mp_31"  # 默认 MUSA 架构
 
 # Thrust 相关
 MUSA_INCLUDE_DIR="/usr/local/musa/include"
@@ -37,6 +38,7 @@ show_help() {
   -j, --jobs N      编译并行数 (默认: $(nproc))
   -T, --test-jobs N 测试并行数 (默认: 8)
   -g, --gpus DEVICES 设置 MUSA_VISIBLE_DEVICES (如: 0,1,2,3)
+  -a, --arch ARCH   MUSA 目标架构 (默认: mp_31, 支持: mp_22, mp_31)
   -n, --no-clean    不删除 build 目录 (增量编译)
   -E, --exclude RE  排除匹配正则表达式的测试 (默认: ${EXCLUDE_TESTS})
                     传空字符串 "" 可取消默认排除
@@ -94,6 +96,10 @@ while [[ $# -gt 0 ]]; do
             MUSA_DEVICES="$2"
             shift 2
             ;;
+        -a|--arch)
+            MUSA_ARCH="$2"
+            shift 2
+            ;;
         -E|--exclude)
             EXCLUDE_TESTS="$2"
             shift 2
@@ -139,8 +145,9 @@ fi
 echo ""
 echo "=========================================="
 echo "CMake 配置 (Ninja)..."
+echo "MUSA 架构: ${MUSA_ARCH}"
 echo "=========================================="
-cmake -G Ninja -DMUSA_64_BIT_DEVICE_CODE=ON -S "${SOURCE_DIR}" -B build
+cmake -G Ninja -DMUSA_64_BIT_DEVICE_CODE=ON -DMUSA_ARCH_LIST="${MUSA_ARCH}" -S "${SOURCE_DIR}" -B build
 
 # 4. 并行编译
 echo ""

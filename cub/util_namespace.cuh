@@ -170,10 +170,21 @@
 #define CUB_DETAIL_MAGIC_NS_BEGIN
 #define CUB_DETAIL_MAGIC_NS_END
 #else // not defined(CUB_DISABLE_NAMESPACE_MAGIC)
+// MUSA: Define MUSA_ARCH_LIST macro for namespace magic
+#if defined(__MUSACC_VER_MAJOR__) && !defined(MUSA_ARCH_LIST)
+    #ifdef __MUSA_ARCH__
+        #define MUSA_ARCH_LIST __MUSA_ARCH__
+    #else
+        #define MUSA_ARCH_LIST 310  // 默认值
+    #endif
+#endif
 #if defined(_NVHPC_CUDA)
 #define CUB_DETAIL_MAGIC_NS_BEGIN inline namespace CUB_DETAIL_MAGIC_NS_NAME(CUB_VERSION, NV_TARGET_SM_INTEGER_LIST) {
 #define CUB_DETAIL_MAGIC_NS_END }
-#else // not defined(_NVHPC_CUDA)
+#elif defined(__MUSACC_VER_MAJOR__)
+#define CUB_DETAIL_MAGIC_NS_BEGIN inline namespace CUB_DETAIL_MAGIC_NS_NAME(CUB_VERSION, MUSA_ARCH_LIST) {
+#define CUB_DETAIL_MAGIC_NS_END }
+#else // not defined(_NVHPC_CUDA) and not defined(__MUSACC_VER_MAJOR__)
 #define CUB_DETAIL_MAGIC_NS_BEGIN inline namespace CUB_DETAIL_MAGIC_NS_NAME(CUB_VERSION, __CUDA_ARCH_LIST__) {
 #define CUB_DETAIL_MAGIC_NS_END }
 #endif // not defined(_NVHPC_CUDA)

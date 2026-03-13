@@ -763,6 +763,94 @@ struct DeviceSegmentedSortPolicy
   // Architecture-specific tuning policies
   //----------------------------------------------------------------------------
 
+#if defined(__MUSACC_VER_MAJOR__)
+  /// MUSA MP_22 (S4000 series) - Conservative settings
+  struct Policy220 : ChainedPolicy<220, Policy220, Policy220>
+  {
+    constexpr static int BLOCK_THREADS = 128;
+    constexpr static int RADIX_BITS = sizeof(KeyT) > 1 ? 5 : 4;
+    constexpr static int PARTITIONING_THRESHOLD = 300;
+
+    using LargeSegmentPolicy =
+      AgentRadixSortDownsweepPolicy<BLOCK_THREADS,
+                                    7,
+                                    DominantT,
+                                    BLOCK_LOAD_WARP_TRANSPOSE,
+                                    LOAD_DEFAULT,
+                                    RADIX_RANK_MATCH,
+                                    BLOCK_SCAN_WARP_SCANS,
+                                    RADIX_BITS>;
+
+    constexpr static int ITEMS_PER_SMALL_THREAD =
+      Nominal4BItemsToItems<DominantT>(4);
+
+    constexpr static int ITEMS_PER_MEDIUM_THREAD =
+      Nominal4BItemsToItems<DominantT>(4);
+
+    using SmallAndMediumSegmentedSortPolicyT =
+      AgentSmallAndMediumSegmentedSortPolicy<
+
+        BLOCK_THREADS,
+
+        // Small policy
+        cub::AgentSubWarpMergeSortPolicy<4,
+                                         ITEMS_PER_SMALL_THREAD,
+                                         WarpLoadAlgorithm::WARP_LOAD_DIRECT,
+                                         CacheLoadModifier::LOAD_DEFAULT>,
+
+        // Medium policy
+        cub::AgentSubWarpMergeSortPolicy<32,
+                                         ITEMS_PER_MEDIUM_THREAD,
+                                         WarpLoadAlgorithm::WARP_LOAD_DIRECT,
+                                         CacheLoadModifier::LOAD_DEFAULT>>;
+  };
+
+  /// MUSA MP_31 (S5000 series) - Optimized settings
+  struct Policy310 : ChainedPolicy<310, Policy310, Policy220>
+  {
+    constexpr static int BLOCK_THREADS = 128;
+    constexpr static int RADIX_BITS = sizeof(KeyT) > 1 ? 6 : 4;
+    constexpr static int PARTITIONING_THRESHOLD = 300;
+
+    using LargeSegmentPolicy =
+      AgentRadixSortDownsweepPolicy<BLOCK_THREADS,
+                                    9,
+                                    DominantT,
+                                    BLOCK_LOAD_WARP_TRANSPOSE,
+                                    LOAD_DEFAULT,
+                                    RADIX_RANK_MATCH,
+                                    BLOCK_SCAN_WARP_SCANS,
+                                    RADIX_BITS>;
+
+    constexpr static int ITEMS_PER_SMALL_THREAD =
+      Nominal4BItemsToItems<DominantT>(5);
+
+    constexpr static int ITEMS_PER_MEDIUM_THREAD =
+      Nominal4BItemsToItems<DominantT>(5);
+
+    using SmallAndMediumSegmentedSortPolicyT =
+      AgentSmallAndMediumSegmentedSortPolicy<
+
+        BLOCK_THREADS,
+
+        // Small policy
+        cub::AgentSubWarpMergeSortPolicy<4,
+                                         ITEMS_PER_SMALL_THREAD,
+                                         WarpLoadAlgorithm::WARP_LOAD_DIRECT,
+                                         CacheLoadModifier::LOAD_DEFAULT>,
+
+        // Medium policy
+        cub::AgentSubWarpMergeSortPolicy<32,
+                                         ITEMS_PER_MEDIUM_THREAD,
+                                         WarpLoadAlgorithm::WARP_LOAD_DIRECT,
+                                         CacheLoadModifier::LOAD_DEFAULT>>;
+  };
+
+  /// MaxPolicy for MUSA
+  using MaxPolicy = Policy310;
+
+#else // CUDA
+
   struct Policy350 : ChainedPolicy<350, Policy350, Policy350>
   {
     constexpr static int BLOCK_THREADS = 128;
@@ -1083,8 +1171,10 @@ struct DeviceSegmentedSortPolicy
                                          CacheLoadModifier::LOAD_LDG>>;
   };
 
-  /// MaxPolicy
+  /// MaxPolicy for CUDA
   using MaxPolicy = Policy860;
+
+#endif // __MUSACC_VER_MAJOR__
 };
 
 template <bool IS_DESCENDING,

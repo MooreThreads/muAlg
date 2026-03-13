@@ -125,7 +125,51 @@ struct DeviceScanByKeyPolicy
     static constexpr size_t MaxInputBytes = (sizeof(KeyT) > sizeof(ValueT) ? sizeof(KeyT) : sizeof(ValueT));
     static constexpr size_t CombinedInputBytes = sizeof(KeyT) + sizeof(ValueT);
 
-    // SM100 - MUSA 兼容的保守策略，使用 LOAD_DEFAULT
+#if defined(__MUSACC_VER_MAJOR__)
+    /// MUSA MP_22 (S4000 series) - Conservative settings
+    struct Policy220 : ChainedPolicy<220, Policy220, Policy220>
+    {
+        enum
+        {
+            NOMINAL_4B_ITEMS_PER_THREAD = 5,
+            ITEMS_PER_THREAD = ((MaxInputBytes <= 8) ? 5 :
+                Nominal4BItemsToItemsCombined(NOMINAL_4B_ITEMS_PER_THREAD, CombinedInputBytes)),
+        };
+
+        typedef AgentScanByKeyPolicy<
+                128, ITEMS_PER_THREAD,
+                BLOCK_LOAD_WARP_TRANSPOSE,
+                LOAD_DEFAULT,
+                BLOCK_SCAN_WARP_SCANS,
+                BLOCK_STORE_WARP_TRANSPOSE>
+            ScanByKeyPolicyT;
+    };
+
+    /// MUSA MP_31 (S5000 series) - Optimized settings
+    struct Policy310 : ChainedPolicy<310, Policy310, Policy220>
+    {
+        enum
+        {
+            NOMINAL_4B_ITEMS_PER_THREAD = 6,
+            ITEMS_PER_THREAD = ((MaxInputBytes <= 8) ? 6 :
+                Nominal4BItemsToItemsCombined(NOMINAL_4B_ITEMS_PER_THREAD, CombinedInputBytes)),
+        };
+
+        typedef AgentScanByKeyPolicy<
+                128, ITEMS_PER_THREAD,
+                BLOCK_LOAD_WARP_TRANSPOSE,
+                LOAD_LDG,
+                BLOCK_SCAN_WARP_SCANS,
+                BLOCK_STORE_WARP_TRANSPOSE>
+            ScanByKeyPolicyT;
+    };
+
+    /// MaxPolicy for MUSA
+    typedef Policy310 MaxPolicy;
+
+#else // CUDA
+
+    // SM100 - Conservative settings for older architectures
     struct Policy100 : ChainedPolicy<100, Policy100, Policy100>
     {
         enum
@@ -183,8 +227,10 @@ struct DeviceScanByKeyPolicy
             ScanByKeyPolicyT;
     };
 
-    /// MaxPolicy
+    /// MaxPolicy for CUDA
     typedef Policy520 MaxPolicy;
+
+#endif // __MUSACC_VER_MAJOR__
 };
 
 

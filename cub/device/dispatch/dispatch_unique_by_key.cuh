@@ -99,6 +99,45 @@ struct DeviceUniqueByKeyPolicy
 {
     using KeyT = typename std::iterator_traits<KeyInputIteratorT>::value_type;
 
+#if defined(__MUSACC_VER_MAJOR__)
+    /// MUSA MP_22 (S4000 series) - Conservative settings
+    struct Policy220 : ChainedPolicy<220, Policy220, Policy220> {
+        const static int INPUT_SIZE = sizeof(KeyT);
+        enum
+        {
+            NOMINAL_4B_ITEMS_PER_THREAD = 7,
+            ITEMS_PER_THREAD = Nominal4BItemsToItems<KeyT>(NOMINAL_4B_ITEMS_PER_THREAD),
+        };
+
+        using UniqueByKeyPolicyT = AgentUniqueByKeyPolicy<128,
+                          ITEMS_PER_THREAD,
+                          cub::BLOCK_LOAD_WARP_TRANSPOSE,
+                          cub::LOAD_DEFAULT,
+                          cub::BLOCK_SCAN_WARP_SCANS>;
+    };
+
+    /// MUSA MP_31 (S5000 series) - Optimized settings
+    struct Policy310 : ChainedPolicy<310, Policy310, Policy220>
+    {
+        const static int INPUT_SIZE = sizeof(KeyT);
+        enum
+        {
+            NOMINAL_4B_ITEMS_PER_THREAD = 9,
+            ITEMS_PER_THREAD = Nominal4BItemsToItems<KeyT>(NOMINAL_4B_ITEMS_PER_THREAD),
+        };
+
+        using UniqueByKeyPolicyT = AgentUniqueByKeyPolicy<128,
+                          ITEMS_PER_THREAD,
+                          cub::BLOCK_LOAD_WARP_TRANSPOSE,
+                          cub::LOAD_LDG,
+                          cub::BLOCK_SCAN_WARP_SCANS>;
+    };
+
+    /// MaxPolicy for MUSA
+    using MaxPolicy = Policy310;
+
+#else // CUDA
+
     // SM350
     struct Policy350 : ChainedPolicy<350, Policy350, Policy350> {
         const static int INPUT_SIZE = sizeof(KeyT);
@@ -132,8 +171,10 @@ struct DeviceUniqueByKeyPolicy
                             cub::BLOCK_SCAN_WARP_SCANS>;
     };
 
-    /// MaxPolicy
+    /// MaxPolicy for CUDA
     using MaxPolicy = Policy520;
+
+#endif // __MUSACC_VER_MAJOR__
 };
 
 

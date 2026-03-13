@@ -116,6 +116,33 @@ struct DeviceAdjacentDifferencePolicy
   // Architecture-specific tuning policies
   //------------------------------------------------------------------------------
 
+#if defined(__MUSACC_VER_MAJOR__)
+  /// MUSA MP_22 (S4000 series) - Conservative settings
+  struct Policy220 : ChainedPolicy<220, Policy220, Policy220>
+  {
+    using AdjacentDifferencePolicy =
+      AgentAdjacentDifferencePolicy<128,
+                                    Nominal8BItemsToItems<ValueT>(6),
+                                    BLOCK_LOAD_WARP_TRANSPOSE,
+                                    LOAD_DEFAULT,
+                                    BLOCK_STORE_WARP_TRANSPOSE>;
+  };
+
+  /// MUSA MP_31 (S5000 series) - Optimized settings
+  struct Policy310 : ChainedPolicy<310, Policy310, Policy220>
+  {
+    using AdjacentDifferencePolicy =
+      AgentAdjacentDifferencePolicy<128,
+                                    Nominal8BItemsToItems<ValueT>(7),
+                                    BLOCK_LOAD_WARP_TRANSPOSE,
+                                    LOAD_LDG,
+                                    BLOCK_STORE_WARP_TRANSPOSE>;
+  };
+
+  using MaxPolicy = Policy310;
+
+#else // CUDA
+
   struct Policy300 : ChainedPolicy<300, Policy300, Policy300>
   {
     using AdjacentDifferencePolicy =
@@ -137,6 +164,8 @@ struct DeviceAdjacentDifferencePolicy
   };
 
   using MaxPolicy = Policy350;
+
+#endif // __MUSACC_VER_MAJOR__
 };
 
 template <typename InputIteratorT,

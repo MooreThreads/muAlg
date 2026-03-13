@@ -641,8 +641,67 @@ struct DeviceRadixSortPolicy
     // Architecture-specific tuning policies
     //------------------------------------------------------------------------------
 
+#if defined(__MUSACC_VER_MAJOR__)
+    /// SM220 (MUSA MP_22 - S4000 series) - Conservative settings
+    struct Policy220 : ChainedPolicy<220, Policy220, Policy220>
+    {
+        enum {
+            PRIMARY_RADIX_BITS      = (sizeof(KeyT) > 1) ? 5 : 4,    // Conservative settings for MP_22
+            ONESWEEP = false,
+            ONESWEEP_RADIX_BITS = 5,
+        };
+
+        // Histogram policy
+        typedef AgentRadixSortHistogramPolicy <128, 5, 1, KeyT, ONESWEEP_RADIX_BITS> HistogramPolicy;
+
+        // Exclusive sum policy
+        typedef AgentRadixSortExclusiveSumPolicy <128, ONESWEEP_RADIX_BITS> ExclusiveSumPolicy;
+
+        // Onesweep policy
+        typedef AgentRadixSortOnesweepPolicy <128, 12, DominantT, 1,
+            RADIX_RANK_MATCH_EARLY_COUNTS_ANY, BLOCK_SCAN_WARP_SCANS, RADIX_SORT_STORE_DIRECT,
+            ONESWEEP_RADIX_BITS> OnesweepPolicy;
+
+        // Scan policy
+        typedef AgentScanPolicy <256, 4, OffsetT, BLOCK_LOAD_DIRECT, LOAD_DEFAULT, BLOCK_STORE_DIRECT, BLOCK_SCAN_WARP_SCANS> ScanPolicy;
+
+        // Keys-only downsweep policies
+        typedef AgentRadixSortDownsweepPolicy <128, 6, DominantT, BLOCK_LOAD_DIRECT, LOAD_DEFAULT, RADIX_RANK_MATCH, BLOCK_SCAN_WARP_SCANS, PRIMARY_RADIX_BITS> DownsweepPolicyKeys;
+        typedef AgentRadixSortDownsweepPolicy <64, 12, DominantT, BLOCK_LOAD_DIRECT, LOAD_DEFAULT, RADIX_RANK_MEMOIZE, BLOCK_SCAN_WARP_SCANS, PRIMARY_RADIX_BITS - 1> AltDownsweepPolicyKeys;
+
+        // Key-value pairs downsweep policies
+        typedef DownsweepPolicyKeys DownsweepPolicyPairs;
+        typedef AgentRadixSortDownsweepPolicy <64, 10, DominantT, BLOCK_LOAD_DIRECT, LOAD_DEFAULT, RADIX_RANK_MEMOIZE, BLOCK_SCAN_WARP_SCANS, PRIMARY_RADIX_BITS - 1> AltDownsweepPolicyPairs;
+
+        // Downsweep policies
+        using DownsweepPolicy =
+          cub::detail::conditional_t<
+            KEYS_ONLY, DownsweepPolicyKeys, DownsweepPolicyPairs>;
+
+        using AltDownsweepPolicy =
+          cub::detail::conditional_t<KEYS_ONLY,
+                                   AltDownsweepPolicyKeys,
+                                   AltDownsweepPolicyPairs>;
+
+        // Upsweep policies
+        using UpsweepPolicy    = DownsweepPolicy;
+        using AltUpsweepPolicy = AltDownsweepPolicy;
+
+        // Single-tile policy
+        using SingleTilePolicy = DownsweepPolicy;
+
+        // Segmented policies
+        using SegmentedPolicy    = DownsweepPolicy;
+        using AltSegmentedPolicy = AltDownsweepPolicy;
+    };
+
+
+    /// SM310 (MUSA MP_31 - S5000 series) - Optimized settings
+    struct Policy310 : ChainedPolicy<310, Policy310, Policy220>
+#else
     /// SM31 (MUSA MP_31)
     struct Policy310 : ChainedPolicy<310, Policy310, Policy310>
+#endif
     {
         enum {
             PRIMARY_RADIX_BITS      = (sizeof(KeyT) > 1) ? 5 : 4,    // Conservative settings for MP_31
@@ -1008,7 +1067,11 @@ struct DeviceRadixSortPolicy
 
 
     /// MaxPolicy
+#if defined(__MUSACC_VER_MAJOR__)
+    typedef Policy310 MaxPolicy;
+#else
     typedef Policy800 MaxPolicy;
+#endif
 
 
 };

@@ -84,6 +84,13 @@ file(GLOB test_srcs
 list(REMOVE_ITEM test_srcs "test_device_spmv.cu")
 list(REMOVE_ITEM test_srcs "test_device_spmv_no_thrust.cu")
 
+# Exclude test_warp_exchange for mp_22 architecture due to compiler backend bug
+# Error: "Cannot select: v6i32,ch = load<(load (s192)..." - non-power-of-2 vector load
+if(MUSA_ARCH_LIST STREQUAL "mp_22")
+  list(REMOVE_ITEM test_srcs "test_warp_exchange.cu")
+  message(STATUS "Excluding test_warp_exchange.cu for mp_22 architecture (compiler backend limitation)")
+endif()
+
 ## cub_add_test
 #
 # Add a test executable and register it with ctest.

@@ -143,6 +143,45 @@ struct DeviceRleDispatch
      * Tuning policies
      ******************************************************************************/
 
+#if defined(__MUSACC_VER_MAJOR__)
+    /// MUSA MP_22 (S4000 series) - Conservative settings
+    struct Policy220
+    {
+        enum {
+            NOMINAL_4B_ITEMS_PER_THREAD = 12,
+            ITEMS_PER_THREAD            = CUB_MIN(NOMINAL_4B_ITEMS_PER_THREAD, CUB_MAX(1, (NOMINAL_4B_ITEMS_PER_THREAD * 4 / sizeof(T)))),
+        };
+
+        typedef AgentRlePolicy<
+                96,
+                ITEMS_PER_THREAD,
+                BLOCK_LOAD_DIRECT,
+                LOAD_DEFAULT,
+                true,
+                BLOCK_SCAN_WARP_SCANS>
+            RleSweepPolicy;
+    };
+
+    /// MUSA MP_31 (S5000 series) - Optimized settings
+    struct Policy310
+    {
+        enum {
+            NOMINAL_4B_ITEMS_PER_THREAD = 15,
+            ITEMS_PER_THREAD            = CUB_MIN(NOMINAL_4B_ITEMS_PER_THREAD, CUB_MAX(1, (NOMINAL_4B_ITEMS_PER_THREAD * 4 / sizeof(T)))),
+        };
+
+        typedef AgentRlePolicy<
+                96,
+                ITEMS_PER_THREAD,
+                BLOCK_LOAD_DIRECT,
+                LOAD_LDG,
+                true,
+                BLOCK_SCAN_WARP_SCANS>
+            RleSweepPolicy;
+    };
+
+#else // CUDA
+
     /// SM35
     struct Policy350
     {
@@ -161,11 +200,21 @@ struct DeviceRleDispatch
             RleSweepPolicy;
     };
 
+#endif // __MUSACC_VER_MAJOR__
+
     /******************************************************************************
      * Tuning policies of current PTX compiler pass
      ******************************************************************************/
 
+#if defined(__MUSACC_VER_MAJOR__)
+    #if (CUB_PTX_ARCH >= 310)
+        typedef Policy310 PtxPolicy;
+    #else
+        typedef Policy220 PtxPolicy;
+    #endif
+#else
     typedef Policy350 PtxPolicy;
+#endif
 
     // "Opaque" policies (whose parameterizations aren't reflected in the type signature)
     struct PtxRleSweepPolicy : PtxPolicy::RleSweepPolicy {};
@@ -197,7 +246,7 @@ struct DeviceRleDispatch
 
                 // (There's only one policy right now)
                 (void)ptx_version;
-                device_rle_config.template Init<typename Policy350::RleSweepPolicy>();
+                device_rle_config.template Init<typename PtxPolicy::RleSweepPolicy>();
             #endif
         }
     }

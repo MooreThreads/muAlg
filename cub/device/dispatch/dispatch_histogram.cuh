@@ -340,6 +340,37 @@ struct DispatchHistogram
         };
     };
 
+#if defined(__MUSACC_VER_MAJOR__)
+    /// MUSA MP_22 (S4000 series) - Conservative settings
+    struct Policy220
+    {
+        typedef AgentHistogramPolicy<
+                128,
+                TScale<6>::VALUE,
+                BLOCK_LOAD_DIRECT,
+                LOAD_DEFAULT,
+                true,
+                BLEND,
+                true>
+            HistogramSweepPolicy;
+    };
+
+    /// MUSA MP_31 (S5000 series) - Optimized settings
+    struct Policy310
+    {
+        typedef AgentHistogramPolicy<
+                128,
+                TScale<8>::VALUE,
+                BLOCK_LOAD_DIRECT,
+                LOAD_LDG,
+                true,
+                BLEND,
+                true>
+            HistogramSweepPolicy;
+    };
+
+#else // CUDA
+
     /// SM35
     struct Policy350
     {
@@ -370,18 +401,28 @@ struct DispatchHistogram
             HistogramSweepPolicy;
     };
 
+#endif // __MUSACC_VER_MAJOR__
+
 
 
     //---------------------------------------------------------------------
     // Tuning policies of current PTX compiler pass
     //---------------------------------------------------------------------
 
-#if (CUB_PTX_ARCH >= 500)
-    typedef Policy500 PtxPolicy;
-
+#if defined(__MUSACC_VER_MAJOR__)
+    // MUSA architecture selection
+    #if (CUB_PTX_ARCH >= 310)
+        typedef Policy310 PtxPolicy;
+    #else
+        typedef Policy220 PtxPolicy;
+    #endif
 #else
-    typedef Policy350 PtxPolicy;
-
+    // CUDA architecture selection
+    #if (CUB_PTX_ARCH >= 500)
+        typedef Policy500 PtxPolicy;
+    #else
+        typedef Policy350 PtxPolicy;
+    #endif
 #endif
 
     // "Opaque" policies (whose parameterizations aren't reflected in the type signature)
@@ -413,14 +454,27 @@ struct DispatchHistogram
         {
             #if CUB_INCLUDE_HOST_CODE
                 // We're on the host, so lookup and initialize the kernel dispatch configurations with the policies that match the device's PTX version
-                if (ptx_version >= 500)
-                {
-                    result = histogram_sweep_config.template Init<typename Policy500::HistogramSweepPolicy>();
-                }
-                else
-                {
-                    result = histogram_sweep_config.template Init<typename Policy350::HistogramSweepPolicy>();
-                }
+                #if defined(__MUSACC_VER_MAJOR__)
+                    // MUSA architecture selection
+                    if (ptx_version >= 310)
+                    {
+                        result = histogram_sweep_config.template Init<typename Policy310::HistogramSweepPolicy>();
+                    }
+                    else
+                    {
+                        result = histogram_sweep_config.template Init<typename Policy220::HistogramSweepPolicy>();
+                    }
+                #else
+                    // CUDA architecture selection
+                    if (ptx_version >= 500)
+                    {
+                        result = histogram_sweep_config.template Init<typename Policy500::HistogramSweepPolicy>();
+                    }
+                    else
+                    {
+                        result = histogram_sweep_config.template Init<typename Policy350::HistogramSweepPolicy>();
+                    }
+                #endif
             #endif
         }
         return result;

@@ -242,6 +242,40 @@ struct DeviceReducePolicy
     // Architecture-specific tuning policies
     //------------------------------------------------------------------------------
 
+#if defined(__MUSACC_VER_MAJOR__)
+    /// MUSA MP_22 (S4000 series) - Conservative settings
+    struct Policy220 : ChainedPolicy<220, Policy220, Policy220>
+    {
+        typedef AgentReducePolicy<
+                256, 16, InputT,                       ///< Threads per block, items per thread
+                2,                                      ///< Number of items per vectorized load
+                BLOCK_REDUCE_WARP_REDUCTIONS,
+                LOAD_DEFAULT>                           ///< Conservative cache modifier
+            ReducePolicy;
+
+        typedef ReducePolicy SingleTilePolicy;
+        typedef ReducePolicy SegmentedReducePolicy;
+    };
+
+    /// MUSA MP_31 (S5000 series) - Optimized settings
+    struct Policy310 : ChainedPolicy<310, Policy310, Policy220>
+    {
+        typedef AgentReducePolicy<
+                256, 20, InputT,                       ///< Threads per block, items per thread
+                4,                                      ///< Number of items per vectorized load
+                BLOCK_REDUCE_WARP_REDUCTIONS,
+                LOAD_LDG>                               ///< Optimized cache modifier
+            ReducePolicy;
+
+        typedef ReducePolicy SingleTilePolicy;
+        typedef ReducePolicy SegmentedReducePolicy;
+    };
+
+    /// MaxPolicy for MUSA
+    typedef Policy310 MaxPolicy;
+
+#else // CUDA
+
     /// SM30
     struct Policy300 : ChainedPolicy<300, Policy300, Policy300>
     {
@@ -297,9 +331,10 @@ struct DeviceReducePolicy
         typedef ReducePolicy SegmentedReducePolicy;
     };
 
-
-    /// MaxPolicy
+    /// MaxPolicy for CUDA
     typedef Policy600 MaxPolicy;
+
+#endif // __MUSACC_VER_MAJOR__
 
 };
 

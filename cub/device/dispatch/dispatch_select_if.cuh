@@ -148,6 +148,43 @@ struct DispatchSelectIf
      * Tuning policies
      ******************************************************************************/
 
+#if defined(__MUSACC_VER_MAJOR__)
+    /// MUSA MP_22 (S4000 series) - Conservative settings
+    struct Policy220
+    {
+        enum {
+            NOMINAL_4B_ITEMS_PER_THREAD = 8,
+            ITEMS_PER_THREAD            = CUB_MIN(NOMINAL_4B_ITEMS_PER_THREAD, CUB_MAX(1, (NOMINAL_4B_ITEMS_PER_THREAD * 4 / sizeof(InputT)))),
+        };
+
+        typedef AgentSelectIfPolicy<
+                128,
+                ITEMS_PER_THREAD,
+                BLOCK_LOAD_DIRECT,
+                LOAD_DEFAULT,
+                BLOCK_SCAN_WARP_SCANS>
+            SelectIfPolicyT;
+    };
+
+    /// MUSA MP_31 (S5000 series) - Optimized settings
+    struct Policy310
+    {
+        enum {
+            NOMINAL_4B_ITEMS_PER_THREAD = 10,
+            ITEMS_PER_THREAD            = CUB_MIN(NOMINAL_4B_ITEMS_PER_THREAD, CUB_MAX(1, (NOMINAL_4B_ITEMS_PER_THREAD * 4 / sizeof(InputT)))),
+        };
+
+        typedef AgentSelectIfPolicy<
+                128,
+                ITEMS_PER_THREAD,
+                BLOCK_LOAD_DIRECT,
+                LOAD_LDG,
+                BLOCK_SCAN_WARP_SCANS>
+            SelectIfPolicyT;
+    };
+
+#else // CUDA
+
     /// SM35
     struct Policy350
     {
@@ -165,11 +202,21 @@ struct DispatchSelectIf
             SelectIfPolicyT;
     };
 
+#endif // __MUSACC_VER_MAJOR__
+
     /******************************************************************************
      * Tuning policies of current PTX compiler pass
      ******************************************************************************/
 
+#if defined(__MUSACC_VER_MAJOR__)
+    #if (CUB_PTX_ARCH >= 310)
+        typedef Policy310 PtxPolicy;
+    #else
+        typedef Policy220 PtxPolicy;
+    #endif
+#else
     typedef Policy350 PtxPolicy;
+#endif
 
     // "Opaque" policies (whose parameterizations aren't reflected in the type signature)
     struct PtxSelectIfPolicyT : PtxPolicy::SelectIfPolicyT {};
@@ -202,7 +249,7 @@ struct DispatchSelectIf
 
                 // (There's only one policy right now)
                 (void)ptx_version;
-                select_if_config.template Init<typename Policy350::SelectIfPolicyT>();
+                select_if_config.template Init<typename PtxPolicy::SelectIfPolicyT>();
             #endif
         }
     }

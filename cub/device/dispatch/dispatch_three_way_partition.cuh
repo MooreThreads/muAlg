@@ -167,6 +167,35 @@ struct DispatchThreeWayPartitionIf
    * Tuning policies
    ****************************************************************************/
 
+#if defined(__MUSACC_VER_MAJOR__)
+  /// MUSA MP_22 (S4000 series) - Conservative settings
+  struct Policy220
+  {
+    constexpr static int ITEMS_PER_THREAD = Nominal4BItemsToItems<InputT>(8);
+
+    using ThreeWayPartitionPolicy =
+      cub::AgentThreeWayPartitionPolicy<256,
+                                        ITEMS_PER_THREAD,
+                                        cub::BLOCK_LOAD_DIRECT,
+                                        cub::LOAD_DEFAULT,
+                                        cub::BLOCK_SCAN_WARP_SCANS>;
+  };
+
+  /// MUSA MP_31 (S5000 series) - Optimized settings
+  struct Policy310
+  {
+    constexpr static int ITEMS_PER_THREAD = Nominal4BItemsToItems<InputT>(9);
+
+    using ThreeWayPartitionPolicy =
+      cub::AgentThreeWayPartitionPolicy<256,
+                                        ITEMS_PER_THREAD,
+                                        cub::BLOCK_LOAD_DIRECT,
+                                        cub::LOAD_LDG,
+                                        cub::BLOCK_SCAN_WARP_SCANS>;
+  };
+
+#else // CUDA
+
   /// SM35
   struct Policy350
   {
@@ -180,11 +209,21 @@ struct DispatchThreeWayPartitionIf
                                         cub::BLOCK_SCAN_WARP_SCANS>;
   };
 
+#endif // __MUSACC_VER_MAJOR__
+
   /*****************************************************************************
    * Tuning policies of current PTX compiler pass
    ****************************************************************************/
 
+#if defined(__MUSACC_VER_MAJOR__)
+  #if (CUB_PTX_ARCH >= 310)
+    using PtxPolicy = Policy310;
+  #else
+    using PtxPolicy = Policy220;
+  #endif
+#else
   using PtxPolicy = Policy350;
+#endif
 
   // "Opaque" policies (whose parameterizations aren't reflected in the type signature)
   struct PtxThreeWayPartitionPolicyT : PtxPolicy::ThreeWayPartitionPolicy {};
@@ -220,7 +259,7 @@ struct DispatchThreeWayPartitionIf
 
       // (There's only one policy right now)
       (void)ptx_version;
-      select_if_config.template Init<typename Policy350::ThreeWayPartitionPolicy>();
+      select_if_config.template Init<typename PtxPolicy::ThreeWayPartitionPolicy>();
 #endif
     }
   }

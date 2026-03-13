@@ -13,7 +13,24 @@ project(CUB NONE)
 # MUSA Configuration
 list(APPEND CMAKE_MODULE_PATH /usr/local/musa/cmake)
 find_package(MUSA REQUIRED)
-set(MUSA_MCC_FLAGS --offload-arch=mp_31 -std=c++17)
+
+# MUSA Architecture Configuration
+set(MUSA_SUPPORTED_ARCHS mp_22 mp_31)
+set(MUSA_ARCH_LIST "mp_31" CACHE STRING "MUSA target architectures (semicolon-separated: 'mp_22', 'mp_31', or 'mp_22;mp_31')")
+
+# Validate and build flags
+set(MUSA_ARCH_FLAGS "")
+foreach(arch IN LISTS MUSA_ARCH_LIST)
+    if(NOT arch IN_LIST MUSA_SUPPORTED_ARCHS)
+        message(FATAL_ERROR "Unsupported MUSA architecture: ${arch}. Supported: ${MUSA_SUPPORTED_ARCHS}")
+    endif()
+    string(APPEND MUSA_ARCH_FLAGS "--offload-arch=${arch} ")
+endforeach()
+string(STRIP "${MUSA_ARCH_FLAGS}" MUSA_ARCH_FLAGS)
+set(MUSA_MCC_FLAGS ${MUSA_ARCH_FLAGS} -std=c++17)
+
+message(STATUS "MUSA Architectures: ${MUSA_ARCH_LIST}")
+message(STATUS "MUSA Flags: ${MUSA_MCC_FLAGS}")
 
 
 # Determine whether CUB is the top-level project or included into
