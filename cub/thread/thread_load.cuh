@@ -272,6 +272,58 @@ struct IterateThreadLoad<MAX, MAX>
 #undef _CUB_LOAD_16
 
 
+/**
+ * Specializations for signed char vector types using MUSA's built-in __ldg
+ * These are needed because the generic volatile read approach doesn't work
+ * correctly for char2/char4 in MUSA.
+ */
+#ifdef __MUSACC_VER_MAJOR__
+template<>
+__device__ __forceinline__ char2 ThreadLoad<LOAD_LDG, char2 *>(char2 *ptr)
+{
+#if defined(__MUSA_ARCH__)
+    return __ldg(ptr);
+#else
+    // Host code path - just do a regular load
+    return *ptr;
+#endif
+}
+
+template<>
+__device__ __forceinline__ char2 ThreadLoad<LOAD_LDG, char2 const *>(char2 const *ptr)
+{
+#if defined(__MUSA_ARCH__)
+    return __ldg(ptr);
+#else
+    // Host code path - just do a regular load
+    return *ptr;
+#endif
+}
+
+template<>
+__device__ __forceinline__ char4 ThreadLoad<LOAD_LDG, char4 *>(char4 *ptr)
+{
+#if defined(__MUSA_ARCH__)
+    return __ldg(ptr);
+#else
+    // Host code path - just do a regular load
+    return *ptr;
+#endif
+}
+
+template<>
+__device__ __forceinline__ char4 ThreadLoad<LOAD_LDG, char4 const *>(char4 const *ptr)
+{
+#if defined(__MUSA_ARCH__)
+    return __ldg(ptr);
+#else
+    // Host code path - just do a regular load
+    return *ptr;
+#endif
+}
+#endif // __MUSACC_VER_MAJOR__
+
+
 
 /**
  * ThreadLoad definition for LOAD_DEFAULT modifier on iterator types

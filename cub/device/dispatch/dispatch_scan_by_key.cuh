@@ -125,8 +125,27 @@ struct DeviceScanByKeyPolicy
     static constexpr size_t MaxInputBytes = (sizeof(KeyT) > sizeof(ValueT) ? sizeof(KeyT) : sizeof(ValueT));
     static constexpr size_t CombinedInputBytes = sizeof(KeyT) + sizeof(ValueT);
 
+    // SM100 - MUSA 兼容的保守策略，使用 LOAD_DEFAULT
+    struct Policy100 : ChainedPolicy<100, Policy100, Policy100>
+    {
+        enum
+        {
+            NOMINAL_4B_ITEMS_PER_THREAD = 6,
+            ITEMS_PER_THREAD = ((MaxInputBytes <= 8) ? 6 :
+                Nominal4BItemsToItemsCombined(NOMINAL_4B_ITEMS_PER_THREAD, CombinedInputBytes)),
+        };
+
+        typedef AgentScanByKeyPolicy<
+                128, ITEMS_PER_THREAD,
+                BLOCK_LOAD_WARP_TRANSPOSE,
+                LOAD_DEFAULT,
+                BLOCK_SCAN_WARP_SCANS,
+                BLOCK_STORE_WARP_TRANSPOSE>
+            ScanByKeyPolicyT;
+    };
+
     // SM350
-    struct Policy350 : ChainedPolicy<350, Policy350, Policy350>
+    struct Policy350 : ChainedPolicy<350, Policy350, Policy100>
     {
         enum
         {

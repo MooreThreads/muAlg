@@ -257,10 +257,19 @@ struct AgentReduce
             vec_items[i] = d_vec_in[BLOCK_THREADS * i];
 
         // Convert from input type to output type
+        // Note: MUSA compiler has a bug where it doesn't correctly track memory
+        // aliasing when using reinterpret_cast. The char array read after char2
+        // write gets incorrectly optimized away. We work around this by reading
+        // through the vector pointer and extracting elements.
         OutputT items[ITEMS_PER_THREAD];
         #pragma unroll
-        for (int i = 0; i < ITEMS_PER_THREAD; ++i)
-            items[i] = input_items[i];
+        for (int i = 0; i < WORDS; ++i)
+        {
+            VectorT vec = vec_items[i];
+            #pragma unroll
+            for (int j = 0; j < VECTOR_LOAD_LENGTH; ++j)
+                items[i * VECTOR_LOAD_LENGTH + j] = reinterpret_cast<InputT*>(&vec)[j];
+        }
 
         // Reduce items within each thread stripe
         thread_aggregate = (IS_FIRST_TILE) ?
