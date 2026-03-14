@@ -1,245 +1,122 @@
 /******************************************************************************
  * Copyright (c) 2011-2023, NVIDIA CORPORATION.  All rights reserved.
+ * Copyright (c) 2024, Moore Threads Corporation.  All rights reserved.
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met:
- *     * Redistributions of source code must retain the above copyright
- *       notice, this list of conditions and the following disclaimer.
- *     * Redistributions in binary form must reproduce the above copyright
- *       notice, this list of conditions and the following disclaimer in the
- *       documentation and/or other materials provided with the distribution.
- *     * Neither the name of the NVIDIA CORPORATION nor the
- *       names of its contributors may be used to endorse or promote products
- *       derived from this software without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
- * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
- * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- * DISCLAIMED. IN NO EVENT SHALL NVIDIA CORPORATION BE LIABLE FOR ANY
- * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
- * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
- * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
- * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
- * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- *
+ * MUSA port of radix_sort/pairs benchmark.
+ * Benchmarks cub::DeviceRadixSort::SortPairs
  ******************************************************************************/
 
+#include <musa_bench.cuh>
+#include <generator.cuh>
 #include <cub/device/device_radix_sort.cuh>
 
-#include <nvbench_helper.cuh>
-
-// %//RANGE//% TUNE_RADIX_BITS bits 8:9:1
-#define TUNE_RADIX_BITS 8
-
-// %RANGE% TUNE_ITEMS_PER_THREAD ipt 7:24:1
-// %RANGE% TUNE_THREADS_PER_BLOCK tpb 128:1024:32
-
-constexpr bool is_descending   = false;
-constexpr bool is_overwrite_ok = false;
-
-#if !TUNE_BASE
-template <typename KeyT, typename ValueT, typename OffsetT>
-struct policy_hub_t
+template <typename KeyT, typename ValueT>
+void run_benchmark(int64_t elements)
 {
-  constexpr static bool KEYS_ONLY = std::is_same<ValueT, cub::NullType>::value;
-
-  using DominantT = cub::detail::conditional_t<(sizeof(ValueT) > sizeof(KeyT)), ValueT, KeyT>;
-
-  struct policy_t : cub::ChainedPolicy<300, policy_t, policy_t>
-  {
-    static constexpr int ONESWEEP_RADIX_BITS = TUNE_RADIX_BITS;
-    static constexpr bool ONESWEEP           = true;
-    static constexpr bool OFFSET_64BIT       = sizeof(OffsetT) == 8;
-
-    // Onesweep policy
-    using OnesweepPolicy = cub::AgentRadixSortOnesweepPolicy<TUNE_THREADS_PER_BLOCK,
-                                                             TUNE_ITEMS_PER_THREAD,
-                                                             DominantT,
-                                                             1,
-                                                             cub::RADIX_RANK_MATCH_EARLY_COUNTS_ANY,
-                                                             cub::BLOCK_SCAN_RAKING_MEMOIZE,
-                                                             cub::RADIX_SORT_STORE_DIRECT,
-                                                             ONESWEEP_RADIX_BITS>;
-
-    // These kernels are launched once, no point in tuning at the moment
-    using HistogramPolicy =
-      cub::AgentRadixSortHistogramPolicy<128, 16, 1, KeyT, ONESWEEP_RADIX_BITS>;
-    using ExclusiveSumPolicy = cub::AgentRadixSortExclusiveSumPolicy<256, ONESWEEP_RADIX_BITS>;
-    using ScanPolicy         = cub::AgentScanPolicy<512,
-                                            23,
-                                            OffsetT,
-                                            cub::BLOCK_LOAD_WARP_TRANSPOSE,
-                                            cub::LOAD_DEFAULT,
-                                            cub::BLOCK_STORE_WARP_TRANSPOSE,
-                                            cub::BLOCK_SCAN_RAKING_MEMOIZE>;
-
-    // No point in tuning
-    static constexpr int SINGLE_TILE_RADIX_BITS = (sizeof(KeyT) > 1) ? 6 : 5;
-
-    // No point in tuning single-tile policy
-    using SingleTilePolicy = cub::AgentRadixSortDownsweepPolicy<256,
-                                                                19,
-                                                                DominantT,
-                                                                cub::BLOCK_LOAD_DIRECT,
-                                                                cub::LOAD_LDG,
-                                                                cub::RADIX_RANK_MEMOIZE,
-                                                                cub::BLOCK_SCAN_WARP_SCANS,
-                                                                SINGLE_TILE_RADIX_BITS>;
-  };
-
-  using MaxPolicy = policy_t;
-};
-
-template <typename KeyT, typename ValueT, typename OffsetT>
-constexpr std::size_t max_onesweep_temp_storage_size()
-{
-  using portion_offset  = int;
-  using onesweep_policy = typename policy_hub_t<KeyT, ValueT, OffsetT>::policy_t::OnesweepPolicy;
-  using agent_radix_sort_onesweep_t = cub::
-    AgentRadixSortOnesweep<onesweep_policy, is_descending, KeyT, ValueT, OffsetT, portion_offset>;
-
-  using hist_policy = typename policy_hub_t<KeyT, ValueT, OffsetT>::policy_t::HistogramPolicy;
-  using hist_agent  = cub::AgentRadixSortHistogram<hist_policy, is_descending, KeyT, OffsetT>;
-
-  return cub::max(sizeof(typename agent_radix_sort_onesweep_t::TempStorage),
-                  sizeof(typename hist_agent::TempStorage));
-}
-
-template <typename KeyT, typename ValueT, typename OffsetT>
-constexpr std::size_t max_temp_storage_size()
-{
-  using policy_t = typename policy_hub_t<KeyT, ValueT, OffsetT>::policy_t;
-
-  static_assert(policy_t::ONESWEEP);
-  return max_onesweep_temp_storage_size<KeyT, ValueT, OffsetT>();
-}
-
-template <typename KeyT, typename ValueT, typename OffsetT>
-constexpr bool fits_in_default_shared_memory()
-{
-  return max_temp_storage_size<KeyT, ValueT, OffsetT>() < 48 * 1024;
-}
-#else // TUNE_BASE
-template <typename, typename, typename>
-constexpr bool fits_in_default_shared_memory()
-{
-  return true;
-}
-#endif // TUNE_BASE
-
-template <typename KeyT, typename ValueT, typename OffsetT>
-void radix_sort_values(std::integral_constant<bool, true>,
-                       nvbench::state &state,
-                       nvbench::type_list<KeyT, ValueT, OffsetT>)
-{
-  using offset_t = typename cub::detail::ChooseOffsetT<OffsetT>::Type;
-
-  using key_t   = KeyT;
+  using key_t = KeyT;
   using value_t = ValueT;
-#if !TUNE_BASE
-  using policy_t   = policy_hub_t<key_t, value_t, offset_t>;
-  using dispatch_t = cub::DispatchRadixSort<is_descending, key_t, value_t, offset_t, policy_t>;
-#else // TUNE_BASE
-  using dispatch_t = cub::DispatchRadixSort<is_descending, key_t, value_t, offset_t>;
-#endif // TUNE_BASE
+  using offset_t = int;
 
-  const int begin_bit = 0;
-  const int end_bit   = sizeof(key_t) * 8;
-
-  // Retrieve axis parameters
-  const auto elements       = static_cast<std::size_t>(state.get_int64("Elements{io}"));
-  const bit_entropy entropy = str_to_entropy(state.get_string("Entropy"));
-
-  thrust::device_vector<key_t> keys_buffer_1(elements);
-  thrust::device_vector<key_t> keys_buffer_2(elements);
-  thrust::device_vector<value_t> values_buffer_1(elements);
-  thrust::device_vector<value_t> values_buffer_2(elements);
-
-  key_t *d_keys_buffer_1     = thrust::raw_pointer_cast(keys_buffer_1.data());
-  key_t *d_keys_buffer_2     = thrust::raw_pointer_cast(keys_buffer_2.data());
-  value_t *d_values_buffer_1 = thrust::raw_pointer_cast(values_buffer_1.data());
-  value_t *d_values_buffer_2 = thrust::raw_pointer_cast(values_buffer_2.data());
-
-  gen(seed_t{}, keys_buffer_1, entropy);
-  gen(seed_t{}, values_buffer_1);
-
-  cub::DoubleBuffer<key_t> d_keys(d_keys_buffer_1, d_keys_buffer_2);
-  cub::DoubleBuffer<value_t> d_values(d_values_buffer_1, d_values_buffer_2);
-
-  // Enable throughput calculations and add "Size" column to results.
+  // Setup benchmark state
+  musa_bench::State state;
   state.add_element_count(elements);
   state.add_global_memory_reads<KeyT>(elements);
   state.add_global_memory_reads<ValueT>(elements);
   state.add_global_memory_writes<KeyT>(elements);
   state.add_global_memory_writes<ValueT>(elements);
 
+  // Allocate double buffers for keys and values (required for radix sort)
+  musa_bench::device_vector<key_t> keys_buffer_1(elements);
+  musa_bench::device_vector<key_t> keys_buffer_2(elements);
+  musa_bench::device_vector<value_t> values_buffer_1(elements);
+  musa_bench::device_vector<value_t> values_buffer_2(elements);
+
+  // Generate random input data
+  musa_bench::gen(musa_bench::seed_t{}, keys_buffer_1);
+  musa_bench::gen(musa_bench::seed_t{}, values_buffer_1);
+
+  key_t *d_keys_buffer_1 = keys_buffer_1.data();
+  key_t *d_keys_buffer_2 = keys_buffer_2.data();
+  value_t *d_values_buffer_1 = values_buffer_1.data();
+  value_t *d_values_buffer_2 = values_buffer_2.data();
+
+  // Create DoubleBuffer for keys and values
+  cub::DoubleBuffer<key_t> d_keys(d_keys_buffer_1, d_keys_buffer_2);
+  cub::DoubleBuffer<value_t> d_values(d_values_buffer_1, d_values_buffer_2);
+
   // Allocate temporary storage:
-  std::size_t temp_size{};
-  dispatch_t::Dispatch(nullptr,
-                       temp_size,
-                       d_keys,
-                       d_values,
-                       static_cast<offset_t>(elements),
-                       begin_bit,
-                       end_bit,
-                       is_overwrite_ok,
-                       0 /* stream */);
+  void *d_temp_storage = nullptr;
+  size_t temp_storage_bytes = 0;
 
-  thrust::device_vector<nvbench::uint8_t> temp(temp_size);
-  auto *temp_storage = thrust::raw_pointer_cast(temp.data());
+  // Sort bits from 0 to sizeof(key_t) * 8 (full key sort)
+  int begin_bit = 0;
+  int end_bit = sizeof(key_t) * 8;
 
-  report_entropy(keys_buffer_1, entropy);
+  cub::DeviceRadixSort::SortPairs(d_temp_storage, temp_storage_bytes, d_keys, d_values,
+                                   static_cast<offset_t>(elements),
+                                   begin_bit, end_bit, state.stream);
 
-  state.exec([&](nvbench::launch &launch) {
-    cub::DoubleBuffer<key_t> keys     = d_keys;
+  musa_bench::device_vector<uint8_t> temp(temp_storage_bytes);
+  d_temp_storage = temp.data();
+
+  // Create timer
+  musa_bench::Timer timer(state.stream);
+
+  // Warmup
+  for (int i = 0; i < state.warmup_iterations; i++) {
+    cub::DoubleBuffer<key_t> keys = d_keys;
     cub::DoubleBuffer<value_t> values = d_values;
+    cub::DeviceRadixSort::SortPairs(d_temp_storage, temp_storage_bytes, keys, values,
+                                     static_cast<offset_t>(elements),
+                                     begin_bit, end_bit, state.stream);
+  }
+  MUSA_BENCH_CHECK(musaDeviceSynchronize());
 
-    dispatch_t::Dispatch(temp_storage,
-                         temp_size,
-                         keys,
-                         values,
-                         static_cast<offset_t>(elements),
-                         begin_bit,
-                         end_bit,
-                         is_overwrite_ok,
-                         launch.get_stream());
-  });
+  // Benchmark
+  for (int i = 0; i < state.test_iterations; i++) {
+    cub::DoubleBuffer<key_t> keys = d_keys;
+    cub::DoubleBuffer<value_t> values = d_values;
+    timer.start();
+    cub::DeviceRadixSort::SortPairs(d_temp_storage, temp_storage_bytes, keys, values,
+                                     static_cast<offset_t>(elements),
+                                     begin_bit, end_bit, state.stream);
+    timer.stop();
+
+    float ms = timer.elapsed_ms();
+    state.total_time_ms += ms;
+    state.min_time_ms = std::min(state.min_time_ms, (double)ms);
+    state.max_time_ms = std::max(state.max_time_ms, (double)ms);
+  }
+
+  // Print results
+  std::cout << "Key Type: " << musa_bench::type_name<KeyT>()
+            << ", Value Type: " << musa_bench::type_name<ValueT>() << std::endl;
+  state.print_results();
 }
 
-template <typename KeyT, typename ValueT, typename OffsetT>
-void radix_sort_values(std::integral_constant<bool, false>,
-                       nvbench::state &,
-                       nvbench::type_list<KeyT, ValueT, OffsetT>)
+int main(int argc, char **argv)
 {
-  (void)is_descending;
-  (void)is_overwrite_ok;
+  // Default element count: 2^24 = 16M
+  int64_t elements = 16777216;
+
+  // Parse command line arguments
+  for (int i = 1; i < argc; i++) {
+    std::string arg = argv[i];
+    if ((arg == "-n" || arg == "--elements") && i + 1 < argc) {
+      elements = std::stoll(argv[++i]);
+    } else if (arg == "-h" || arg == "--help") {
+      std::cout << "Usage: " << argv[0] << " [options]\n"
+                << "Options:\n"
+                << "  -n, --elements N  Number of elements (default: 16777216)\n"
+                << "  -h, --help        Show this help message\n";
+      return 0;
+    }
+  }
+
+  std::cout << "=== Benchmark: cub::DeviceRadixSort::SortPairs ===" << std::endl;
+
+  // Run benchmark with int32_t key and value type (most common)
+  run_benchmark<int32_t, int32_t>(elements);
+
+  return 0;
 }
-
-template <typename KeyT, typename ValueT, typename OffsetT>
-void radix_sort_values(nvbench::state &state, nvbench::type_list<KeyT, ValueT, OffsetT> tl)
-{
-  using offset_t = typename cub::detail::ChooseOffsetT<OffsetT>::Type;
-
-  radix_sort_values(std::integral_constant<bool, fits_in_default_shared_memory<KeyT, ValueT, offset_t>()>{},
-                    state,
-                    tl);
-}
-
-#ifdef TUNE_KeyT
-using key_types = nvbench::type_list<TUNE_KeyT>;
-#else // !defined(TUNE_KeyT) 
-using key_types = fundamental_types;
-#endif // TUNE_KeyT
-
-#ifdef TUNE_ValueT
-using value_types = nvbench::type_list<TUNE_ValueT>;
-#else // !defined(Tune_ValueT)
-using value_types = nvbench::type_list<int8_t, int16_t, int32_t, int64_t, int128_t>;
-#endif // TUNE_ValueT
-
-NVBENCH_BENCH_TYPES(radix_sort_values, NVBENCH_TYPE_AXES(key_types, value_types, offset_types))
-  .set_name("cub::DeviceRadixSort::SortPairs")
-  .set_type_axes_names({"KeyT{ct}", "ValueT{ct}", "OffsetT{ct}"})
-  .add_int64_power_of_two_axis("Elements{io}", nvbench::range(16, 28, 4))
-  .add_string_axis("Entropy", {"1.000", "0.811", "0.544", "0.337", "0.201"});

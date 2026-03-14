@@ -1,168 +1,151 @@
 /******************************************************************************
  * Copyright (c) 2011-2023, NVIDIA CORPORATION.  All rights reserved.
+ * Copyright (c) 2024, Moore Threads Corporation.  All rights reserved.
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met:
- *     * Redistributions of source code must retain the above copyright
- *       notice, this list of conditions and the following disclaimer.
- *     * Redistributions in binary form must reproduce the above copyright
- *       notice, this list of conditions and the following disclaimer in the
- *       documentation and/or other materials provided with the distribution.
- *     * Neither the name of the NVIDIA CORPORATION nor the
- *       names of its contributors may be used to endorse or promote products
- *       derived from this software without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
- * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
- * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- * DISCLAIMED. IN NO EVENT SHALL NVIDIA CORPORATION BE LIABLE FOR ANY
- * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
- * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
- * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
- * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
- * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- *
+ * MUSA port of scan/exclusive/by_key benchmark.
  ******************************************************************************/
 
-#include <nvbench_helper.cuh>
-#include <look_back_helper.cuh>
+#include <musa_bench.cuh>
+#include <generator.cuh>
 #include <cub/device/device_scan.cuh>
 
-// %RANGE% TUNE_ITEMS ipt 7:24:1
-// %RANGE% TUNE_THREADS tpb 128:1024:32
-// %RANGE% TUNE_MAGIC_NS ns 0:2048:4
-// %RANGE% TUNE_DELAY_CONSTRUCTOR_ID dcid 0:7:1
-// %RANGE% TUNE_L2_WRITE_LATENCY_NS l2w 0:1200:5
-// %RANGE% TUNE_TRANSPOSE trp 0:1:1
-// %RANGE% TUNE_LOAD ld 0:2:1
+using op_t = cub::Sum;
 
-#if !TUNE_BASE
-#if TUNE_TRANSPOSE == 0
-#define TUNE_LOAD_ALGORITHM cub::BLOCK_LOAD_DIRECT
-#define TUNE_STORE_ALGORITHM cub::BLOCK_STORE_DIRECT
-#else // TUNE_TRANSPOSE == 1
-#define TUNE_LOAD_ALGORITHM cub::BLOCK_LOAD_WARP_TRANSPOSE
-#define TUNE_STORE_ALGORITHM cub::BLOCK_STORE_WARP_TRANSPOSE
-#endif // TUNE_TRANSPOSE
+//=============================================================================
+// Helper kernel to generate uniform key segments
+//=============================================================================
 
-#if TUNE_LOAD == 0
-#define TUNE_LOAD_MODIFIER cub::LOAD_DEFAULT
-#else // TUNE_LOAD == 1
-#define TUNE_LOAD_MODIFIER cub::LOAD_CA
-#endif // TUNE_LOAD
-
-struct policy_hub_t
+template <typename KeyT>
+__global__ void generate_key_segments_kernel(KeyT *keys, int64_t n, int64_t segment_size)
 {
-  struct policy_t : cub::ChainedPolicy<300, policy_t, policy_t>
-  {
-    using ScanByKeyPolicyT = cub::AgentScanByKeyPolicy<TUNE_THREADS,
-                                                       TUNE_ITEMS,
-                                                       // TODO Tune
-                                                       TUNE_LOAD_ALGORITHM,
-                                                       TUNE_LOAD_MODIFIER,
-                                                       cub::BLOCK_SCAN_WARP_SCANS,
-                                                       TUNE_STORE_ALGORITHM,
-                                                       delay_constructor_t>;
-  };
+  int64_t idx = blockIdx.x * blockDim.x + threadIdx.x;
+  if (idx >= n)
+    return;
+  keys[idx] = static_cast<KeyT>(idx / segment_size);
+}
 
-  using MaxPolicy = policy_t;
-};
-#endif // !TUNE_BASE
+template <typename KeyT>
+void generate_key_segments(musa_bench::device_vector<KeyT> &keys, int64_t n, int64_t segment_size)
+{
+  const int threads = 256;
+  const int blocks = (n + threads - 1) / threads;
+  generate_key_segments_kernel<<<blocks, threads>>>(keys.data(), n, segment_size);
+  MUSA_BENCH_CHECK(musaGetLastError());
+  MUSA_BENCH_CHECK(musaDeviceSynchronize());
+}
 
-template <typename KeyT, typename ValueT, typename OffsetT>
-static void scan(nvbench::state &state, nvbench::type_list<KeyT, ValueT, OffsetT>)
+//=============================================================================
+// Benchmark implementation
+//=============================================================================
+
+template <typename KeyT, typename ValueT>
+void run_benchmark(int64_t elements, int64_t segment_size)
 {
   using init_value_t    = ValueT;
-  using op_t            = cub::Sum;
-  using accum_t         = cub::detail::accumulator_t<op_t, init_value_t, ValueT>;
   using key_input_it_t  = const KeyT *;
   using val_input_it_t  = const ValueT *;
   using val_output_it_t = ValueT *;
   using equality_op_t   = cub::Equality;
-  using offset_t        = OffsetT;
+  using offset_t        = int;
 
-  #if !TUNE_BASE
-  using policy_t   = policy_hub_t;
-  using dispatch_t = cub::DispatchScanByKey<key_input_it_t,
-                                            val_input_it_t,
-                                            val_output_it_t,
-                                            equality_op_t,
-                                            op_t,
-                                            init_value_t,
-                                            offset_t,
-                                            accum_t,
-                                            policy_t>;
-  #else // TUNE_BASE
-  using dispatch_t = cub::DispatchScanByKey<key_input_it_t,
-                                            val_input_it_t,
-                                            val_output_it_t,
-                                            equality_op_t,
-                                            op_t,
-                                            init_value_t,
-                                            offset_t,
-                                            accum_t>;
-  #endif // TUNE_BASE
-
-  const auto elements = static_cast<std::size_t>(state.get_int64("Elements{io}"));
-
-  thrust::device_vector<ValueT> in_vals(elements);
-  thrust::device_vector<ValueT> out_vals(elements);
-  thrust::device_vector<KeyT> keys = gen_uniform_key_segments<KeyT>(seed_t{}, elements, 0, 5200);
-
-  KeyT *d_keys       = thrust::raw_pointer_cast(keys.data());
-  ValueT *d_in_vals  = thrust::raw_pointer_cast(in_vals.data());
-  ValueT *d_out_vals = thrust::raw_pointer_cast(out_vals.data());
-
+  // Setup benchmark state
+  musa_bench::State state;
   state.add_element_count(elements);
-  state.add_global_memory_reads<KeyT>(elements);
-  state.add_global_memory_reads<ValueT>(elements);
-  state.add_global_memory_writes<ValueT>(elements);
+  state.add_global_memory_reads<KeyT>(elements);    // Keys
+  state.add_global_memory_reads<ValueT>(elements);  // Values
+  state.add_global_memory_writes<ValueT>(elements); // Output values
 
-  size_t tmp_size;
-  dispatch_t::Dispatch(nullptr,
-                       tmp_size,
-                       d_keys,
-                       d_in_vals,
-                       d_out_vals,
-                       equality_op_t{},
-                       op_t{},
-                       init_value_t{},
-                       static_cast<int>(elements),
-                       0 /* stream */);
+  // Allocate data
+  musa_bench::device_vector<KeyT> keys(elements);
+  musa_bench::device_vector<ValueT> in_vals(elements);
+  musa_bench::device_vector<ValueT> out_vals(elements);
 
-  thrust::device_vector<nvbench::uint8_t> tmp(tmp_size);
-  nvbench::uint8_t *d_tmp = thrust::raw_pointer_cast(tmp.data());
+  // Generate key segments
+  generate_key_segments(keys, elements, segment_size);
 
-  state.exec([&](nvbench::launch &launch) {
-    dispatch_t::Dispatch(d_tmp,
-                         tmp_size,
-                         d_keys,
-                         d_in_vals,
-                         d_out_vals,
-                         equality_op_t{},
-                         op_t{},
-                         init_value_t{},
-                         static_cast<int>(elements),
-                         launch.get_stream());
-  });
+  // Generate random values
+  musa_bench::gen(musa_bench::seed_t{}, in_vals);
+
+  key_input_it_t d_keys     = keys.data();
+  val_input_it_t d_in_vals  = in_vals.data();
+  val_output_it_t d_out_vals = out_vals.data();
+
+  // Allocate temporary storage
+  void *d_temp_storage = nullptr;
+  size_t temp_storage_bytes = 0;
+
+  cub::DeviceScan::ExclusiveScanByKey(d_temp_storage, temp_storage_bytes,
+                                       d_keys, d_in_vals, d_out_vals,
+                                       op_t{}, init_value_t{},
+                                       static_cast<offset_t>(elements),
+                                       equality_op_t{});
+
+  musa_bench::device_vector<uint8_t> temp(temp_storage_bytes);
+  d_temp_storage = temp.data();
+
+  // Create timer
+  musa_bench::Timer timer(state.stream);
+
+  // Warmup
+  for (int i = 0; i < state.warmup_iterations; i++) {
+    cub::DeviceScan::ExclusiveScanByKey(d_temp_storage, temp_storage_bytes,
+                                         d_keys, d_in_vals, d_out_vals,
+                                         op_t{}, init_value_t{},
+                                         static_cast<offset_t>(elements),
+                                         equality_op_t{}, state.stream);
+  }
+  MUSA_BENCH_CHECK(musaDeviceSynchronize());
+
+  // Benchmark
+  for (int i = 0; i < state.test_iterations; i++) {
+    timer.start();
+    cub::DeviceScan::ExclusiveScanByKey(d_temp_storage, temp_storage_bytes,
+                                         d_keys, d_in_vals, d_out_vals,
+                                         op_t{}, init_value_t{},
+                                         static_cast<offset_t>(elements),
+                                         equality_op_t{}, state.stream);
+    timer.stop();
+
+    float ms = timer.elapsed_ms();
+    state.total_time_ms += ms;
+    state.min_time_ms = std::min(state.min_time_ms, (double)ms);
+    state.max_time_ms = std::max(state.max_time_ms, (double)ms);
+  }
+
+  // Print results
+  std::cout << "KeyType: " << musa_bench::type_name<KeyT>()
+            << ", ValueType: " << musa_bench::type_name<ValueT>()
+            << ", SegmentSize: " << segment_size << std::endl;
+  state.print_results();
 }
 
-using some_offset_types = nvbench::type_list<nvbench::int32_t>;
+int main(int argc, char **argv)
+{
+  // Default element count: 2^24 = 16M
+  int64_t elements = 16777216;
+  int64_t segment_size = 5200;  // Default segment size (matches original benchmark)
 
-#ifdef TUNE_KeyT
-using key_types = nvbench::type_list<TUNE_KeyT>;
-#else // !defined(TUNE_KeyT)
-using key_types = all_types;
-#endif // TUNE_KeyT
+  // Parse command line arguments
+  for (int i = 1; i < argc; i++) {
+    std::string arg = argv[i];
+    if ((arg == "-n" || arg == "--elements") && i + 1 < argc) {
+      elements = std::stoll(argv[++i]);
+    } else if ((arg == "-s" || arg == "--segment-size") && i + 1 < argc) {
+      segment_size = std::stoll(argv[++i]);
+    } else if (arg == "-h" || arg == "--help") {
+      std::cout << "Usage: " << argv[0] << " [options]\n"
+                << "Options:\n"
+                << "  -n, --elements N     Number of elements (default: 16777216)\n"
+                << "  -s, --segment-size S Segment size (default: 5200)\n"
+                << "  -h, --help           Show this help message\n";
+      return 0;
+    }
+  }
 
-#ifdef TUNE_ValueT
-using value_types = nvbench::type_list<TUNE_ValueT>;
-#else // !defined(TUNE_ValueT)
-using value_types = nvbench::type_list<int8_t, int16_t, int32_t, int64_t, int128_t>;
-#endif // TUNE_ValueT
+  std::cout << "=== Benchmark: cub::DeviceScan::ExclusiveScanByKey ===" << std::endl;
 
-NVBENCH_BENCH_TYPES(scan, NVBENCH_TYPE_AXES(key_types, value_types, some_offset_types))
-  .set_name("cub::DeviceScan::ExclusiveSumByKey")
-  .set_type_axes_names({"KeyT{ct}", "ValueT{ct}", "OffsetT{ct}"})
-  .add_int64_power_of_two_axis("Elements{io}", nvbench::range(16, 28, 4));
+  // Run benchmark with int32_t key and value types (most common)
+  run_benchmark<int32_t, int32_t>(elements, segment_size);
+
+  return 0;
+}

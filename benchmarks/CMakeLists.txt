@@ -8,6 +8,13 @@ project(CUBBenchmarks)
 list(APPEND CMAKE_MODULE_PATH /usr/local/musa/cmake)
 find_package(MUSA REQUIRED)
 
+# muRAND Configuration
+find_library(MURAND_LIBRARY murand HINTS /usr/local/musa/lib)
+if(NOT MURAND_LIBRARY)
+  message(FATAL_ERROR "muRAND library not found. Please install muRAND.")
+endif()
+message(STATUS "Found muRAND: ${MURAND_LIBRARY}")
+
 # Build type must be Release for accurate benchmarking
 if(NOT CMAKE_BUILD_TYPE STREQUAL "Release")
   message(WARNING "CUB benchmarks should be built in Release mode for accurate results.")
@@ -52,6 +59,7 @@ target_include_directories(musa_bench INTERFACE
   ${CMAKE_CURRENT_SOURCE_DIR}
   ${CMAKE_CURRENT_SOURCE_DIR}/..
 )
+target_link_libraries(musa_bench INTERFACE ${MURAND_LIBRARY})
 
 #=============================================================================
 # Benchmark discovery and registration

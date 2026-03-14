@@ -1,194 +1,201 @@
 /******************************************************************************
  * Copyright (c) 2011-2023, NVIDIA CORPORATION.  All rights reserved.
+ * Copyright (c) 2024, Moore Threads Corporation.  All rights reserved.
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met:
- *     * Redistributions of source code must retain the above copyright
- *       notice, this list of conditions and the following disclaimer.
- *     * Redistributions in binary form must reproduce the above copyright
- *       notice, this list of conditions and the following disclaimer in the
- *       documentation and/or other materials provided with the distribution.
- *     * Neither the name of the NVIDIA CORPORATION nor the
- *       names of its contributors may be used to endorse or promote products
- *       derived from this software without specific prior written permission.
+ * MUSA port of reduce/by_key benchmark.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
- * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
- * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- * DISCLAIMED. IN NO EVENT SHALL NVIDIA CORPORATION BE LIABLE FOR ANY
- * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
- * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
- * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
- * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
- * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- *
+ * Benchmark for cub::DeviceReduce::ReduceByKey - reduces values by key segments.
+ * This operation groups consecutive equal keys and reduces the corresponding values.
  ******************************************************************************/
 
-#include <nvbench_helper.cuh>
-#include <look_back_helper.cuh>
+#include <musa_bench.cuh>
+#include <generator.cuh>
 #include <cub/device/device_reduce.cuh>
 
-// %RANGE% TUNE_ITEMS ipt 7:24:1
-// %RANGE% TUNE_THREADS tpb 128:1024:32
-// %RANGE% TUNE_TRANSPOSE trp 0:1:1
-// %RANGE% TUNE_LOAD ld 0:1:1
-// %RANGE% TUNE_MAGIC_NS ns 0:2048:4
-// %RANGE% TUNE_DELAY_CONSTRUCTOR_ID dcid 0:7:1
-// %RANGE% TUNE_L2_WRITE_LATENCY_NS l2w 0:1200:5
+#include <vector>
+#include <random>
+#include <algorithm>
 
-#if !TUNE_BASE
-#if TUNE_TRANSPOSE == 0
-#define TUNE_LOAD_ALGORITHM cub::BLOCK_LOAD_DIRECT
-#else // TUNE_TRANSPOSE == 1
-#define TUNE_LOAD_ALGORITHM cub::BLOCK_LOAD_WARP_TRANSPOSE
-#endif // TUNE_TRANSPOSE
+namespace {
 
-#if TUNE_LOAD == 0
-#define TUNE_LOAD_MODIFIER cub::LOAD_DEFAULT
-#else // TUNE_LOAD == 1
-#define TUNE_LOAD_MODIFIER cub::LOAD_CA
-#endif // TUNE_LOAD
+//=============================================================================
+// Helper to generate uniform key segments on host
+//=============================================================================
 
-struct device_reduce_by_key_policy_hub
+template <typename KeyT>
+std::vector<KeyT> generate_uniform_key_segments_host(size_t total_elements,
+                                                      size_t min_segment_size,
+                                                      size_t max_segment_size,
+                                                      unsigned long long seed)
 {
-  struct Policy350 : cub::ChainedPolicy<350, Policy350, Policy350>
-  {
-    using ReduceByKeyPolicyT = cub::AgentReduceByKeyPolicy<TUNE_THREADS,
-                                                           TUNE_ITEMS,
-                                                           TUNE_LOAD_ALGORITHM,
-                                                           TUNE_LOAD_MODIFIER,
-                                                           cub::BLOCK_SCAN_WARP_SCANS,
-                                                           delay_constructor_t>;
-  };
+  std::vector<KeyT> keys(total_elements);
+  std::mt19937_64 rng(seed);
+  std::uniform_int_distribution<size_t> seg_dist(min_segment_size, max_segment_size);
 
-  using MaxPolicy = Policy350;
-};
-#endif // !TUNE_BASE
+  KeyT current_key = KeyT(0);
+  size_t idx = 0;
 
-template <class KeyT, class ValueT, class OffsetT>
-static void reduce(nvbench::state &state, nvbench::type_list<KeyT, ValueT, OffsetT>)
-{
-  using keys_input_it_t = const KeyT*;
-  using unique_output_it_t = KeyT*;
-  using vals_input_it_t = const ValueT*;
-  using aggregate_output_it_t = ValueT*;
-  using num_runs_output_iterator_t = OffsetT*;
-  using equality_op_t = cub::Equality;
-  using reduction_op_t = cub::Sum;
-  using accum_t = ValueT;
-  using offset_t = OffsetT;
+  while (idx < total_elements) {
+    // Determine segment size
+    size_t remaining = total_elements - idx;
+    size_t seg_size = std::min(seg_dist(rng), remaining);
+    if (remaining <= max_segment_size) {
+      seg_size = remaining;  // Last segment takes all remaining
+    }
 
-  #if !TUNE_BASE
-  using dispatch_t = cub::DispatchReduceByKey<keys_input_it_t,
-                                              unique_output_it_t,
-                                              vals_input_it_t,
-                                              aggregate_output_it_t,
-                                              num_runs_output_iterator_t,
-                                              equality_op_t,
-                                              reduction_op_t,
-                                              offset_t,
-                                              accum_t,
-                                              device_reduce_by_key_policy_hub>;
-  #else
-  using dispatch_t = cub::DispatchReduceByKey<keys_input_it_t,
-                                              unique_output_it_t,
-                                              vals_input_it_t,
-                                              aggregate_output_it_t,
-                                              num_runs_output_iterator_t,
-                                              equality_op_t,
-                                              reduction_op_t,
-                                              offset_t,
-                                              accum_t>;
-  #endif
+    // Fill segment with current key
+    for (size_t i = 0; i < seg_size && idx < total_elements; i++, idx++) {
+      keys[idx] = current_key;
+    }
+    current_key++;
+  }
 
-  const auto elements = static_cast<std::size_t>(state.get_int64("Elements{io}"));
-  const std::size_t min_segment_size = 1;
-  const std::size_t max_segment_size = static_cast<std::size_t>(state.get_int64("MaxSegSize"));
-
-  thrust::device_vector<OffsetT> num_runs_out(1);
-  thrust::device_vector<ValueT> in_vals(elements);
-  thrust::device_vector<ValueT> out_vals(elements);
-  thrust::device_vector<KeyT> out_keys(elements);
-  thrust::device_vector<KeyT> in_keys =
-    gen_uniform_key_segments<KeyT>(seed_t{}, elements, min_segment_size, max_segment_size);
-
-  KeyT *d_in_keys         = thrust::raw_pointer_cast(in_keys.data());
-  KeyT *d_out_keys        = thrust::raw_pointer_cast(out_keys.data());
-  ValueT *d_in_vals       = thrust::raw_pointer_cast(in_vals.data());
-  ValueT *d_out_vals      = thrust::raw_pointer_cast(out_vals.data());
-  OffsetT *d_num_runs_out = thrust::raw_pointer_cast(num_runs_out.data());
-
-  std::uint8_t *d_temp_storage{};
-  std::size_t temp_storage_bytes{};
-
-  dispatch_t::Dispatch(d_temp_storage,
-                       temp_storage_bytes,
-                       d_in_keys,
-                       d_out_keys,
-                       d_in_vals,
-                       d_out_vals,
-                       d_num_runs_out,
-                       equality_op_t{},
-                       reduction_op_t{},
-                       elements,
-                       0);
-
-  thrust::device_vector<std::uint8_t> temp_storage(temp_storage_bytes);
-  d_temp_storage = thrust::raw_pointer_cast(temp_storage.data());
-
-  dispatch_t::Dispatch(d_temp_storage,
-                       temp_storage_bytes,
-                       d_in_keys,
-                       d_out_keys,
-                       d_in_vals,
-                       d_out_vals,
-                       d_num_runs_out,
-                       equality_op_t{},
-                       reduction_op_t{},
-                       elements,
-                       0);
-  cudaDeviceSynchronize();
-  const OffsetT num_runs = num_runs_out[0];
-
-  state.add_element_count(elements);
-  state.add_global_memory_reads<KeyT>(elements);
-  state.add_global_memory_reads<ValueT>(elements);
-  state.add_global_memory_writes<ValueT>(num_runs);
-  state.add_global_memory_writes<KeyT>(num_runs);
-  state.add_global_memory_writes<OffsetT>(1);
-
-  state.exec([&](nvbench::launch &launch) {
-    dispatch_t::Dispatch(d_temp_storage,
-                         temp_storage_bytes,
-                         d_in_keys,
-                         d_out_keys,
-                         d_in_vals,
-                         d_out_vals,
-                         d_num_runs_out,
-                         equality_op_t{},
-                         reduction_op_t{},
-                         elements,
-                         launch.get_stream());
-  });
+  return keys;
 }
 
-using some_offset_types = nvbench::type_list<nvbench::int32_t>;
+} // anonymous namespace
 
-#ifdef TUNE_KeyT
-using key_types = nvbench::type_list<TUNE_KeyT>;
-#else // !defined(TUNE_KeyT)
-using key_types = nvbench::type_list<int8_t, int16_t, int32_t, int64_t, int128_t>;
-#endif // TUNE_KeyT
+template <typename KeyT, typename ValueT>
+void run_benchmark(int64_t elements, size_t max_segment_size)
+{
+  using offset_t = int;
 
-#ifdef TUNE_ValueT
-using value_types = nvbench::type_list<TUNE_ValueT>;
-#else // !defined(TUNE_ValueT)
-using value_types = all_types;
-#endif // TUNE_ValueT
+  // Setup benchmark state
+  musa_bench::State state;
+  state.add_element_count(elements);
 
-NVBENCH_BENCH_TYPES(reduce, NVBENCH_TYPE_AXES(key_types, value_types, some_offset_types))
-  .set_name("cub::DeviceReduce::ReduceByKey")
-  .set_type_axes_names({"KeyT{ct}", "ValueT{ct}", "OffsetT{ct}"})
-  .add_int64_power_of_two_axis("Elements{io}", nvbench::range(16, 28, 4))
-  .add_int64_power_of_two_axis("MaxSegSize", {1, 4, 8});
+  // We read keys and values, write unique keys, aggregated values, and num_runs
+  state.add_global_memory_reads<KeyT>(elements);
+  state.add_global_memory_reads<ValueT>(elements);
+
+  // Allocate data
+  musa_bench::device_vector<KeyT> in_keys(elements);
+  musa_bench::device_vector<KeyT> out_keys(elements);
+  musa_bench::device_vector<ValueT> in_vals(elements);
+  musa_bench::device_vector<ValueT> out_vals(elements);
+  musa_bench::device_vector<offset_t> num_runs_out(1);
+
+  // Generate key segments on host
+  size_t min_segment_size = 1;
+  std::vector<KeyT> h_keys = generate_uniform_key_segments_host<KeyT>(
+      elements, min_segment_size, max_segment_size, musa_bench::seed_t{}.get());
+
+  // Copy keys to device
+  MUSA_BENCH_CHECK(musaMemcpy(in_keys.data(), h_keys.data(),
+                               elements * sizeof(KeyT), musaMemcpyHostToDevice));
+
+  // Generate random values
+  musa_bench::gen(musa_bench::seed_t{}, in_vals);
+
+  // Get raw pointers
+  const KeyT *d_in_keys = in_keys.data();
+  KeyT *d_out_keys = out_keys.data();
+  const ValueT *d_in_vals = in_vals.data();
+  ValueT *d_out_vals = out_vals.data();
+  offset_t *d_num_runs = num_runs_out.data();
+
+  // Allocate temporary storage
+  void *d_temp_storage = nullptr;
+  size_t temp_storage_bytes = 0;
+
+  cub::DeviceReduce::ReduceByKey(d_temp_storage, temp_storage_bytes,
+                                  d_in_keys, d_out_keys,
+                                  d_in_vals, d_out_vals,
+                                  d_num_runs,
+                                  cub::Sum(),
+                                  static_cast<int>(elements));
+
+  musa_bench::device_vector<uint8_t> temp(temp_storage_bytes);
+  d_temp_storage = temp.data();
+
+  // Warmup run to get num_runs
+  cub::DeviceReduce::ReduceByKey(d_temp_storage, temp_storage_bytes,
+                                  d_in_keys, d_out_keys,
+                                  d_in_vals, d_out_vals,
+                                  d_num_runs,
+                                  cub::Sum(),
+                                  static_cast<int>(elements),
+                                  state.stream);
+  MUSA_BENCH_CHECK(musaDeviceSynchronize());
+
+  // Get number of runs for memory accounting
+  offset_t h_num_runs;
+  MUSA_BENCH_CHECK(musaMemcpy(&h_num_runs, d_num_runs, sizeof(offset_t),
+                               musaMemcpyDeviceToHost));
+
+  // Update memory accounting
+  state.add_global_memory_writes<KeyT>(h_num_runs);
+  state.add_global_memory_writes<ValueT>(h_num_runs);
+  state.add_global_memory_writes<offset_t>(1);
+
+  // Create timer
+  musa_bench::Timer timer(state.stream);
+
+  // Warmup
+  for (int i = 0; i < state.warmup_iterations; i++) {
+    cub::DeviceReduce::ReduceByKey(d_temp_storage, temp_storage_bytes,
+                                    d_in_keys, d_out_keys,
+                                    d_in_vals, d_out_vals,
+                                    d_num_runs,
+                                    cub::Sum(),
+                                    static_cast<int>(elements),
+                                    state.stream);
+  }
+  MUSA_BENCH_CHECK(musaDeviceSynchronize());
+
+  // Benchmark
+  for (int i = 0; i < state.test_iterations; i++) {
+    timer.start();
+    cub::DeviceReduce::ReduceByKey(d_temp_storage, temp_storage_bytes,
+                                    d_in_keys, d_out_keys,
+                                    d_in_vals, d_out_vals,
+                                    d_num_runs,
+                                    cub::Sum(),
+                                    static_cast<int>(elements),
+                                    state.stream);
+    timer.stop();
+
+    float ms = timer.elapsed_ms();
+    state.total_time_ms += ms;
+    state.min_time_ms = std::min(state.min_time_ms, (double)ms);
+    state.max_time_ms = std::max(state.max_time_ms, (double)ms);
+  }
+
+  // Print results
+  std::cout << "KeyType: " << musa_bench::type_name<KeyT>() << std::endl;
+  std::cout << "ValueType: " << musa_bench::type_name<ValueT>() << std::endl;
+  std::cout << "MaxSegmentSize: " << max_segment_size << std::endl;
+  std::cout << "NumSegments: " << h_num_runs << std::endl;
+  state.print_results();
+}
+
+int main(int argc, char **argv)
+{
+  // Default element count: 2^24 = 16M
+  int64_t elements = 16777216;
+  size_t max_segment_size = 8;
+
+  // Parse command line arguments
+  for (int i = 1; i < argc; i++) {
+    std::string arg = argv[i];
+    if ((arg == "-n" || arg == "--elements") && i + 1 < argc) {
+      elements = std::stoll(argv[++i]);
+    } else if ((arg == "-s" || arg == "--max-seg-size") && i + 1 < argc) {
+      max_segment_size = std::stoull(argv[++i]);
+    } else if (arg == "-h" || arg == "--help") {
+      std::cout << "Usage: " << argv[0] << " [options]\n"
+                << "Options:\n"
+                << "  -n, --elements N      Number of elements (default: 16777216)\n"
+                << "  -s, --max-seg-size N  Maximum segment size (default: 8)\n"
+                << "  -h, --help            Show this help message\n";
+      return 0;
+    }
+  }
+
+  std::cout << "=== Benchmark: cub::DeviceReduce::ReduceByKey ===" << std::endl;
+
+  // Run benchmark with int32_t key and value types (most common)
+  run_benchmark<int32_t, int32_t>(elements, max_segment_size);
+
+  return 0;
+}

@@ -1,36 +1,27 @@
 /******************************************************************************
  * Copyright (c) 2011-2023, NVIDIA CORPORATION.  All rights reserved.
+ * Copyright (c) 2024, Moore Threads Corporation.  All rights reserved.
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met:
- *     * Redistributions of source code must retain the above copyright
- *       notice, this list of conditions and the following disclaimer.
- *     * Redistributions in binary form must reproduce the above copyright
- *       notice, this list of conditions and the following disclaimer in the
- *       documentation and/or other materials provided with the distribution.
- *     * Neither the name of the NVIDIA CORPORATION nor the
- *       names of its contributors may be used to endorse or promote products
- *       derived from this software without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
- * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
- * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- * DISCLAIMED. IN NO EVENT SHALL NVIDIA CORPORATION BE LIABLE FOR ANY
- * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
- * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
- * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
- * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
- * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- *
+ * MUSA port of adjacent_difference/subtract_left benchmark.
+ * Benchmarks DeviceAdjacentDifference::SubtractLeft.
  ******************************************************************************/
 
+#include <musa_bench.cuh>
+#include <generator.cuh>
 #include <cub/device/device_adjacent_difference.cuh>
 
-#include <nvbench_helper.cuh>
+// Default tuning parameters (can be overridden via compile flags)
+#ifndef TUNE_BASE
+#define TUNE_BASE 1
+#endif
 
-// %RANGE% TUNE_ITEMS_PER_THREAD ipt 7:24:1
-// %RANGE% TUNE_THREADS_PER_BLOCK tpb 128:1024:32
+#ifndef TUNE_ITEMS_PER_THREAD
+#define TUNE_ITEMS_PER_THREAD 7
+#endif
+
+#ifndef TUNE_THREADS_PER_BLOCK
+#define TUNE_THREADS_PER_BLOCK 256
+#endif
 
 #if !TUNE_BASE
 struct policy_hub_t
@@ -49,8 +40,8 @@ struct policy_hub_t
 };
 #endif // !TUNE_BASE
 
-template <class T, class OffsetT>
-void adjacent_difference(nvbench::state& state, nvbench::type_list<T, OffsetT>)
+template <typename T, class OffsetT>
+void run_benchmark(int64_t elements)
 {
   constexpr bool may_alias = false;
   constexpr bool read_left = true;
@@ -75,20 +66,25 @@ void adjacent_difference(nvbench::state& state, nvbench::type_list<T, OffsetT>)
                                                      offset_t,
                                                      may_alias,
                                                      read_left>;
-#endif // TUNE_BASE
+#endif
 
-  const auto elements = static_cast<std::size_t>(state.get_int64("Elements{io}"));
-  thrust::device_vector<T> in(elements);
-  thrust::device_vector<T> out(elements);
-  gen(seed_t{}, in);
-
-  input_it_t d_in   = thrust::raw_pointer_cast(in.data());
-  output_it_t d_out = thrust::raw_pointer_cast(out.data());
-
+  // Setup benchmark state
+  musa_bench::State state;
   state.add_element_count(elements);
   state.add_global_memory_reads<T>(elements);
   state.add_global_memory_writes<T>(elements);
 
+  // Allocate data
+  musa_bench::device_vector<T> in(elements);
+  musa_bench::device_vector<T> out(elements);
+
+  // Generate random input data
+  musa_bench::gen(musa_bench::seed_t{}, in);
+
+  input_it_t d_in   = in.data();
+  output_it_t d_out = out.data();
+
+  // Allocate temporary storage
   std::size_t temp_storage_bytes{};
   dispatch_t::Dispatch(nullptr,
                        temp_storage_bytes,
@@ -96,26 +92,75 @@ void adjacent_difference(nvbench::state& state, nvbench::type_list<T, OffsetT>)
                        d_out,
                        static_cast<offset_t>(elements),
                        difference_op_t{},
-                       0);
+                       0,
+                       false /* debug_synchronous */);
 
-  thrust::device_vector<std::uint8_t> temp_storage(temp_storage_bytes);
-  std::uint8_t* d_temp_storage = thrust::raw_pointer_cast(temp_storage.data());
+  musa_bench::device_vector<std::uint8_t> temp_storage(temp_storage_bytes);
+  std::uint8_t* d_temp_storage = temp_storage.data();
 
-  state.exec([&](nvbench::launch &launch) {
+  // Create timer
+  musa_bench::Timer timer(state.stream);
+
+  // Warmup
+  for (int i = 0; i < state.warmup_iterations; i++) {
     dispatch_t::Dispatch(d_temp_storage,
                          temp_storage_bytes,
                          d_in,
                          d_out,
                          static_cast<offset_t>(elements),
                          difference_op_t{},
-                         launch.get_stream());
-  });
+                         state.stream,
+                         false /* debug_synchronous */);
+  }
+  MUSA_BENCH_CHECK(musaDeviceSynchronize());
+
+  // Benchmark
+  for (int i = 0; i < state.test_iterations; i++) {
+    timer.start();
+    dispatch_t::Dispatch(d_temp_storage,
+                         temp_storage_bytes,
+                         d_in,
+                         d_out,
+                         static_cast<offset_t>(elements),
+                         difference_op_t{},
+                         state.stream,
+                         false /* debug_synchronous */);
+    timer.stop();
+
+    float ms = timer.elapsed_ms();
+    state.total_time_ms += ms;
+    state.min_time_ms = std::min(state.min_time_ms, (double)ms);
+    state.max_time_ms = std::max(state.max_time_ms, (double)ms);
+  }
+
+  // Print results
+  std::cout << "Type: " << musa_bench::type_name<T>() << std::endl;
+  state.print_results();
 }
 
+int main(int argc, char **argv)
+{
+  // Default element count: 2^24 = 16M
+  int64_t elements = 16777216;
 
-using types = nvbench::type_list<int32_t>;
+  // Parse command line arguments
+  for (int i = 1; i < argc; i++) {
+    std::string arg = argv[i];
+    if ((arg == "-n" || arg == "--elements") && i + 1 < argc) {
+      elements = std::stoll(argv[++i]);
+    } else if (arg == "-h" || arg == "--help") {
+      std::cout << "Usage: " << argv[0] << " [options]\n"
+                << "Options:\n"
+                << "  -n, --elements N  Number of elements (default: 16777216)\n"
+                << "  -h, --help        Show this help message\n";
+      return 0;
+    }
+  }
 
-NVBENCH_BENCH_TYPES(adjacent_difference, NVBENCH_TYPE_AXES(types, offset_types))
-  .set_name("cub::DeviceAdjacentDifference::SubtractLeftCopy")
-  .set_type_axes_names({"T{ct}", "OffsetT{ct}"})
-  .add_int64_power_of_two_axis("Elements{io}", nvbench::range(16, 28, 4));
+  std::cout << "=== Benchmark: cub::DeviceAdjacentDifference::SubtractLeftCopy ===" << std::endl;
+
+  // Run benchmark with int32_t type and int32_t offset (most common)
+  run_benchmark<int32_t, int32_t>(elements);
+
+  return 0;
+}

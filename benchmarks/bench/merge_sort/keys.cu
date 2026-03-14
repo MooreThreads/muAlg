@@ -1,122 +1,50 @@
 /******************************************************************************
  * Copyright (c) 2011-2023, NVIDIA CORPORATION.  All rights reserved.
+ * Copyright (c) 2024, Moore Threads Corporation.  All rights reserved.
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met:
- *     * Redistributions of source code must retain the above copyright
- *       notice, this list of conditions and the following disclaimer.
- *     * Redistributions in binary form must reproduce the above copyright
- *       notice, this list of conditions and the following disclaimer in the
- *       documentation and/or other materials provided with the distribution.
- *     * Neither the name of the NVIDIA CORPORATION nor the
- *       names of its contributors may be used to endorse or promote products
- *       derived from this software without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
- * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
- * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- * DISCLAIMED. IN NO EVENT SHALL NVIDIA CORPORATION BE LIABLE FOR ANY
- * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
- * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
- * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
- * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
- * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- *
+ * MUSA port of merge_sort/keys benchmark.
+ * Benchmarks cub::DeviceMergeSort::SortKeys
  ******************************************************************************/
 
+#include <musa_bench.cuh>
+#include <generator.cuh>
 #include <cub/device/device_merge_sort.cuh>
-
-#include <nvbench_helper.cuh>
-
-// %RANGE% TUNE_TRANSPOSE trp 0:1:1
-// %RANGE% TUNE_LOAD ld 0:2:1
-// %RANGE% TUNE_ITEMS_PER_THREAD ipt 7:24:1
-// %RANGE% TUNE_THREADS_PER_BLOCK_POW2 tpb 6:10:1
-
-#ifndef TUNE_BASE
-#define TUNE_THREADS_PER_BLOCK (1 << TUNE_THREADS_PER_BLOCK_POW2)
-#endif // TUNE_BASE
 
 using value_t = cub::NullType;
 
-#if !TUNE_BASE
-
-#if TUNE_TRANSPOSE == 0
-#define TUNE_LOAD_ALGORITHM cub::BLOCK_LOAD_DIRECT
-#define TUNE_STORE_ALGORITHM cub::BLOCK_STORE_DIRECT
-#else // TUNE_TRANSPOSE == 1
-#define TUNE_LOAD_ALGORITHM cub::BLOCK_LOAD_WARP_TRANSPOSE
-#define TUNE_STORE_ALGORITHM cub::BLOCK_STORE_WARP_TRANSPOSE
-#endif // TUNE_TRANSPOSE
-
-#if TUNE_LOAD == 0
-#define TUNE_LOAD_MODIFIER cub::LOAD_DEFAULT
-#elif TUNE_LOAD == 1
-#define TUNE_LOAD_MODIFIER cub::LOAD_LDG
-#else // TUNE_LOAD == 2
-#define TUNE_LOAD_MODIFIER cub::LOAD_CA
-#endif // TUNE_LOAD 
-
-template <typename KeyT>
-struct policy_hub_t
+template <typename KeyT, typename OffsetT>
+void run_merge_sort_keys(int64_t elements, musa_bench::bit_entropy entropy)
 {
-  struct policy_t : cub::ChainedPolicy<300, policy_t, policy_t>
-  {
-    using MergeSortPolicy =
-      cub::AgentMergeSortPolicy<TUNE_THREADS_PER_BLOCK,
-                                cub::Nominal4BItemsToItems<KeyT>(TUNE_ITEMS_PER_THREAD),
-                                TUNE_LOAD_ALGORITHM,
-                                TUNE_LOAD_MODIFIER,
-                                TUNE_STORE_ALGORITHM>;
-  };
-
-  using MaxPolicy = policy_t;
-};
-#endif // !TUNE_BASE
-
-template <typename T, typename OffsetT>
-void merge_sort_keys(nvbench::state &state, nvbench::type_list<T, OffsetT>)
-{
-  using key_t            = T;
-  using value_t          = cub::NullType;
+  using key_t            = KeyT;
   using key_input_it_t   = key_t *;
   using value_input_it_t = value_t *;
   using key_it_t         = key_t *;
   using value_it_t       = value_t *;
   using offset_t         = OffsetT;
-  using compare_op_t     = less_t;
+  using compare_op_t     = musa_bench::less_t;
 
-#if !TUNE_BASE
-  using policy_t   = policy_hub_t<key_t>;
   using dispatch_t = cub::DispatchMergeSort<key_input_it_t,
                                             value_input_it_t,
                                             key_it_t,
                                             value_it_t,
                                             offset_t,
-                                            compare_op_t,
-                                            policy_t>;
-#else // TUNE_BASE
-  using dispatch_t = cub::
-    DispatchMergeSort<key_input_it_t, value_input_it_t, key_it_t, value_it_t, offset_t, compare_op_t>;
-#endif // TUNE_BASE
+                                            compare_op_t>;
 
-  // Retrieve axis parameters
-  const auto elements       = static_cast<std::size_t>(state.get_int64("Elements{io}"));
-  const bit_entropy entropy = str_to_entropy(state.get_string("Entropy"));
-
-  thrust::device_vector<T> buffer_1(elements);
-  thrust::device_vector<T> buffer_2(elements);
-
-  gen(seed_t{}, buffer_1, entropy);
-
-  key_t *d_buffer_1 = thrust::raw_pointer_cast(buffer_1.data());
-  key_t *d_buffer_2 = thrust::raw_pointer_cast(buffer_2.data());
-
-  // Enable throughput calculations and add "Size" column to results.
+  // Setup benchmark state
+  musa_bench::State state;
   state.add_element_count(elements);
-  state.add_global_memory_reads<T>(elements, "Size");
-  state.add_global_memory_writes<T>(elements);
+  state.add_global_memory_reads<KeyT>(elements);
+  state.add_global_memory_writes<KeyT>(elements);
+
+  // Allocate data
+  musa_bench::device_vector<KeyT> buffer_1(elements);
+  musa_bench::device_vector<KeyT> buffer_2(elements);
+
+  // Generate random input data
+  musa_bench::gen(musa_bench::seed_t{}, buffer_1, entropy);
+
+  key_t *d_buffer_1 = buffer_1.data();
+  key_t *d_buffer_2 = buffer_2.data();
 
   // Allocate temporary storage:
   std::size_t temp_size{};
@@ -128,14 +56,17 @@ void merge_sort_keys(nvbench::state &state, nvbench::type_list<T, OffsetT>)
                        nullptr,
                        static_cast<offset_t>(elements),
                        compare_op_t{},
-                       0 /* stream */);
+                       0 /* stream */,
+                       false /* debug_synchronous */);
 
-  thrust::device_vector<nvbench::uint8_t> temp(temp_size);
-  auto *temp_storage = thrust::raw_pointer_cast(temp.data());
+  musa_bench::device_vector<uint8_t> temp(temp_size);
+  auto *temp_storage = temp.data();
 
-  report_entropy(buffer_1, entropy);
+  // Create timer
+  musa_bench::Timer timer(state.stream);
 
-  state.exec([&](nvbench::launch &launch) {
+  // Warmup
+  for (int i = 0; i < state.warmup_iterations; i++) {
     dispatch_t::Dispatch(temp_storage,
                          temp_size,
                          d_buffer_1,
@@ -144,12 +75,103 @@ void merge_sort_keys(nvbench::state &state, nvbench::type_list<T, OffsetT>)
                          nullptr,
                          static_cast<offset_t>(elements),
                          compare_op_t{},
-                         launch.get_stream());
-  });
+                         state.stream,
+                         false /* debug_synchronous */);
+  }
+  MUSA_BENCH_CHECK(musaDeviceSynchronize());
+
+  // Benchmark
+  for (int i = 0; i < state.test_iterations; i++) {
+    timer.start();
+    dispatch_t::Dispatch(temp_storage,
+                         temp_size,
+                         d_buffer_1,
+                         nullptr,
+                         d_buffer_2,
+                         nullptr,
+                         static_cast<offset_t>(elements),
+                         compare_op_t{},
+                         state.stream,
+                         false /* debug_synchronous */);
+    timer.stop();
+
+    float ms = timer.elapsed_ms();
+    state.total_time_ms += ms;
+    state.min_time_ms = std::min(state.min_time_ms, (double)ms);
+    state.max_time_ms = std::max(state.max_time_ms, (double)ms);
+  }
+
+  // Print results
+  std::cout << "Type: " << musa_bench::type_name<KeyT>() << std::endl;
+  state.print_results();
 }
 
-NVBENCH_BENCH_TYPES(merge_sort_keys, NVBENCH_TYPE_AXES(all_types, offset_types))
-  .set_name("cub::DeviceMergeSort::SortKeys")
-  .set_type_axes_names({"T{ct}", "OffsetT{ct}"})
-  .add_int64_power_of_two_axis("Elements{io}", nvbench::range(16, 28, 4))
-  .add_string_axis("Entropy", {"1.000", "0.201"});
+void print_usage(const char *prog_name)
+{
+  std::cout << "Usage: " << prog_name << " [options]\n"
+            << "Options:\n"
+            << "  -n, --elements N    Number of elements (default: 16777216)\n"
+            << "  -e, --entropy E     Bit entropy: 1.000, 0.811, 0.544, 0.337, 0.201 (default: 1.000)\n"
+            << "  -t, --type T        Data type: int8, int16, int32, int64, float, double (default: int32)\n"
+            << "  -h, --help          Show this help message\n";
+}
+
+musa_bench::bit_entropy parse_entropy(const std::string &str)
+{
+  if (str == "1.000") return musa_bench::bit_entropy::_1_000;
+  if (str == "0.811") return musa_bench::bit_entropy::_0_811;
+  if (str == "0.544") return musa_bench::bit_entropy::_0_544;
+  if (str == "0.337") return musa_bench::bit_entropy::_0_337;
+  if (str == "0.201") return musa_bench::bit_entropy::_0_201;
+  if (str == "0.000") return musa_bench::bit_entropy::_0_000;
+  return musa_bench::bit_entropy::_1_000;
+}
+
+int main(int argc, char **argv)
+{
+  // Default values
+  int64_t elements = 16777216;  // 2^24 = 16M
+  musa_bench::bit_entropy entropy = musa_bench::bit_entropy::_1_000;
+  std::string type_name = "int32";
+
+  // Parse command line arguments
+  for (int i = 1; i < argc; i++) {
+    std::string arg = argv[i];
+    if ((arg == "-n" || arg == "--elements") && i + 1 < argc) {
+      elements = std::stoll(argv[++i]);
+    } else if ((arg == "-e" || arg == "--entropy") && i + 1 < argc) {
+      entropy = parse_entropy(argv[++i]);
+    } else if ((arg == "-t" || arg == "--type") && i + 1 < argc) {
+      type_name = argv[++i];
+    } else if (arg == "-h" || arg == "--help") {
+      print_usage(argv[0]);
+      return 0;
+    }
+  }
+
+  std::cout << "=== Benchmark: cub::DeviceMergeSort::SortKeys ===" << std::endl;
+  std::cout << "Elements: " << elements << std::endl;
+  std::cout << "Entropy: " << musa_bench::entropy_to_probability(entropy) << std::endl;
+  std::cout << std::endl;
+
+  // Run benchmark based on type
+  if (type_name == "int8") {
+    run_merge_sort_keys<int8_t, int32_t>(elements, entropy);
+  } else if (type_name == "int16") {
+    run_merge_sort_keys<int16_t, int32_t>(elements, entropy);
+  } else if (type_name == "int32") {
+    run_merge_sort_keys<int32_t, int32_t>(elements, entropy);
+  } else if (type_name == "int64") {
+    run_merge_sort_keys<int64_t, int32_t>(elements, entropy);
+  } else if (type_name == "float") {
+    run_merge_sort_keys<float, int32_t>(elements, entropy);
+  } else if (type_name == "double") {
+    run_merge_sort_keys<double, int32_t>(elements, entropy);
+  } else {
+    std::cerr << "Unknown type: " << type_name << std::endl;
+    print_usage(argv[0]);
+    return 1;
+  }
+
+  return 0;
+}
