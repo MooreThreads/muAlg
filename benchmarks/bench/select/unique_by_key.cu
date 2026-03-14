@@ -13,7 +13,7 @@
 #define TUNE_BASE 1
 
 template <typename KeyT, typename ValueT, typename OffsetT>
-void run_unique_by_key_benchmark(int64_t elements, int64_t max_segment_size)
+void run_unique_by_key_benchmark(int64_t elements, int64_t max_segment_size, bool output_json)
 {
   using keys_input_it_t = const KeyT *;
   using keys_output_it_t = KeyT *;
@@ -33,6 +33,8 @@ void run_unique_by_key_benchmark(int64_t elements, int64_t max_segment_size)
 
   // Setup benchmark state
   musa_bench::State state;
+  state.benchmark_name = "cub.bench.select_unique_by_key";
+  state.type_name = musa_bench::type_name<KeyT>();
   state.add_element_count(elements);
 
   // Allocate data
@@ -141,10 +143,14 @@ void run_unique_by_key_benchmark(int64_t elements, int64_t max_segment_size)
   }
 
   // Print results
-  std::cout << "KeyType: " << musa_bench::type_name<KeyT>()
-            << ", ValueType: " << musa_bench::type_name<ValueT>()
-            << ", MaxSegSize: " << max_segment_size << std::endl;
-  state.print_results();
+  if (output_json) {
+    state.print_json();
+  } else {
+    std::cout << "KeyType: " << musa_bench::type_name<KeyT>()
+              << ", ValueType: " << musa_bench::type_name<ValueT>()
+              << ", MaxSegSize: " << max_segment_size << std::endl;
+    state.print_results();
+  }
 }
 
 int main(int argc, char **argv)
@@ -152,6 +158,7 @@ int main(int argc, char **argv)
   // Default element count: 2^24 = 16M
   int64_t elements = 16777216;
   int64_t max_segment_size = 4;
+  bool output_json = false;
 
   // Parse command line arguments
   for (int i = 1; i < argc; i++) {
@@ -160,20 +167,25 @@ int main(int argc, char **argv)
       elements = std::stoll(argv[++i]);
     } else if ((arg == "-s" || arg == "--max-seg-size") && i + 1 < argc) {
       max_segment_size = std::stoll(argv[++i]);
+    } else if (arg == "--json") {
+      output_json = true;
     } else if (arg == "-h" || arg == "--help") {
       std::cout << "Usage: " << argv[0] << " [options]\n"
                 << "Options:\n"
                 << "  -n, --elements N     Number of elements (default: 16777216)\n"
                 << "  -s, --max-seg-size N Maximum segment size (default: 4)\n"
+                << "  --json               Output results in JSON format\n"
                 << "  -h, --help           Show this help message\n";
       return 0;
     }
   }
 
-  std::cout << "=== Benchmark: cub::DeviceSelect::UniqueByKey ===" << std::endl;
+  if (!output_json) {
+    std::cout << "=== Benchmark: cub::DeviceSelect::UniqueByKey ===" << std::endl;
+  }
 
   // Run with int32_t key and value types (most common)
-  run_unique_by_key_benchmark<int32_t, int32_t, int32_t>(elements, max_segment_size);
+  run_unique_by_key_benchmark<int32_t, int32_t, int32_t>(elements, max_segment_size, output_json);
 
   return 0;
 }

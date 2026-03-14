@@ -13,7 +13,7 @@
 using value_t = cub::NullType;
 
 template <typename KeyT, typename OffsetT>
-void run_merge_sort_keys(int64_t elements, musa_bench::bit_entropy entropy)
+void run_merge_sort_keys(int64_t elements, musa_bench::bit_entropy entropy, bool output_json)
 {
   using key_t            = KeyT;
   using key_input_it_t   = key_t *;
@@ -35,6 +35,10 @@ void run_merge_sort_keys(int64_t elements, musa_bench::bit_entropy entropy)
   state.add_element_count(elements);
   state.add_global_memory_reads<KeyT>(elements);
   state.add_global_memory_writes<KeyT>(elements);
+
+  // Set benchmark identification for JSON output
+  state.benchmark_name = "cub.bench.merge_sort.keys";
+  state.type_name = musa_bench::type_name<KeyT>();
 
   // Allocate data
   musa_bench::device_vector<KeyT> buffer_1(elements);
@@ -102,8 +106,12 @@ void run_merge_sort_keys(int64_t elements, musa_bench::bit_entropy entropy)
   }
 
   // Print results
-  std::cout << "Type: " << musa_bench::type_name<KeyT>() << std::endl;
-  state.print_results();
+  if (output_json) {
+    state.print_json();
+  } else {
+    std::cout << "Type: " << musa_bench::type_name<KeyT>() << std::endl;
+    state.print_results();
+  }
 }
 
 void print_usage(const char *prog_name)
@@ -113,6 +121,7 @@ void print_usage(const char *prog_name)
             << "  -n, --elements N    Number of elements (default: 16777216)\n"
             << "  -e, --entropy E     Bit entropy: 1.000, 0.811, 0.544, 0.337, 0.201 (default: 1.000)\n"
             << "  -t, --type T        Data type: int8, int16, int32, int64, float, double (default: int32)\n"
+            << "  --json              Output results in JSON format\n"
             << "  -h, --help          Show this help message\n";
 }
 
@@ -133,6 +142,7 @@ int main(int argc, char **argv)
   int64_t elements = 16777216;  // 2^24 = 16M
   musa_bench::bit_entropy entropy = musa_bench::bit_entropy::_1_000;
   std::string type_name = "int32";
+  bool output_json = false;
 
   // Parse command line arguments
   for (int i = 1; i < argc; i++) {
@@ -143,30 +153,34 @@ int main(int argc, char **argv)
       entropy = parse_entropy(argv[++i]);
     } else if ((arg == "-t" || arg == "--type") && i + 1 < argc) {
       type_name = argv[++i];
+    } else if (arg == "--json") {
+      output_json = true;
     } else if (arg == "-h" || arg == "--help") {
       print_usage(argv[0]);
       return 0;
     }
   }
 
-  std::cout << "=== Benchmark: cub::DeviceMergeSort::SortKeys ===" << std::endl;
-  std::cout << "Elements: " << elements << std::endl;
-  std::cout << "Entropy: " << musa_bench::entropy_to_probability(entropy) << std::endl;
-  std::cout << std::endl;
+  if (!output_json) {
+    std::cout << "=== Benchmark: cub::DeviceMergeSort::SortKeys ===" << std::endl;
+    std::cout << "Elements: " << elements << std::endl;
+    std::cout << "Entropy: " << musa_bench::entropy_to_probability(entropy) << std::endl;
+    std::cout << std::endl;
+  }
 
   // Run benchmark based on type
   if (type_name == "int8") {
-    run_merge_sort_keys<int8_t, int32_t>(elements, entropy);
+    run_merge_sort_keys<int8_t, int32_t>(elements, entropy, output_json);
   } else if (type_name == "int16") {
-    run_merge_sort_keys<int16_t, int32_t>(elements, entropy);
+    run_merge_sort_keys<int16_t, int32_t>(elements, entropy, output_json);
   } else if (type_name == "int32") {
-    run_merge_sort_keys<int32_t, int32_t>(elements, entropy);
+    run_merge_sort_keys<int32_t, int32_t>(elements, entropy, output_json);
   } else if (type_name == "int64") {
-    run_merge_sort_keys<int64_t, int32_t>(elements, entropy);
+    run_merge_sort_keys<int64_t, int32_t>(elements, entropy, output_json);
   } else if (type_name == "float") {
-    run_merge_sort_keys<float, int32_t>(elements, entropy);
+    run_merge_sort_keys<float, int32_t>(elements, entropy, output_json);
   } else if (type_name == "double") {
-    run_merge_sort_keys<double, int32_t>(elements, entropy);
+    run_merge_sort_keys<double, int32_t>(elements, entropy, output_json);
   } else {
     std::cerr << "Unknown type: " << type_name << std::endl;
     print_usage(argv[0]);

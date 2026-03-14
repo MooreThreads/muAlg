@@ -18,6 +18,7 @@
 #include <iostream>
 #include <iomanip>
 #include <cmath>
+#include <sstream>
 
 namespace musa_bench {
 
@@ -76,6 +77,10 @@ struct State {
   int warmup_iterations = 10;
   int test_iterations = 100;
 
+  // Identification for JSON output
+  std::string benchmark_name;
+  std::string type_name;
+
   // Performance metrics
   double total_time_ms = 0.0;
   double min_time_ms = 1e30;
@@ -116,6 +121,28 @@ struct State {
     std::cout << "Min Time: " << min_time_ms << " ms\n";
     std::cout << "Max Time: " << max_time_ms << " ms\n";
     std::cout << "Throughput: " << throughput_gb_s() << " GB/s\n";
+  }
+
+  // JSON output for automated performance comparison
+  void print_json(std::ostream& os = std::cout) const {
+    os << "{\n";
+    os << "  \"benchmark\": \"" << benchmark_name << "\",\n";
+    os << "  \"type\": \"" << type_name << "\",\n";
+    os << "  \"elements\": " << elements << ",\n";
+    os << std::fixed << std::setprecision(3);
+    os << "  \"avg_time_ms\": " << avg_time_ms() << ",\n";
+    os << "  \"min_time_ms\": " << min_time_ms << ",\n";
+    os << "  \"max_time_ms\": " << max_time_ms << ",\n";
+    os << std::setprecision(2);
+    os << "  \"throughput_gb_s\": " << throughput_gb_s() << "\n";
+    os << "}\n";
+  }
+
+  // JSON output as string for batch collection
+  std::string to_json() const {
+    std::ostringstream oss;
+    print_json(oss);
+    return oss.str();
   }
 };
 

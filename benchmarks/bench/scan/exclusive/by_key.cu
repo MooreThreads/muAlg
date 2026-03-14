@@ -39,7 +39,7 @@ void generate_key_segments(musa_bench::device_vector<KeyT> &keys, int64_t n, int
 //=============================================================================
 
 template <typename KeyT, typename ValueT>
-void run_benchmark(int64_t elements, int64_t segment_size)
+void run_benchmark(int64_t elements, int64_t segment_size, bool output_json)
 {
   using init_value_t    = ValueT;
   using key_input_it_t  = const KeyT *;
@@ -50,6 +50,8 @@ void run_benchmark(int64_t elements, int64_t segment_size)
 
   // Setup benchmark state
   musa_bench::State state;
+  state.benchmark_name = "cub.bench.scan_exclusive_by_key";
+  state.type_name = musa_bench::type_name<ValueT>();
   state.add_element_count(elements);
   state.add_global_memory_reads<KeyT>(elements);    // Keys
   state.add_global_memory_reads<ValueT>(elements);  // Values
@@ -113,10 +115,14 @@ void run_benchmark(int64_t elements, int64_t segment_size)
   }
 
   // Print results
-  std::cout << "KeyType: " << musa_bench::type_name<KeyT>()
-            << ", ValueType: " << musa_bench::type_name<ValueT>()
-            << ", SegmentSize: " << segment_size << std::endl;
-  state.print_results();
+  if (output_json) {
+    state.print_json();
+  } else {
+    std::cout << "KeyType: " << musa_bench::type_name<KeyT>()
+              << ", ValueType: " << musa_bench::type_name<ValueT>()
+              << ", SegmentSize: " << segment_size << std::endl;
+    state.print_results();
+  }
 }
 
 int main(int argc, char **argv)
@@ -124,6 +130,7 @@ int main(int argc, char **argv)
   // Default element count: 2^24 = 16M
   int64_t elements = 16777216;
   int64_t segment_size = 5200;  // Default segment size (matches original benchmark)
+  bool output_json = false;
 
   // Parse command line arguments
   for (int i = 1; i < argc; i++) {
@@ -132,20 +139,25 @@ int main(int argc, char **argv)
       elements = std::stoll(argv[++i]);
     } else if ((arg == "-s" || arg == "--segment-size") && i + 1 < argc) {
       segment_size = std::stoll(argv[++i]);
+    } else if (arg == "--json") {
+      output_json = true;
     } else if (arg == "-h" || arg == "--help") {
       std::cout << "Usage: " << argv[0] << " [options]\n"
                 << "Options:\n"
                 << "  -n, --elements N     Number of elements (default: 16777216)\n"
                 << "  -s, --segment-size S Segment size (default: 5200)\n"
+                << "  --json               Output results in JSON format\n"
                 << "  -h, --help           Show this help message\n";
       return 0;
     }
   }
 
-  std::cout << "=== Benchmark: cub::DeviceScan::ExclusiveScanByKey ===" << std::endl;
+  if (!output_json) {
+    std::cout << "=== Benchmark: cub::DeviceScan::ExclusiveScanByKey ===" << std::endl;
+  }
 
   // Run benchmark with int32_t key and value types (most common)
-  run_benchmark<int32_t, int32_t>(elements, segment_size);
+  run_benchmark<int32_t, int32_t>(elements, segment_size, output_json);
 
   return 0;
 }

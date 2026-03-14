@@ -56,13 +56,17 @@ std::vector<KeyT> generate_uniform_key_segments_host(size_t total_elements,
 } // anonymous namespace
 
 template <typename KeyT, typename ValueT>
-void run_benchmark(int64_t elements, size_t max_segment_size)
+void run_benchmark(int64_t elements, size_t max_segment_size, bool output_json)
 {
   using offset_t = int;
 
   // Setup benchmark state
   musa_bench::State state;
   state.add_element_count(elements);
+
+  // Set benchmark identification for JSON output
+  state.benchmark_name = "cub.bench.reduce.by_key";
+  state.type_name = std::string(musa_bench::type_name<KeyT>()) + "_" + musa_bench::type_name<ValueT>();
 
   // We read keys and values, write unique keys, aggregated values, and num_runs
   state.add_global_memory_reads<KeyT>(elements);
@@ -162,11 +166,15 @@ void run_benchmark(int64_t elements, size_t max_segment_size)
   }
 
   // Print results
-  std::cout << "KeyType: " << musa_bench::type_name<KeyT>() << std::endl;
-  std::cout << "ValueType: " << musa_bench::type_name<ValueT>() << std::endl;
-  std::cout << "MaxSegmentSize: " << max_segment_size << std::endl;
-  std::cout << "NumSegments: " << h_num_runs << std::endl;
-  state.print_results();
+  if (output_json) {
+    state.print_json();
+  } else {
+    std::cout << "KeyType: " << musa_bench::type_name<KeyT>() << std::endl;
+    std::cout << "ValueType: " << musa_bench::type_name<ValueT>() << std::endl;
+    std::cout << "MaxSegmentSize: " << max_segment_size << std::endl;
+    std::cout << "NumSegments: " << h_num_runs << std::endl;
+    state.print_results();
+  }
 }
 
 int main(int argc, char **argv)
@@ -174,6 +182,7 @@ int main(int argc, char **argv)
   // Default element count: 2^24 = 16M
   int64_t elements = 16777216;
   size_t max_segment_size = 8;
+  bool output_json = false;
 
   // Parse command line arguments
   for (int i = 1; i < argc; i++) {
@@ -182,20 +191,25 @@ int main(int argc, char **argv)
       elements = std::stoll(argv[++i]);
     } else if ((arg == "-s" || arg == "--max-seg-size") && i + 1 < argc) {
       max_segment_size = std::stoull(argv[++i]);
+    } else if (arg == "--json") {
+      output_json = true;
     } else if (arg == "-h" || arg == "--help") {
       std::cout << "Usage: " << argv[0] << " [options]\n"
                 << "Options:\n"
                 << "  -n, --elements N      Number of elements (default: 16777216)\n"
                 << "  -s, --max-seg-size N  Maximum segment size (default: 8)\n"
+                << "  --json                Output results in JSON format\n"
                 << "  -h, --help            Show this help message\n";
       return 0;
     }
   }
 
-  std::cout << "=== Benchmark: cub::DeviceReduce::ReduceByKey ===" << std::endl;
+  if (!output_json) {
+    std::cout << "=== Benchmark: cub::DeviceReduce::ReduceByKey ===" << std::endl;
+  }
 
   // Run benchmark with int32_t key and value types (most common)
-  run_benchmark<int32_t, int32_t>(elements, max_segment_size);
+  run_benchmark<int32_t, int32_t>(elements, max_segment_size, output_json);
 
   return 0;
 }

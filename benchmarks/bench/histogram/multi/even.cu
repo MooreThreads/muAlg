@@ -39,7 +39,7 @@ SampleT get_upper_level(OffsetT bins, OffsetT elements)
 //=============================================================================
 
 template <typename SampleT, typename CounterT, typename OffsetT>
-void run_multi_histogram_even(int64_t elements, int64_t num_bins, double entropy_prob)
+void run_multi_histogram_even(int64_t elements, int64_t num_bins, double entropy_prob, bool output_json)
 {
   // Multi-channel histogram for RGB-like data:
   // 4 channels total (RGBA), but only 3 active channels (RGB)
@@ -57,6 +57,8 @@ void run_multi_histogram_even(int64_t elements, int64_t num_bins, double entropy
 
   // Setup benchmark state
   musa_bench::State state;
+  state.benchmark_name = "cub.bench.histogram_multi_even";
+  state.type_name = musa_bench::type_name<SampleT>();
   state.add_element_count(elements);
   state.add_global_memory_reads<SampleT>(elements * num_active_channels);
   state.add_global_memory_writes<CounterT>(num_bins * num_active_channels);
@@ -150,13 +152,17 @@ void run_multi_histogram_even(int64_t elements, int64_t num_bins, double entropy
   }
 
   // Print results
-  std::cout << "Type: " << musa_bench::type_name<SampleT>() << std::endl;
-  std::cout << "Counter: " << musa_bench::type_name<CounterT>() << std::endl;
-  std::cout << "Elements: " << elements << std::endl;
-  std::cout << "Bins: " << num_bins << std::endl;
-  std::cout << "Channels: " << num_active_channels << " active / " << num_channels << " total" << std::endl;
-  std::cout << "Entropy: " << entropy_prob << std::endl;
-  state.print_results();
+  if (output_json) {
+    state.print_json();
+  } else {
+    std::cout << "Type: " << musa_bench::type_name<SampleT>() << std::endl;
+    std::cout << "Counter: " << musa_bench::type_name<CounterT>() << std::endl;
+    std::cout << "Elements: " << elements << std::endl;
+    std::cout << "Bins: " << num_bins << std::endl;
+    std::cout << "Channels: " << num_active_channels << " active / " << num_channels << " total" << std::endl;
+    std::cout << "Entropy: " << entropy_prob << std::endl;
+    state.print_results();
+  }
 }
 
 int main(int argc, char **argv)
@@ -165,6 +171,7 @@ int main(int argc, char **argv)
   int64_t elements = 16777216;  // 2^24
   int64_t num_bins = 128;
   double entropy = 1.0;
+  bool output_json = false;
 
   // Parse command line arguments
   for (int i = 1; i < argc; i++) {
@@ -175,21 +182,26 @@ int main(int argc, char **argv)
       num_bins = std::stoll(argv[++i]);
     } else if ((arg == "-e" || arg == "--entropy") && i + 1 < argc) {
       entropy = std::stod(argv[++i]);
+    } else if (arg == "--json") {
+      output_json = true;
     } else if (arg == "-h" || arg == "--help") {
       std::cout << "Usage: " << argv[0] << " [options]\n"
                 << "Options:\n"
                 << "  -n, --elements N  Number of elements (default: 16777216)\n"
                 << "  -b, --bins N      Number of bins (default: 128)\n"
                 << "  -e, --entropy F   Bit entropy 0.0-1.0 (default: 1.0)\n"
+                << "  --json            Output results in JSON format\n"
                 << "  -h, --help        Show this help message\n";
       return 0;
     }
   }
 
-  std::cout << "=== Benchmark: cub::DeviceHistogram::MultiHistogramEven ===" << std::endl;
+  if (!output_json) {
+    std::cout << "=== Benchmark: cub::DeviceHistogram::MultiHistogramEven ===" << std::endl;
+  }
 
   // Run benchmark with int32_t sample type (most common)
-  run_multi_histogram_even<int32_t, int32_t, int32_t>(elements, num_bins, entropy);
+  run_multi_histogram_even<int32_t, int32_t, int32_t>(elements, num_bins, entropy, output_json);
 
   return 0;
 }

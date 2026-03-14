@@ -12,7 +12,7 @@
 using op_t = cub::Sum;
 
 template <typename T>
-void run_benchmark(int64_t elements)
+void run_benchmark(int64_t elements, bool output_json)
 {
   using input_it_t  = const T *;
   using output_it_t = T *;
@@ -24,6 +24,10 @@ void run_benchmark(int64_t elements)
   state.add_element_count(elements);
   state.add_global_memory_reads<T>(elements);
   state.add_global_memory_writes<T>(elements);
+
+  // Set benchmark identification for JSON output
+  state.benchmark_name = "cub.bench.scan.exclusive.sum";
+  state.type_name = musa_bench::type_name<T>();
 
   // Allocate data
   musa_bench::device_vector<T> in(elements);
@@ -69,33 +73,43 @@ void run_benchmark(int64_t elements)
   }
 
   // Print results
-  std::cout << "Type: " << musa_bench::type_name<T>() << std::endl;
-  state.print_results();
+  if (output_json) {
+    state.print_json();
+  } else {
+    std::cout << "Type: " << musa_bench::type_name<T>() << std::endl;
+    state.print_results();
+  }
 }
 
 int main(int argc, char **argv)
 {
   // Default element count: 2^24 = 16M
   int64_t elements = 16777216;
+  bool output_json = false;
 
   // Parse command line arguments
   for (int i = 1; i < argc; i++) {
     std::string arg = argv[i];
     if ((arg == "-n" || arg == "--elements") && i + 1 < argc) {
       elements = std::stoll(argv[++i]);
+    } else if (arg == "--json") {
+      output_json = true;
     } else if (arg == "-h" || arg == "--help") {
       std::cout << "Usage: " << argv[0] << " [options]\n"
                 << "Options:\n"
                 << "  -n, --elements N  Number of elements (default: 16777216)\n"
+                << "  --json            Output results in JSON format\n"
                 << "  -h, --help        Show this help message\n";
       return 0;
     }
   }
 
-  std::cout << "=== Benchmark: cub::DeviceScan::ExclusiveSum ===" << std::endl;
+  if (!output_json) {
+    std::cout << "=== Benchmark: cub::DeviceScan::ExclusiveSum ===" << std::endl;
+  }
 
   // Run benchmark with int32_t type (most common)
-  run_benchmark<int32_t>(elements);
+  run_benchmark<int32_t>(elements, output_json);
 
   return 0;
 }

@@ -41,7 +41,7 @@ struct policy_hub_t
 #endif // !TUNE_BASE
 
 template <typename T, class OffsetT>
-void run_benchmark(int64_t elements)
+void run_benchmark(int64_t elements, bool output_json)
 {
   constexpr bool may_alias = false;
   constexpr bool read_left = true;
@@ -70,6 +70,8 @@ void run_benchmark(int64_t elements)
 
   // Setup benchmark state
   musa_bench::State state;
+  state.benchmark_name = "cub.bench.adjacent_difference_subtract_left";
+  state.type_name = musa_bench::type_name<T>();
   state.add_element_count(elements);
   state.add_global_memory_reads<T>(elements);
   state.add_global_memory_writes<T>(elements);
@@ -134,33 +136,43 @@ void run_benchmark(int64_t elements)
   }
 
   // Print results
-  std::cout << "Type: " << musa_bench::type_name<T>() << std::endl;
-  state.print_results();
+  if (output_json) {
+    state.print_json();
+  } else {
+    std::cout << "Type: " << musa_bench::type_name<T>() << std::endl;
+    state.print_results();
+  }
 }
 
 int main(int argc, char **argv)
 {
   // Default element count: 2^24 = 16M
   int64_t elements = 16777216;
+  bool output_json = false;
 
   // Parse command line arguments
   for (int i = 1; i < argc; i++) {
     std::string arg = argv[i];
     if ((arg == "-n" || arg == "--elements") && i + 1 < argc) {
       elements = std::stoll(argv[++i]);
+    } else if (arg == "--json") {
+      output_json = true;
     } else if (arg == "-h" || arg == "--help") {
       std::cout << "Usage: " << argv[0] << " [options]\n"
                 << "Options:\n"
                 << "  -n, --elements N  Number of elements (default: 16777216)\n"
+                << "  --json            Output results in JSON format\n"
                 << "  -h, --help        Show this help message\n";
       return 0;
     }
   }
 
-  std::cout << "=== Benchmark: cub::DeviceAdjacentDifference::SubtractLeftCopy ===" << std::endl;
+  if (!output_json) {
+    std::cout << "=== Benchmark: cub::DeviceAdjacentDifference::SubtractLeftCopy ===" << std::endl;
+  }
 
   // Run benchmark with int32_t type and int32_t offset (most common)
-  run_benchmark<int32_t, int32_t>(elements);
+  run_benchmark<int32_t, int32_t>(elements, output_json);
 
   return 0;
 }

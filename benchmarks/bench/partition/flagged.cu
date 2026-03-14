@@ -16,7 +16,7 @@ constexpr bool keep_rejects = true;
 constexpr bool may_alias = false;
 
 template <typename T, typename OffsetT>
-void run_partition_benchmark(int64_t elements, const std::string &entropy_str)
+void run_partition_benchmark(int64_t elements, const std::string &entropy_str, bool output_json)
 {
   using input_it_t = const T *;
   using flag_it_t = const bool *;
@@ -40,6 +40,8 @@ void run_partition_benchmark(int64_t elements, const std::string &entropy_str)
 
   // Setup benchmark state
   musa_bench::State state;
+  state.benchmark_name = "cub.bench.partition_flagged";
+  state.type_name = musa_bench::type_name<T>();
   state.add_element_count(elements);
   state.add_global_memory_reads<T>(elements);
   state.add_global_memory_reads<bool>(elements);
@@ -120,9 +122,13 @@ void run_partition_benchmark(int64_t elements, const std::string &entropy_str)
   }
 
   // Print results
-  std::cout << "Type: " << musa_bench::type_name<T>()
-            << ", Entropy: " << entropy_str << std::endl;
-  state.print_results();
+  if (output_json) {
+    state.print_json();
+  } else {
+    std::cout << "Type: " << musa_bench::type_name<T>()
+              << ", Entropy: " << entropy_str << std::endl;
+    state.print_results();
+  }
 }
 
 int main(int argc, char **argv)
@@ -130,6 +136,7 @@ int main(int argc, char **argv)
   // Default element count: 2^24 = 16M
   int64_t elements = 16777216;
   std::string entropy = "0.544";
+  bool output_json = false;
 
   // Parse command line arguments
   for (int i = 1; i < argc; i++) {
@@ -138,20 +145,25 @@ int main(int argc, char **argv)
       elements = std::stoll(argv[++i]);
     } else if ((arg == "-e" || arg == "--entropy") && i + 1 < argc) {
       entropy = argv[++i];
+    } else if (arg == "--json") {
+      output_json = true;
     } else if (arg == "-h" || arg == "--help") {
       std::cout << "Usage: " << argv[0] << " [options]\n"
                 << "Options:\n"
                 << "  -n, --elements N  Number of elements (default: 16777216)\n"
                 << "  -e, --entropy S  Bit entropy: 1.000, 0.544, 0.000 (default: 0.544)\n"
-                << "  -h, --help        Show this help message\n";
+                << "  --json           Output results in JSON format\n"
+                << "  -h, --help       Show this help message\n";
       return 0;
     }
   }
 
-  std::cout << "=== Benchmark: cub::DevicePartition::Flagged ===" << std::endl;
+  if (!output_json) {
+    std::cout << "=== Benchmark: cub::DevicePartition::Flagged ===" << std::endl;
+  }
 
   // Run with int32_t type (most common)
-  run_partition_benchmark<int32_t, int32_t>(elements, entropy);
+  run_partition_benchmark<int32_t, int32_t>(elements, entropy, output_json);
 
   return 0;
 }

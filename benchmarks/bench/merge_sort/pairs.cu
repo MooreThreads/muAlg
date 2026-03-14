@@ -11,7 +11,7 @@
 #include <cub/device/device_merge_sort.cuh>
 
 template <typename KeyT, typename ValueT, typename OffsetT>
-void run_merge_sort_pairs(int64_t elements, musa_bench::bit_entropy entropy)
+void run_merge_sort_pairs(int64_t elements, musa_bench::bit_entropy entropy, bool output_json)
 {
   using key_t            = KeyT;
   using value_t          = ValueT;
@@ -31,6 +31,8 @@ void run_merge_sort_pairs(int64_t elements, musa_bench::bit_entropy entropy)
 
   // Setup benchmark state
   musa_bench::State state;
+  state.benchmark_name = "cub.bench.merge_sort_pairs";
+  state.type_name = musa_bench::type_name<KeyT>();
   state.add_element_count(elements);
   state.add_global_memory_reads<KeyT>(elements);
   state.add_global_memory_reads<ValueT>(elements);
@@ -107,9 +109,13 @@ void run_merge_sort_pairs(int64_t elements, musa_bench::bit_entropy entropy)
   }
 
   // Print results
-  std::cout << "KeyType: " << musa_bench::type_name<KeyT>() << std::endl;
-  std::cout << "ValueType: " << musa_bench::type_name<ValueT>() << std::endl;
-  state.print_results();
+  if (output_json) {
+    state.print_json();
+  } else {
+    std::cout << "KeyType: " << musa_bench::type_name<KeyT>() << std::endl;
+    std::cout << "ValueType: " << musa_bench::type_name<ValueT>() << std::endl;
+    state.print_results();
+  }
 }
 
 void print_usage(const char *prog_name)
@@ -120,6 +126,7 @@ void print_usage(const char *prog_name)
             << "  -e, --entropy E     Bit entropy: 1.000, 0.811, 0.544, 0.337, 0.201 (default: 1.000)\n"
             << "  -k, --key-type T    Key type: int8, int16, int32, int64, float, double (default: int32)\n"
             << "  -v, --value-type T  Value type: int8, int16, int32, int64 (default: int32)\n"
+            << "  --json              Output results in JSON format\n"
             << "  -h, --help          Show this help message\n";
 }
 
@@ -136,16 +143,16 @@ musa_bench::bit_entropy parse_entropy(const std::string &str)
 
 // Helper template to run benchmark with different value types
 template <typename KeyT>
-void run_with_value_type(const std::string &value_type, int64_t elements, musa_bench::bit_entropy entropy)
+void run_with_value_type(const std::string &value_type, int64_t elements, musa_bench::bit_entropy entropy, bool output_json)
 {
   if (value_type == "int8") {
-    run_merge_sort_pairs<KeyT, int8_t, int32_t>(elements, entropy);
+    run_merge_sort_pairs<KeyT, int8_t, int32_t>(elements, entropy, output_json);
   } else if (value_type == "int16") {
-    run_merge_sort_pairs<KeyT, int16_t, int32_t>(elements, entropy);
+    run_merge_sort_pairs<KeyT, int16_t, int32_t>(elements, entropy, output_json);
   } else if (value_type == "int32") {
-    run_merge_sort_pairs<KeyT, int32_t, int32_t>(elements, entropy);
+    run_merge_sort_pairs<KeyT, int32_t, int32_t>(elements, entropy, output_json);
   } else if (value_type == "int64") {
-    run_merge_sort_pairs<KeyT, int64_t, int32_t>(elements, entropy);
+    run_merge_sort_pairs<KeyT, int64_t, int32_t>(elements, entropy, output_json);
   } else {
     std::cerr << "Unknown value type: " << value_type << std::endl;
   }
@@ -158,6 +165,7 @@ int main(int argc, char **argv)
   musa_bench::bit_entropy entropy = musa_bench::bit_entropy::_1_000;
   std::string key_type = "int32";
   std::string value_type = "int32";
+  bool output_json = false;
 
   // Parse command line arguments
   for (int i = 1; i < argc; i++) {
@@ -170,30 +178,34 @@ int main(int argc, char **argv)
       key_type = argv[++i];
     } else if ((arg == "-v" || arg == "--value-type") && i + 1 < argc) {
       value_type = argv[++i];
+    } else if (arg == "--json") {
+      output_json = true;
     } else if (arg == "-h" || arg == "--help") {
       print_usage(argv[0]);
       return 0;
     }
   }
 
-  std::cout << "=== Benchmark: cub::DeviceMergeSort::SortPairs ===" << std::endl;
-  std::cout << "Elements: " << elements << std::endl;
-  std::cout << "Entropy: " << musa_bench::entropy_to_probability(entropy) << std::endl;
-  std::cout << std::endl;
+  if (!output_json) {
+    std::cout << "=== Benchmark: cub::DeviceMergeSort::SortPairs ===" << std::endl;
+    std::cout << "Elements: " << elements << std::endl;
+    std::cout << "Entropy: " << musa_bench::entropy_to_probability(entropy) << std::endl;
+    std::cout << std::endl;
+  }
 
   // Run benchmark based on key type
   if (key_type == "int8") {
-    run_with_value_type<int8_t>(value_type, elements, entropy);
+    run_with_value_type<int8_t>(value_type, elements, entropy, output_json);
   } else if (key_type == "int16") {
-    run_with_value_type<int16_t>(value_type, elements, entropy);
+    run_with_value_type<int16_t>(value_type, elements, entropy, output_json);
   } else if (key_type == "int32") {
-    run_with_value_type<int32_t>(value_type, elements, entropy);
+    run_with_value_type<int32_t>(value_type, elements, entropy, output_json);
   } else if (key_type == "int64") {
-    run_with_value_type<int64_t>(value_type, elements, entropy);
+    run_with_value_type<int64_t>(value_type, elements, entropy, output_json);
   } else if (key_type == "float") {
-    run_with_value_type<float>(value_type, elements, entropy);
+    run_with_value_type<float>(value_type, elements, entropy, output_json);
   } else if (key_type == "double") {
-    run_with_value_type<double>(value_type, elements, entropy);
+    run_with_value_type<double>(value_type, elements, entropy, output_json);
   } else {
     std::cerr << "Unknown key type: " << key_type << std::endl;
     print_usage(argv[0]);

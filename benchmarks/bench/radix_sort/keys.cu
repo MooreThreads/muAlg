@@ -11,7 +11,7 @@
 #include <cub/device/device_radix_sort.cuh>
 
 template <typename KeyT>
-void run_benchmark(int64_t elements)
+void run_benchmark(int64_t elements, bool output_json)
 {
   using key_t = KeyT;
   using offset_t = int;
@@ -21,6 +21,10 @@ void run_benchmark(int64_t elements)
   state.add_element_count(elements);
   state.add_global_memory_reads<KeyT>(elements);
   state.add_global_memory_writes<KeyT>(elements);
+
+  // Set benchmark identification for JSON output
+  state.benchmark_name = "cub.bench.radix_sort.keys";
+  state.type_name = musa_bench::type_name<KeyT>();
 
   // Allocate double buffers for keys (required for radix sort)
   musa_bench::device_vector<key_t> keys_buffer_1(elements);
@@ -78,33 +82,43 @@ void run_benchmark(int64_t elements)
   }
 
   // Print results
-  std::cout << "Type: " << musa_bench::type_name<KeyT>() << std::endl;
-  state.print_results();
+  if (output_json) {
+    state.print_json();
+  } else {
+    std::cout << "Type: " << musa_bench::type_name<KeyT>() << std::endl;
+    state.print_results();
+  }
 }
 
 int main(int argc, char **argv)
 {
   // Default element count: 2^24 = 16M
   int64_t elements = 16777216;
+  bool output_json = false;
 
   // Parse command line arguments
   for (int i = 1; i < argc; i++) {
     std::string arg = argv[i];
     if ((arg == "-n" || arg == "--elements") && i + 1 < argc) {
       elements = std::stoll(argv[++i]);
+    } else if (arg == "--json") {
+      output_json = true;
     } else if (arg == "-h" || arg == "--help") {
       std::cout << "Usage: " << argv[0] << " [options]\n"
                 << "Options:\n"
                 << "  -n, --elements N  Number of elements (default: 16777216)\n"
+                << "  --json            Output results in JSON format\n"
                 << "  -h, --help        Show this help message\n";
       return 0;
     }
   }
 
-  std::cout << "=== Benchmark: cub::DeviceRadixSort::SortKeys ===" << std::endl;
+  if (!output_json) {
+    std::cout << "=== Benchmark: cub::DeviceRadixSort::SortKeys ===" << std::endl;
+  }
 
   // Run benchmark with int32_t type (most common)
-  run_benchmark<int32_t>(elements);
+  run_benchmark<int32_t>(elements, output_json);
 
   return 0;
 }
