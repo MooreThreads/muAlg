@@ -172,24 +172,34 @@ struct BlockReduceRaking
         }
         else
         {
-            // Place partial into shared memory grid.
-            *BlockRakingLayout::PlacementPtr(temp_storage.raking_grid, linear_tid) = partial;
+            // Place partial into shared memory grid (only for valid threads in partial tiles).
+            // This prevents writing uninitialized data that could be read by raking threads.
+            if (IS_FULL_TILE || (linear_tid < num_valid))
+            {
+                *BlockRakingLayout::PlacementPtr(temp_storage.raking_grid, linear_tid) = partial;
+            }
 
             CTA_SYNC();
 
             // Reduce parallelism to one warp
             if (linear_tid < RAKING_THREADS)
             {
-                // Raking reduction in grid
-                T *raking_segment = BlockRakingLayout::RakingPtr(temp_storage.raking_grid, linear_tid);
-                partial = raking_segment[0];
-
-                partial = RakingReduction<IS_FULL_TILE>(reduction_op, raking_segment, partial, num_valid, Int2Type<1>());
-
                 int valid_raking_threads = (IS_FULL_TILE) ?
                     RAKING_THREADS :
                     (num_valid + SEGMENT_LENGTH - 1) / SEGMENT_LENGTH;
 
+                // Raking reduction in grid (only for valid raking threads)
+                if (linear_tid < valid_raking_threads)
+                {
+                    // Raking reduction in grid
+                    T *raking_segment = BlockRakingLayout::RakingPtr(temp_storage.raking_grid, linear_tid);
+                    partial = raking_segment[0];
+
+                    partial = RakingReduction<IS_FULL_TILE>(reduction_op, raking_segment, partial, num_valid, Int2Type<1>());
+                }
+
+                // WarpReduce must be called by ALL raking threads, not just valid ones.
+                // The valid_raking_threads parameter ensures only valid lanes contribute.
                 partial = WarpReduce(temp_storage.warp_storage).template Reduce<IS_FULL_TILE && RAKING_UNGUARDED>(
                     partial,
                     valid_raking_threads,

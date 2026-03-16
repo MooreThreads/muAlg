@@ -29,8 +29,33 @@ endforeach()
 string(STRIP "${MUSA_ARCH_FLAGS}" MUSA_ARCH_FLAGS)
 set(MUSA_MCC_FLAGS ${MUSA_ARCH_FLAGS} -std=c++17)
 
+# Determine CUB_MUSA_ARCH for host code Policy selection
+# When compiling for a single architecture, use that architecture's version number
+# mp_22 -> 220, mp_31 -> 310
+list(LENGTH MUSA_ARCH_LIST MUSA_ARCH_COUNT)
+if(MUSA_ARCH_COUNT EQUAL 1)
+    list(GET MUSA_ARCH_LIST 0 SINGLE_ARCH)
+    if(SINGLE_ARCH STREQUAL "mp_22")
+        set(CUB_MUSA_ARCH_VALUE 220)
+    elseif(SINGLE_ARCH STREQUAL "mp_31")
+        set(CUB_MUSA_ARCH_VALUE 310)
+    else()
+        set(CUB_MUSA_ARCH_VALUE 310)  # Default fallback
+    endif()
+else()
+    # Multi-arch: use the highest architecture for host code
+    set(CUB_MUSA_ARCH_VALUE 310)
+endif()
+
 message(STATUS "MUSA Architectures: ${MUSA_ARCH_LIST}")
 message(STATUS "MUSA Flags: ${MUSA_MCC_FLAGS}")
+message(STATUS "CUB_MUSA_ARCH: ${CUB_MUSA_ARCH_VALUE}")
+
+# Add CUB_MUSA_ARCH definition for host code Policy selection
+add_compile_definitions(CUB_MUSA_ARCH=${CUB_MUSA_ARCH_VALUE})
+
+# Add MUSA_ARCH_LIST definition for namespace magic (must match CUB_MUSA_ARCH)
+add_compile_definitions(MUSA_ARCH_LIST=${CUB_MUSA_ARCH_VALUE})
 
 
 # Determine whether CUB is the top-level project or included into

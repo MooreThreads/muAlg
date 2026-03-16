@@ -57,13 +57,9 @@ CUB_NAMESPACE_BEGIN
         // when compiling both host code and device code. Currently, only one
         // PTX version can be targeted.
         #define CUB_PTX_ARCH __NVCOMPILER_CUDA_ARCH__
-    #elif defined(__MUSA_ARCH__)
-        // MUSA: Device code - Use __MUSA_ARCH__ for MUSA platform
-        #define CUB_PTX_ARCH __MUSA_ARCH__
     #elif defined(__MUSACC_VER_MAJOR__)
-        // MUSA: Host code - __MUSA_ARCH__ is not defined in host code,
-        // use default architecture version 310 (MP_31)
-        // Can be overridden via compile option -DCUB_MUSA_ARCH=XXX
+        // MUSA: Both host and device code use CUB_MUSA_ARCH
+        // Note: __MUSA_ARCH__ is defined as 1 in device code, not the arch version
         #ifndef CUB_MUSA_ARCH
             #define CUB_MUSA_ARCH 310
         #endif
