@@ -1,5 +1,15 @@
 #!/bin/bash
 # CUB 并行编译和测试脚本 (使用 Ninja)
+#
+# 所有参数均可通过环境变量设置，命令行参数优先级更高
+# 环境变量:
+#   CUB_JOBS          编译并行数 (默认: nproc)
+#   CUB_TEST_JOBS     测试并行数 (默认: 1)
+#   CUB_MUSA_ARCH     MUSA 目标架构 (默认: mp_31)
+#   CUB_MUSA_DEVICES  设置 MUSA_VISIBLE_DEVICES
+#   CUB_NO_CLEAN      设置为 1 不删除 build 目录
+#   CUB_EXCLUDE_TESTS 排除匹配正则表达式的测试
+#   CUB_BUILD_ONLY    设置为 1 仅编译不测试
 
 set -e
 
@@ -8,18 +18,18 @@ CUB_DIR="${SCRIPT_DIR}"
 BUILD_DIR="${CUB_DIR}/build"
 SOURCE_DIR="${CUB_DIR}"
 
-# 默认值
-JOBS=$(nproc)
-TEST_JOBS=1
+# 默认值 - 可通过环境变量覆盖
+JOBS="${CUB_JOBS:-$(nproc)}"
+TEST_JOBS="${CUB_TEST_JOBS:-1}"
 RUN_TEST=true
 TEST_VERBOSE="-V"
-MUSA_DEVICES=""  # 默认所有GPU可见
+MUSA_DEVICES="${CUB_MUSA_DEVICES:-}"  # 默认所有GPU可见
 LOG_FILE="${CUB_DIR}/test_verbose.log"
 REPORT_FILE="${CUB_DIR}/test_report.md"
-SKIP_CLEAN=false
-BUILD_ONLY=false
-EXCLUDE_TESTS="grid_barrier|namespace_wrapped"  # 默认排除的测试用例
-MUSA_ARCH="mp_31"  # 默认 MUSA 架构
+SKIP_CLEAN="${CUB_NO_CLEAN:-false}"
+BUILD_ONLY="${CUB_BUILD_ONLY:-false}"
+EXCLUDE_TESTS="${CUB_EXCLUDE_TESTS:-grid_barrier|namespace_wrapped}"  # 默认排除的测试用例
+MUSA_ARCH="${CUB_MUSA_ARCH:-mp_31}"  # 默认 MUSA 架构
 
 # Thrust 相关
 MUSA_INCLUDE_DIR="/usr/local/musa/include"

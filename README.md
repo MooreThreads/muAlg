@@ -1,10 +1,99 @@
 # 测试方法
 
-确保有python安装和ninja安装，然后直接运行当前目录下的 `build_cub.sh` 即可，如有问题，随时联系 MingXu
+## 快速开始
 
-```
+确保已安装 Python 和 Ninja，然后直接运行 `build_cub.sh`：
+
+```bash
 ./build_cub.sh
 ```
+
+## build_cub.sh 用法详解
+
+### 命令
+
+```bash
+./build_cub.sh [选项] [命令]
+```
+
+**命令：**
+- 无参数：执行完整流程（清理、编译、测试、生成报告）
+- `build`：仅编译，不运行测试
+- `clean`：仅清理 build 目录
+
+### 选项
+
+| 选项 | 说明 | 默认值 |
+|------|------|--------|
+| `-j, --jobs N` | 编译并行数 | `nproc` (CPU 核心数) |
+| `-T, --test-jobs N` | 测试并行数 | 1 |
+| `-g, --gpus DEVICES` | 设置 MUSA_VISIBLE_DEVICES | 所有 GPU 可见 |
+| `-a, --arch ARCH` | MUSA 目标架构 | `mp_31` |
+| `-n, --no-clean` | 不删除 build 目录（增量编译） | 否 |
+| `-E, --exclude RE` | 排除匹配正则表达式的测试 | `grid_barrier\|namespace_wrapped` |
+| `-h, --help` | 显示帮助信息 | - |
+
+### 架构选择
+
+MUSA 架构决定了编译目标硬件：
+
+| 架构 | 对应硬件 | PTX 版本 | 说明 |
+|------|----------|----------|------|
+| `mp_22` | S4000 系列 | 220 | Shared Memory 28KB，Warp 128 线程 |
+| `mp_31` | S5000 系列 | 310 | Shared Memory 较大，Warp 32 线程 |
+
+**重要：** 编译时必须指定正确的目标架构，否则运行时会报 "invalid device function" 错误。
+
+### 环境变量
+
+所有参数均可通过环境变量设置，命令行参数优先级更高：
+
+| 环境变量 | 说明 |
+|----------|------|
+| `CUB_JOBS` | 编译并行数 |
+| `CUB_TEST_JOBS` | 测试并行数 |
+| `CUB_MUSA_ARCH` | MUSA 目标架构 |
+| `CUB_MUSA_DEVICES` | 设置 MUSA_VISIBLE_DEVICES |
+| `CUB_NO_CLEAN` | 设置为 1 不删除 build 目录 |
+| `CUB_EXCLUDE_TESTS` | 排除匹配正则表达式的测试 |
+| `CUB_BUILD_ONLY` | 设置为 1 仅编译不测试 |
+
+### 示例
+
+```bash
+# 完整流程：清理、编译、测试、生成报告
+./build_cub.sh
+
+# 仅编译（不测试）
+./build_cub.sh build
+
+# 增量编译并测试
+./build_cub.sh -n
+
+# 为 S4000 (mp_22) 编译
+./build_cub.sh -a mp_22 build
+
+# 使用 8 个并行测试，指定 GPU 0-7
+./build_cub.sh -T 8 -g 0,1,2,3,4,5,6,7
+
+# 使用环境变量配置
+export CUB_MUSA_ARCH=mp_22
+export CUB_TEST_JOBS=4
+./build_cub.sh
+
+# 排除特定测试
+./build_cub.sh -E "warp_exchange|device_radix_sort"
+
+# 取消默认排除（运行所有测试）
+./build_cub.sh -E ""
+```
+
+### 输出文件
+
+- `test_verbose.log`：详细测试输出日志
+- `test_report.md`：Markdown 格式的测试报告
+
+如有问题，请联系 MingXu。
 
 <hr>
 <h3>About CUB</h3>
