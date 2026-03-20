@@ -126,9 +126,13 @@ CUB_NAMESPACE_BEGIN
 
 
 /// Number of threads per warp
+/// MUSA: mp21/mp22 have 128 threads per warp (log2 = 7), mp31 has 32 (log2 = 5)
+/// CUDA: Always 32 threads per warp (log2 = 5)
 #ifndef CUB_LOG_WARP_THREADS
     #define CUB_LOG_WARP_THREADS(arch)                      \
-        (5)
+        (((arch) >= 210 && (arch) < 310) ?                  \
+            (7) :                                           \
+            (5))
     #define CUB_WARP_THREADS(arch)                          \
         (1 << CUB_LOG_WARP_THREADS(arch))
 

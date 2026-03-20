@@ -682,7 +682,7 @@ CUB_DEFINE_VECTOR_TYPE(bool,               uchar)
  * \brief A storage-backing wrapper that allows types with non-trivial constructors to be aliased in unions
  */
 template <typename T>
-struct Uninitialized
+struct alignas(alignof(T)) Uninitialized
 {
     /// Biggest memory-access word that T is a whole multiple of and is not larger than the alignment of T
     typedef typename UnitWord<T>::DeviceWord DeviceWord;
