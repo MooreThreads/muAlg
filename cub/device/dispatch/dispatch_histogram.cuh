@@ -341,6 +341,20 @@ struct DispatchHistogram
     };
 
 #if defined(__MUSACC_VER_MAJOR__)
+    /// MUSA MP_21 (S3000 series) - Most conservative settings
+    struct Policy210
+    {
+        typedef AgentHistogramPolicy<
+                64,
+                TScale<4>::VALUE,
+                BLOCK_LOAD_DIRECT,
+                LOAD_DEFAULT,
+                true,
+                BLEND,
+                true>
+            HistogramSweepPolicy;
+    };
+
     /// MUSA MP_22 (S4000 series) - Conservative settings
     struct Policy220
     {
@@ -413,8 +427,10 @@ struct DispatchHistogram
     // MUSA architecture selection
     #if (CUB_PTX_ARCH >= 310)
         typedef Policy310 PtxPolicy;
-    #else
+    #elif (CUB_PTX_ARCH >= 220)
         typedef Policy220 PtxPolicy;
+    #else
+        typedef Policy210 PtxPolicy;
     #endif
 #else
     // CUDA architecture selection

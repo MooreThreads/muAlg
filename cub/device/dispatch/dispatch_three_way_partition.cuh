@@ -168,6 +168,19 @@ struct DispatchThreeWayPartitionIf
    ****************************************************************************/
 
 #if defined(__MUSACC_VER_MAJOR__)
+  /// MUSA MP_21 (S3000 series) - Most conservative settings
+  struct Policy210
+  {
+    constexpr static int ITEMS_PER_THREAD = Nominal4BItemsToItems<InputT>(6);
+
+    using ThreeWayPartitionPolicy =
+      cub::AgentThreeWayPartitionPolicy<128,
+                                        ITEMS_PER_THREAD,
+                                        cub::BLOCK_LOAD_DIRECT,
+                                        cub::LOAD_DEFAULT,
+                                        cub::BLOCK_SCAN_WARP_SCANS>;
+  };
+
   /// MUSA MP_22 (S4000 series) - Conservative settings
   struct Policy220
   {
@@ -218,8 +231,10 @@ struct DispatchThreeWayPartitionIf
 #if defined(__MUSACC_VER_MAJOR__)
   #if (CUB_PTX_ARCH >= 310)
     using PtxPolicy = Policy310;
-  #else
+  #elif (CUB_PTX_ARCH >= 220)
     using PtxPolicy = Policy220;
+  #else
+    using PtxPolicy = Policy210;
   #endif
 #else
   using PtxPolicy = Policy350;

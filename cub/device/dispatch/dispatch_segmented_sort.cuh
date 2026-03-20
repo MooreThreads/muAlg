@@ -764,8 +764,49 @@ struct DeviceSegmentedSortPolicy
   //----------------------------------------------------------------------------
 
 #if defined(__MUSACC_VER_MAJOR__)
+  /// MUSA MP_21 (S3000 series) - Most conservative settings
+  struct Policy210 : ChainedPolicy<210, Policy210, Policy210>
+  {
+    constexpr static int BLOCK_THREADS = 64;
+    constexpr static int RADIX_BITS = sizeof(KeyT) > 1 ? 4 : 3;
+    constexpr static int PARTITIONING_THRESHOLD = 200;
+
+    using LargeSegmentPolicy =
+      AgentRadixSortDownsweepPolicy<BLOCK_THREADS,
+                                    5,
+                                    DominantT,
+                                    BLOCK_LOAD_DIRECT,
+                                    LOAD_DEFAULT,
+                                    RADIX_RANK_MATCH,
+                                    BLOCK_SCAN_WARP_SCANS,
+                                    RADIX_BITS>;
+
+    constexpr static int ITEMS_PER_SMALL_THREAD =
+      Nominal4BItemsToItems<DominantT>(3);
+
+    constexpr static int ITEMS_PER_MEDIUM_THREAD =
+      Nominal4BItemsToItems<DominantT>(3);
+
+    using SmallAndMediumSegmentedSortPolicyT =
+      AgentSmallAndMediumSegmentedSortPolicy<
+
+        BLOCK_THREADS,
+
+        // Small policy
+        cub::AgentSubWarpMergeSortPolicy<2,
+                                         ITEMS_PER_SMALL_THREAD,
+                                         WarpLoadAlgorithm::WARP_LOAD_DIRECT,
+                                         CacheLoadModifier::LOAD_DEFAULT>,
+
+        // Medium policy
+        cub::AgentSubWarpMergeSortPolicy<16,
+                                         ITEMS_PER_MEDIUM_THREAD,
+                                         WarpLoadAlgorithm::WARP_LOAD_DIRECT,
+                                         CacheLoadModifier::LOAD_DEFAULT>>;
+  };
+
   /// MUSA MP_22 (S4000 series) - Conservative settings
-  struct Policy220 : ChainedPolicy<220, Policy220, Policy220>
+  struct Policy220 : ChainedPolicy<220, Policy220, Policy210>
   {
     constexpr static int BLOCK_THREADS = 128;
     constexpr static int RADIX_BITS = sizeof(KeyT) > 1 ? 5 : 4;

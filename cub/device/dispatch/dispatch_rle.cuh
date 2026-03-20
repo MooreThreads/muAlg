@@ -144,6 +144,24 @@ struct DeviceRleDispatch
      ******************************************************************************/
 
 #if defined(__MUSACC_VER_MAJOR__)
+    /// MUSA MP_21 (S3000 series) - Most conservative settings
+    struct Policy210
+    {
+        enum {
+            NOMINAL_4B_ITEMS_PER_THREAD = 8,
+            ITEMS_PER_THREAD            = CUB_MIN(NOMINAL_4B_ITEMS_PER_THREAD, CUB_MAX(1, (NOMINAL_4B_ITEMS_PER_THREAD * 4 / sizeof(T)))),
+        };
+
+        typedef AgentRlePolicy<
+                64,
+                ITEMS_PER_THREAD,
+                BLOCK_LOAD_DIRECT,
+                LOAD_DEFAULT,
+                true,
+                BLOCK_SCAN_WARP_SCANS>
+            RleSweepPolicy;
+    };
+
     /// MUSA MP_22 (S4000 series) - Conservative settings
     struct Policy220
     {
@@ -209,8 +227,10 @@ struct DeviceRleDispatch
 #if defined(__MUSACC_VER_MAJOR__)
     #if (CUB_PTX_ARCH >= 310)
         typedef Policy310 PtxPolicy;
-    #else
+    #elif (CUB_PTX_ARCH >= 220)
         typedef Policy220 PtxPolicy;
+    #else
+        typedef Policy210 PtxPolicy;
     #endif
 #else
     typedef Policy350 PtxPolicy;

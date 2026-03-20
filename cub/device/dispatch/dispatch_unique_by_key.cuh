@@ -100,18 +100,34 @@ struct DeviceUniqueByKeyPolicy
     using KeyT = typename std::iterator_traits<KeyInputIteratorT>::value_type;
 
 #if defined(__MUSACC_VER_MAJOR__)
-    /// MUSA MP_22 (S4000 series) - Conservative settings
-    struct Policy220 : ChainedPolicy<220, Policy220, Policy220> {
+    /// MUSA MP_21 (S3000 series) - Most conservative settings
+    struct Policy210 : ChainedPolicy<210, Policy210, Policy210> {
         const static int INPUT_SIZE = sizeof(KeyT);
         enum
         {
-            NOMINAL_4B_ITEMS_PER_THREAD = 7,
+            NOMINAL_4B_ITEMS_PER_THREAD = 4,
+            ITEMS_PER_THREAD = Nominal4BItemsToItems<KeyT>(NOMINAL_4B_ITEMS_PER_THREAD),
+        };
+
+        using UniqueByKeyPolicyT = AgentUniqueByKeyPolicy<64,
+                          ITEMS_PER_THREAD,
+                          cub::BLOCK_LOAD_DIRECT,
+                          cub::LOAD_DEFAULT,
+                          cub::BLOCK_SCAN_WARP_SCANS>;
+    };
+
+    /// MUSA MP_22 (S4000 series) - Conservative settings
+    struct Policy220 : ChainedPolicy<220, Policy220, Policy210> {
+        const static int INPUT_SIZE = sizeof(KeyT);
+        enum
+        {
+            NOMINAL_4B_ITEMS_PER_THREAD = 5,
             ITEMS_PER_THREAD = Nominal4BItemsToItems<KeyT>(NOMINAL_4B_ITEMS_PER_THREAD),
         };
 
         using UniqueByKeyPolicyT = AgentUniqueByKeyPolicy<128,
                           ITEMS_PER_THREAD,
-                          cub::BLOCK_LOAD_WARP_TRANSPOSE,
+                          cub::BLOCK_LOAD_DIRECT,
                           cub::LOAD_DEFAULT,
                           cub::BLOCK_SCAN_WARP_SCANS>;
     };
@@ -122,13 +138,13 @@ struct DeviceUniqueByKeyPolicy
         const static int INPUT_SIZE = sizeof(KeyT);
         enum
         {
-            NOMINAL_4B_ITEMS_PER_THREAD = 9,
+            NOMINAL_4B_ITEMS_PER_THREAD = 5,
             ITEMS_PER_THREAD = Nominal4BItemsToItems<KeyT>(NOMINAL_4B_ITEMS_PER_THREAD),
         };
 
         using UniqueByKeyPolicyT = AgentUniqueByKeyPolicy<128,
                           ITEMS_PER_THREAD,
-                          cub::BLOCK_LOAD_WARP_TRANSPOSE,
+                          cub::BLOCK_LOAD_DIRECT,
                           cub::LOAD_LDG,
                           cub::BLOCK_SCAN_WARP_SCANS>;
     };

@@ -48,7 +48,7 @@ show_help() {
   -j, --jobs N      编译并行数 (默认: $(nproc))
   -T, --test-jobs N 测试并行数 (默认: 8)
   -g, --gpus DEVICES 设置 MUSA_VISIBLE_DEVICES (如: 0,1,2,3)
-  -a, --arch ARCH   MUSA 目标架构 (默认: mp_31, 支持: mp_22, mp_31)
+  -a, --arch ARCH   MUSA 目标架构 (默认: mp_31, 支持: mp_21, mp_22, mp_31)
   -n, --no-clean    不删除 build 目录 (增量编译)
   -E, --exclude RE  排除匹配正则表达式的测试 (默认: ${EXCLUDE_TESTS})
                     传空字符串 "" 可取消默认排除

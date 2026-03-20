@@ -12,10 +12,10 @@
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
- * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
- * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- * DISCLAIMED. IN NO EVENT SHALL NVIDIA CORPORATION BE LIABLE FOR ANY
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL NVIDIA CORPORATION BE LIABLE FOR ANY
  * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
  * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
  * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
@@ -108,6 +108,20 @@ __global__ void DeviceScanByKeyKernel(
 }
 
 
+/**
+ * Initialization kernel for scan-by-key tile status
+ */
+template <
+    typename            ScanByKeyTileStateT>     ///< Tile status interface type
+__global__ void DeviceScanByKeyInitKernel(
+    ScanByKeyTileStateT tile_state,             ///< [in] Tile status interface
+    int                 num_tiles)              ///< [in] Number of tiles
+{
+    // Initialize tile status
+    tile_state.InitializeStatus(num_tiles);
+}
+
+
 /******************************************************************************
  * Policy
  ******************************************************************************/
@@ -126,8 +140,27 @@ struct DeviceScanByKeyPolicy
     static constexpr size_t CombinedInputBytes = sizeof(KeyT) + sizeof(ValueT);
 
 #if defined(__MUSACC_VER_MAJOR__)
+    /// MUSA MP_21 (S3000 series) - Most conservative settings
+    struct Policy210 : ChainedPolicy<210, Policy210, Policy210>
+    {
+        enum
+        {
+            NOMINAL_4B_ITEMS_PER_THREAD = 4,
+            ITEMS_PER_THREAD = ((MaxInputBytes <= 8) ? 4 :
+                Nominal4BItemsToItemsCombined(NOMINAL_4B_ITEMS_PER_THREAD, CombinedInputBytes)),
+        };
+
+        typedef AgentScanByKeyPolicy<
+                64, ITEMS_PER_THREAD,
+                BLOCK_LOAD_DIRECT,
+                LOAD_DEFAULT,
+                BLOCK_SCAN_WARP_SCANS,
+                BLOCK_STORE_DIRECT>
+            ScanByKeyPolicyT;
+    };
+
     /// MUSA MP_22 (S4000 series) - Conservative settings
-    struct Policy220 : ChainedPolicy<220, Policy220, Policy220>
+    struct Policy220 : ChainedPolicy<220, Policy220, Policy210>
     {
         enum
         {
@@ -320,9 +353,9 @@ struct DispatchScanByKey:
         ptx_version(ptx_version)
     {}
 
-    template <typename ActivePolicyT, typename InitKernel, typename ScanKernel>
+    template <typename ActivePolicyT, typename InitKernelT, typename ScanKernelT>
     CUB_RUNTIME_FUNCTION __host__  __forceinline__
-    musaError_t Invoke(InitKernel init_kernel, ScanKernel scan_kernel)
+    musaError_t Invoke(InitKernelT init_kernel, ScanKernelT scan_kernel)
     {
 #ifndef CUB_RUNTIME_ENABLED
 
@@ -334,7 +367,6 @@ struct DispatchScanByKey:
 
 #else
         typedef typename ActivePolicyT::ScanByKeyPolicyT Policy;
-        typedef ReduceByKeyScanTileState<OutputT, OffsetT> ScanByKeyTileStateT;
 
         musaError error = musaSuccess;
         do
@@ -349,6 +381,7 @@ struct DispatchScanByKey:
 
             // Specify temporary storage allocation requirements
             size_t  allocation_sizes[1];
+            typedef ReduceByKeyScanTileState<OutputT, OffsetT> ScanByKeyTileStateT;
             if (CubDebug(error = ScanByKeyTileStateT::AllocationSize(num_tiles, allocation_sizes[0]))) break;    // bytes needed for tile status descriptors
 
             // Compute allocation pointers into the single storage blob (or compute the necessary size of the blob)
@@ -375,7 +408,9 @@ struct DispatchScanByKey:
             // Invoke init_kernel to initialize tile descriptors
             THRUST_NS_QUALIFIER::cuda_cub::launcher::triple_chevron(
                 init_grid_size, INIT_KERNEL_THREADS, 0, stream
-            ).doit(init_kernel, tile_state, num_tiles);
+            ).doit(init_kernel,
+                tile_state,
+                num_tiles);
 
             // Check for failure to launch
             if (CubDebug(error = musaPeekAtLastError())) break;
@@ -406,8 +441,7 @@ struct DispatchScanByKey:
                 // Invoke scan_kernel
                 THRUST_NS_QUALIFIER::cuda_cub::launcher::triple_chevron(
                     scan_grid_size, Policy::BLOCK_THREADS, 0, stream
-                ).doit(
-                    scan_kernel,
+                ).doit(scan_kernel,
                     d_keys_in,
                     d_values_in,
                     d_values_out,
@@ -438,15 +472,14 @@ struct DispatchScanByKey:
     {
         typedef typename DispatchScanByKey::MaxPolicy MaxPolicyT;
         typedef ReduceByKeyScanTileState<OutputT, OffsetT> ScanByKeyTileStateT;
+
         // Ensure kernels are instantiated.
         return Invoke<ActivePolicyT>(
-            DeviceScanInitKernel<ScanByKeyTileStateT>,
-            DeviceScanByKeyKernel<
-                MaxPolicyT, KeysInputIteratorT, ValuesInputIteratorT, ValuesOutputIteratorT,
-                ScanByKeyTileStateT, EqualityOp, ScanOpT, InitValueT, OffsetT>
+            DeviceScanByKeyInitKernel<ScanByKeyTileStateT>,
+            DeviceScanByKeyKernel<MaxPolicyT, KeysInputIteratorT, ValuesInputIteratorT, ValuesOutputIteratorT,
+                                  ScanByKeyTileStateT, EqualityOp, ScanOpT, InitValueT, OffsetT>
         );
     }
-
 
     /**
      * Internal dispatch routine

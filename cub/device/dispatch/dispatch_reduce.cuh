@@ -243,8 +243,22 @@ struct DeviceReducePolicy
     //------------------------------------------------------------------------------
 
 #if defined(__MUSACC_VER_MAJOR__)
+    /// MUSA MP_21 (S3000 series) - Most conservative settings
+    struct Policy210 : ChainedPolicy<210, Policy210, Policy210>
+    {
+        typedef AgentReducePolicy<
+                128, 8, InputT,                        ///< Threads per block, items per thread
+                1,                                      ///< Number of items per vectorized load
+                BLOCK_REDUCE_WARP_REDUCTIONS,
+                LOAD_DEFAULT>                           ///< Most conservative settings
+            ReducePolicy;
+
+        typedef ReducePolicy SingleTilePolicy;
+        typedef ReducePolicy SegmentedReducePolicy;
+    };
+
     /// MUSA MP_22 (S4000 series) - Conservative settings
-    struct Policy220 : ChainedPolicy<220, Policy220, Policy220>
+    struct Policy220 : ChainedPolicy<220, Policy220, Policy210>
     {
         typedef AgentReducePolicy<
                 256, 16, InputT,                       ///< Threads per block, items per thread

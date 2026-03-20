@@ -149,8 +149,21 @@ struct DeviceScanPolicy
                   : BLOCK_STORE_WARP_TRANSPOSE;
 
 #if defined(__MUSACC_VER_MAJOR__)
+    /// MUSA MP_21 (S3000 series) - Most conservative settings
+    struct Policy210 : ChainedPolicy<210, Policy210, Policy210>
+    {
+        typedef AgentScanPolicy<
+                64, 6,                                         ///< Threads per block, items per thread
+                OutputT,
+                BLOCK_LOAD_DIRECT,
+                LOAD_DEFAULT,
+                ScanTransposedStore,
+                BLOCK_SCAN_RAKING>
+            ScanPolicyT;
+    };
+
     /// MUSA MP_22 (S4000 series) - Conservative settings
-    struct Policy220 : ChainedPolicy<220, Policy220, Policy220>
+    struct Policy220 : ChainedPolicy<220, Policy220, Policy210>
     {
         typedef AgentScanPolicy<
                 128, 10,                                        ///< Threads per block, items per thread

@@ -15,8 +15,8 @@ list(APPEND CMAKE_MODULE_PATH /usr/local/musa/cmake)
 find_package(MUSA REQUIRED)
 
 # MUSA Architecture Configuration
-set(MUSA_SUPPORTED_ARCHS mp_22 mp_31)
-set(MUSA_ARCH_LIST "mp_31" CACHE STRING "MUSA target architectures (semicolon-separated: 'mp_22', 'mp_31', or 'mp_22;mp_31')")
+set(MUSA_SUPPORTED_ARCHS mp_21 mp_22 mp_31)
+set(MUSA_ARCH_LIST "mp_31" CACHE STRING "MUSA target architectures (semicolon-separated: 'mp_21', 'mp_22', 'mp_31', or 'mp_21;mp_22;mp_31')")
 
 # Validate and build flags
 set(MUSA_ARCH_FLAGS "")
@@ -31,16 +31,18 @@ set(MUSA_MCC_FLAGS ${MUSA_ARCH_FLAGS} -std=c++17)
 
 # Determine CUB_MUSA_ARCH for host code Policy selection
 # When compiling for a single architecture, use that architecture's version number
-# mp_22 -> 220, mp_31 -> 310
+# mp_21 -> 210, mp_22 -> 220, mp_31 -> 310
 list(LENGTH MUSA_ARCH_LIST MUSA_ARCH_COUNT)
 if(MUSA_ARCH_COUNT EQUAL 1)
     list(GET MUSA_ARCH_LIST 0 SINGLE_ARCH)
-    if(SINGLE_ARCH STREQUAL "mp_22")
+    if(SINGLE_ARCH STREQUAL "mp_21")
+        set(CUB_MUSA_ARCH_VALUE 210)
+    elseif(SINGLE_ARCH STREQUAL "mp_22")
         set(CUB_MUSA_ARCH_VALUE 220)
     elseif(SINGLE_ARCH STREQUAL "mp_31")
         set(CUB_MUSA_ARCH_VALUE 310)
     else()
-        set(CUB_MUSA_ARCH_VALUE 310)  # Default fallback
+        set(CUB_MUSA_ARCH_VALUE 210)  # Default fallback to lowest
     endif()
 else()
     # Multi-arch: use the highest architecture for host code

@@ -378,7 +378,10 @@ template <unsigned int ItemsPerThread>
 void Test(thrust::default_random_engine &rng)
 {
   Test<ItemsPerThread, 32>(rng);
+  // Skip 256-thread tests for high items_per_thread on mp_21 (28KB shared memory limit)
+#if !defined(__MUSA_ARCH__) || __MUSA_ARCH__ >= 220 || ItemsPerThread < 15
   Test<ItemsPerThread, 256>(rng);
+#endif
 }
 
 struct CountToType
@@ -435,8 +438,11 @@ int main(int argc, char** argv)
   Test<10>(rng);
   Test<15>(rng);
 
+  // 512 threads per block tests - only for mp_22 and above
+#if !defined(__MUSA_ARCH__) || __MUSA_ARCH__ >= 220
   Test<std::int32_t, std::int32_t, 1, 512>(rng);
   Test<std::int64_t, std::int64_t, 2, 512>(rng);
+#endif
 
   TestStability();
 

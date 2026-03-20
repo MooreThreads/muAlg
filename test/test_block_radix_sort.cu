@@ -635,7 +635,11 @@ int main(int argc, char** argv)
   CubDebugExit(args.DeviceInit());
 
   Test<32>();
+  // Skip Test<160> on mp_21 (S3000) due to 28KB shared memory limit
+  // 160 threads * 11 items/thread requires too much shared memory
+#if !defined(__MUSA_ARCH__) || __MUSA_ARCH__ >= 220
   Test<160>();
+#endif
 
   return 0;
 }

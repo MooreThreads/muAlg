@@ -22,7 +22,7 @@ if(NOT CMAKE_BUILD_TYPE STREQUAL "Release")
 endif()
 
 # MUSA Architecture Configuration
-set(MUSA_SUPPORTED_ARCHS mp_22 mp_31)
+set(MUSA_SUPPORTED_ARCHS mp_21 mp_22 mp_31)
 set(MUSA_ARCH_LIST "mp_31" CACHE STRING "MUSA target architectures")
 
 # Validate and build flags

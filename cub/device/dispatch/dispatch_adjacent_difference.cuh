@@ -117,8 +117,19 @@ struct DeviceAdjacentDifferencePolicy
   //------------------------------------------------------------------------------
 
 #if defined(__MUSACC_VER_MAJOR__)
+  /// MUSA MP_21 (S3000 series) - Most conservative settings
+  struct Policy210 : ChainedPolicy<210, Policy210, Policy210>
+  {
+    using AdjacentDifferencePolicy =
+      AgentAdjacentDifferencePolicy<64,
+                                    Nominal8BItemsToItems<ValueT>(4),
+                                    BLOCK_LOAD_DIRECT,
+                                    LOAD_DEFAULT,
+                                    BLOCK_STORE_DIRECT>;
+  };
+
   /// MUSA MP_22 (S4000 series) - Conservative settings
-  struct Policy220 : ChainedPolicy<220, Policy220, Policy220>
+  struct Policy220 : ChainedPolicy<220, Policy220, Policy210>
   {
     using AdjacentDifferencePolicy =
       AgentAdjacentDifferencePolicy<128,

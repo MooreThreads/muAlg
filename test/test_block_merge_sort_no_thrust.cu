@@ -414,17 +414,22 @@ int main(int argc, char **argv) {
   printf("=== Block Merge Sort Test (No Thrust) ===\n\n");
 
   TestAll<1, 32>(seed);
+#if !defined(__MUSA_ARCH__) || __MUSA_ARCH__ >= 220
+  // mp_21 (S3000) has 28KB shared memory limit, can't support 256 threads with 15 items
   TestAll<1, 256>(seed);
+  TestAll<15, 256>(seed);
+#endif
   TestAll<2, 32>(seed);
   TestAll<2, 256>(seed);
   TestAll<10, 32>(seed);
   TestAll<10, 256>(seed);
   TestAll<15, 32>(seed);
-  TestAll<15, 256>(seed);
 
-  // 512 threads per block tests
+  // 512 threads per block tests - only for mp_22 and above
+#if !defined(__MUSA_ARCH__) || __MUSA_ARCH__ >= 220
   Test<std::int32_t, 1, 512>(512, seed);
   Test<std::int64_t, 2, 512>(1024, seed);
+#endif
 
   TestStability();
 

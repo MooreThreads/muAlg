@@ -197,8 +197,19 @@ struct DeviceMergeSortPolicy
   //----------------------------------------------------------------------------
 
 #if defined(__MUSACC_VER_MAJOR__)
+  /// MUSA MP_21 (S3000 series) - Most conservative settings
+  struct Policy210 : ChainedPolicy<210, Policy210, Policy210>
+  {
+    using MergeSortPolicy =
+      AgentMergeSortPolicy<128,
+                           Nominal4BItemsToItems<KeyT>(6),
+                           cub::BLOCK_LOAD_DIRECT,
+                           cub::LOAD_DEFAULT,
+                           cub::BLOCK_STORE_DIRECT>;
+  };
+
   /// MUSA MP_22 (S4000 series) - Conservative settings
-  struct Policy220 : ChainedPolicy<220, Policy220, Policy220>
+  struct Policy220 : ChainedPolicy<220, Policy220, Policy210>
   {
     using MergeSortPolicy =
       AgentMergeSortPolicy<256,
