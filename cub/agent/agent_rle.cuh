@@ -86,7 +86,7 @@ struct AgentRlePolicy
  ******************************************************************************/
 
 /**
- * \brief AgentRle implements a stateful abstraction of CUDA thread blocks for participating in device-wide run-length-encode 
+ * \brief AgentRle implements a stateful abstraction of CUDA thread blocks for participating in device-wide run-length-encode
  */
 template <
     typename    AgentRlePolicyT,        ///< Parameterized AgentRlePolicyT tuning policy type
@@ -94,7 +94,8 @@ template <
     typename    OffsetsOutputIteratorT, ///< Random-access output iterator type for offset values
     typename    LengthsOutputIteratorT, ///< Random-access output iterator type for length values
     typename    EqualityOpT,            ///< T equality operator type
-    typename    OffsetT>                ///< Signed integer type for global offsets
+    typename    OffsetT,                ///< Signed integer type for global offsets
+    int         PTX_ARCH = CUB_PTX_ARCH>///< PTX compute capability
 struct AgentRle
 {
     //---------------------------------------------------------------------

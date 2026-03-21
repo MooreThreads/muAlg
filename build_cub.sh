@@ -28,7 +28,7 @@ LOG_FILE="${CUB_DIR}/test_verbose.log"
 REPORT_FILE="${CUB_DIR}/test_report.md"
 SKIP_CLEAN="${CUB_NO_CLEAN:-false}"
 BUILD_ONLY="${CUB_BUILD_ONLY:-false}"
-EXCLUDE_TESTS="${CUB_EXCLUDE_TESTS:-grid_barrier|namespace_wrapped}"  # 默认排除的测试用例
+EXCLUDE_TESTS="${CUB_EXCLUDE_TESTS:-grid_barrier|namespace_wrapped}"  # grid_barrier 和 namespace_wrapped 会挂起
 MUSA_ARCH="${CUB_MUSA_ARCH:-mp_31}"  # 默认 MUSA 架构
 
 # Thrust 相关

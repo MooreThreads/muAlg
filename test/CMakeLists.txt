@@ -81,11 +81,15 @@ file(GLOB test_srcs
 )
 
 # Exclude device_spmv from test build (has no_thrust version but still fails)
+# TODO: Re-enable after investigating the root cause of failures
+# The failures appear to be related to segment_fixup_kernel producing incorrect results
 list(REMOVE_ITEM test_srcs "test_device_spmv.cu")
 list(REMOVE_ITEM test_srcs "test_device_spmv_no_thrust.cu")
 
 # Exclude test_warp_exchange for mp_22 architecture due to compiler backend bug
 # Error: "Cannot select: v6i32,ch = load<(load (s192)..." - non-power-of-2 vector load
+# Note: This only affects mp_22, mp_31 works correctly
+# This is a MUSA compiler backend limitation, not a porting issue
 if(MUSA_ARCH_LIST STREQUAL "mp_22")
   list(REMOVE_ITEM test_srcs "test_warp_exchange.cu")
   message(STATUS "Excluding test_warp_exchange.cu for mp_22 architecture (compiler backend limitation)")

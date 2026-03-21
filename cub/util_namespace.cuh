@@ -171,9 +171,12 @@
 #define CUB_DETAIL_MAGIC_NS_END
 #else // not defined(CUB_DISABLE_NAMESPACE_MAGIC)
 // MUSA: Define MUSA_ARCH_LIST macro for namespace magic
+// CUB_MUSA_ARCH is defined by CMake and should be used consistently
+// in both host and device code. __MUSA_ARCH__ is defined as 1 in device
+// code, not the architecture version, so we should NOT use it here.
 #if defined(__MUSACC_VER_MAJOR__) && !defined(MUSA_ARCH_LIST)
-    #ifdef __MUSA_ARCH__
-        #define MUSA_ARCH_LIST __MUSA_ARCH__
+    #ifdef CUB_MUSA_ARCH
+        #define MUSA_ARCH_LIST CUB_MUSA_ARCH
     #else
         #define MUSA_ARCH_LIST 310  // 默认值
     #endif
