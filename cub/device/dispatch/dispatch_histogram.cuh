@@ -340,7 +340,7 @@ struct DispatchHistogram
         };
     };
 
-#if defined(__MUSACC_VER_MAJOR__)
+#if defined(__MUSACC_VER_MAJOR__) || defined(CUB_MUSA_ARCH)
     /// MUSA MP_21 (S3000 series) - Most conservative settings
     struct Policy210
     {
@@ -423,7 +423,7 @@ struct DispatchHistogram
     // Tuning policies of current PTX compiler pass
     //---------------------------------------------------------------------
 
-#if defined(__MUSACC_VER_MAJOR__)
+#if defined(__MUSACC_VER_MAJOR__) || defined(CUB_MUSA_ARCH)
     // MUSA architecture selection
     #if (CUB_PTX_ARCH >= 310)
         typedef Policy310 PtxPolicy;
@@ -470,7 +470,7 @@ struct DispatchHistogram
         {
             #if CUB_INCLUDE_HOST_CODE
                 // We're on the host, so lookup and initialize the kernel dispatch configurations with the policies that match the device's PTX version
-                #if defined(__MUSACC_VER_MAJOR__)
+                #if defined(__MUSACC_VER_MAJOR__) || defined(CUB_MUSA_ARCH)
                     // MUSA architecture selection
                     if (ptx_version >= 310)
                     {

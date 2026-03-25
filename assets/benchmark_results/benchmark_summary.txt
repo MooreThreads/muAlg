@@ -1,0 +1,74 @@
+=========================================
+CUB 1.17.2 & Thrust 1.17.2 Benchmark Report
+=========================================
+Platform: NVIDIA A100 80GB PCIe
+CUDA Version: 12.8
+Date: 2026-03-24
+
+== Thrust Benchmark Summary ==
+
+Thrust Version,Algorithm,Element Type,Element Size,Elements per Trial,Total Input Size,STL Trials,STL Average Walltime,STL Walltime Uncertainty,STL Average Throughput,STL Throughput Uncertainty,Thrust Trials,Thrust Average Walltime,Thrust Walltime Uncertainty,Thrust Average Throughput,Thrust Throughput Uncertainty
+,,,bits/element,elements,MiBs,trials,secs,secs,elements/sec,elements/sec,trials,secs,secs,elements/sec,elements/sec
+101702,reduce,char,8,67108864,64,4,0.0047,5e-05,1.43e+10,1e+08,16,0.00024,5e-06,2.8e+11,6e+09
+101702,transform_inplace,char,8,67108864,64,4,0.00503,4e-05,1.335e+10,1e+08,16,0.0002295,4e-07,2.924e+11,5e+08
+101702,inclusive_scan_inplace,char,8,67108864,64,4,0.02797,3e-05,2.399e+09,2e+06,16,0.000466,7e-06,1.44e+11,2e+09
+101702,sort,char,8,1048576,1,4,0.03552,3e-05,2.952e+07,20000,16,0.000201,2e-06,5.22e+09,6e+07
+101702,copy,char,8,67108864,64,4,0.0042,6e-05,1.6e+10,2e+08,16,0.0002271,4e-07,2.955e+11,6e+08
+101702,shuffle,char,8,67108864,64,4,0.855,0.007,7.85e+07,600000,16,0.0068,1e-05,9.87e+09,2e+07
+101702,reduce,int,32,16777216,64,4,0.004446,4e-06,3.773e+09,3e+06,16,0.000225,3e-06,7.45e+10,9e+08
+101702,transform_inplace,int,32,16777216,64,4,0.00491,7e-05,3.42e+09,5e+07,16,9.7e-05,3e-06,1.74e+11,5e+09
+101702,inclusive_scan_inplace,int,32,16777216,64,4,0.01,0.004,1.6e+09,6e+08,16,0.00026,1e-05,6.4e+10,3e+09
+101702,sort,int,32,1048576,4,4,0.06694,8e-05,1.567e+07,20000,16,0.0003996,9e-07,2.624e+09,6e+06
+101702,copy,int,32,16777216,64,4,0.00431,2e-05,3.89e+09,2e+07,16,9.7e-05,3e-06,1.73e+11,6e+09
+101702,shuffle,int,32,16777216,64,4,0.2213,0.0001,7.582e+07,40000,16,0.003161,7e-06,5.31e+09,1e+07
+101702,reduce,int8_t,8,67108864,64,4,0.0045,0.0001,1.49e+10,4e+08,16,0.000238,3e-06,2.83e+11,3e+09
+101702,transform_inplace,int8_t,8,67108864,64,4,0.0049,4e-05,1.37e+10,1e+08,16,0.0002296,6e-07,2.923e+11,7e+08
+101702,inclusive_scan_inplace,int8_t,8,67108864,64,4,0.02803,4e-05,2.395e+09,3e+06,16,0.004,0.005,2e+10,2e+10
+101702,sort,int8_t,8,1048576,1,4,0.0358,0.0001,2.931e+07,90000,16,0.000211,5e-06,5e+09,1e+08
+101702,copy,int8_t,8,67108864,64,4,0.006,0.005,1e+10,7e+09,16,0.0002269,5e-07,2.958e+11,7e+08
+101702,shuffle,int8_t,8,67108864,64,4,0.869,0.006,7.72e+07,500000,16,0.006801,9e-06,9.87e+09,1e+07
+
+Key Performance Metrics (elements/sec):
+
+101702,reduce,int,32,16777216,64,4,0.004446,4e-06,3.773e+09,3e+06,16,0.000225,3e-06,7.45e+10,9e+08
+101702,reduce,int,32,33554432,128,4,0.010305,8e-06,3.256e+09,3e+06,16,0.000267,3e-06,1.26e+11,2e+09
+
+101702,sort,int,32,1048576,4,4,0.06694,8e-05,1.567e+07,20000,16,0.0003996,9e-07,2.624e+09,6e+06
+101702,sort,int,32,2097152,8,4,0.1414,0.0001,1.483e+07,10000,16,0.000641,2e-06,3.273e+09,9e+06
+
+101702,inclusive_scan_inplace,int,32,16777216,64,4,0.01,0.004,1.6e+09,6e+08,16,0.00026,1e-05,6.4e+10,3e+09
+101702,inclusive_scan_inplace,int,32,33554432,128,4,0.02084,2e-05,1.61e+09,1e+06,16,0.00039,3e-05,8.7e+10,6e+09
+
+== CUB Example Performance ==
+
+	Average million items / sec: 176.6786
+	Average million items / sec: 177.3051
+	Average million items / sec: 179.2116
+	Average million items / sec: 178.5715
+	Average million items / sec: 174.8253
+	Average million items / sec: 176.3669
+	Average million items / sec: 167.7854
+	Average million items / sec: 178.8910
+	Average million items / sec: 176.6786
+	Average million items / sec: 182.4818
+	Average million items / sec: 182.1494
+	Average million items / sec: 178.8910
+	Average million items / sec: 176.3670
+	Average million items / sec: 169.2049
+	Average million items / sec: 165.2894
+	Average million items / sec: 172.7117
+	Average million items / sec: 177.6200
+	Average million items / sec: 176.0565
+	Average million items / sec: 170.6486
+	Average million items / sec: 166.1131
+	Average million items / sec: 168.9191
+	Average million items / sec: 173.3104
+	Average million items / sec: 177.9360
+	Average million items / sec: 175.7470
+	Average million items / sec: 171.5267
+	Average million items / sec: 166.1131
+	Average million items / sec: 154.3211
+	Average million items / sec: 171.2330
+	Average million items / sec: 182.8154
+	Average million items / sec: 177.3051
+

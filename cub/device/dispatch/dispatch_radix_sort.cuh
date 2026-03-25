@@ -641,7 +641,7 @@ struct DeviceRadixSortPolicy
     // Architecture-specific tuning policies
     //------------------------------------------------------------------------------
 
-#if defined(__MUSACC_VER_MAJOR__)
+#if defined(__MUSACC_VER_MAJOR__) || defined(CUB_MUSA_ARCH)
     /// SM210 (MUSA MP_21 - S3000 series) - Most conservative settings
     struct Policy210 : ChainedPolicy<210, Policy210, Policy210>
     {
@@ -1120,7 +1120,7 @@ struct DeviceRadixSortPolicy
 
 
     /// MaxPolicy
-#if defined(__MUSACC_VER_MAJOR__)
+#if defined(__MUSACC_VER_MAJOR__) || defined(CUB_MUSA_ARCH)
     typedef Policy310 MaxPolicy;
 #else
     typedef Policy800 MaxPolicy;

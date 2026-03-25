@@ -40,13 +40,13 @@
 #include <type_traits>
 
 // MUSA: fp16 and bf16 are always available
-#if defined(__MUSACC_VER_MAJOR__)
+#if defined(__MUSACC_VER_MAJOR__) || defined(CUB_MUSA_ARCH)
     #include <musa_fp16.h>
     #include <musa_bf16.h>
 #elif (__CUDACC_VER_MAJOR__ >= 9 || CUDA_VERSION >= 9000) && !_NVHPC_CUDA
     #include <musa_fp16.h>
 #endif
-#if !defined(__MUSACC_VER_MAJOR__) && (__CUDACC_VER_MAJOR__ >= 11 || CUDA_VERSION >= 11000) && !_NVHPC_CUDA
+#if !defined(__MUSACC_VER_MAJOR__) && !defined(CUB_MUSA_ARCH) && (__CUDACC_VER_MAJOR__ >= 11 || CUDA_VERSION >= 11000) && !_NVHPC_CUDA
     #include <musa_bf16.h>
 #endif
 
@@ -1112,7 +1112,7 @@ struct FpLimits<double>
     }
 };
 
-#if defined(__MUSACC_VER_MAJOR__) || ((__CUDACC_VER_MAJOR__ >= 9 || CUDA_VERSION >= 9000) && !_NVHPC_CUDA)
+#if defined(__MUSACC_VER_MAJOR__) || defined(CUB_MUSA_ARCH) || ((__CUDACC_VER_MAJOR__ >= 9 || CUDA_VERSION >= 9000) && !_NVHPC_CUDA)
 template <>
 struct FpLimits<__half>
 {
@@ -1128,7 +1128,7 @@ struct FpLimits<__half>
 };
 #endif
 
-#if defined(__MUSACC_VER_MAJOR__) || ((__CUDACC_VER_MAJOR__ >= 11 || CUDA_VERSION >= 11000) && !_NVHPC_CUDA)
+#if defined(__MUSACC_VER_MAJOR__) || defined(CUB_MUSA_ARCH) || ((__CUDACC_VER_MAJOR__ >= 11 || CUDA_VERSION >= 11000) && !_NVHPC_CUDA)
 template <>
 struct FpLimits<__mt_bfloat16>
 {
@@ -1208,10 +1208,10 @@ template <> struct NumericTraits<unsigned long long> :  BaseTraits<UNSIGNED_INTE
 
 template <> struct NumericTraits<float> :               BaseTraits<FLOATING_POINT, true, false, unsigned int, float> {};
 template <> struct NumericTraits<double> :              BaseTraits<FLOATING_POINT, true, false, unsigned long long, double> {};
-#if defined(__MUSACC_VER_MAJOR__) || ((__CUDACC_VER_MAJOR__ >= 9 || CUDA_VERSION >= 9000) && !_NVHPC_CUDA)
+#if defined(__MUSACC_VER_MAJOR__) || defined(CUB_MUSA_ARCH) || ((__CUDACC_VER_MAJOR__ >= 9 || CUDA_VERSION >= 9000) && !_NVHPC_CUDA)
     template <> struct NumericTraits<__half> :          BaseTraits<FLOATING_POINT, true, false, unsigned short, __half> {};
 #endif
-#if defined(__MUSACC_VER_MAJOR__) || ((__CUDACC_VER_MAJOR__ >= 11 || CUDA_VERSION >= 11000) && !_NVHPC_CUDA)
+#if defined(__MUSACC_VER_MAJOR__) || defined(CUB_MUSA_ARCH) || ((__CUDACC_VER_MAJOR__ >= 11 || CUDA_VERSION >= 11000) && !_NVHPC_CUDA)
     template <> struct NumericTraits<__mt_bfloat16> :   BaseTraits<FLOATING_POINT, true, false, unsigned short, __mt_bfloat16> {};
 #endif
 

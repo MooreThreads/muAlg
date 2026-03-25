@@ -184,10 +184,10 @@
 #if defined(_NVHPC_CUDA)
 #define CUB_DETAIL_MAGIC_NS_BEGIN inline namespace CUB_DETAIL_MAGIC_NS_NAME(CUB_VERSION, NV_TARGET_SM_INTEGER_LIST) {
 #define CUB_DETAIL_MAGIC_NS_END }
-#elif defined(__MUSACC_VER_MAJOR__)
+#elif defined(__MUSACC_VER_MAJOR__) || defined(CUB_MUSA_ARCH)
 #define CUB_DETAIL_MAGIC_NS_BEGIN inline namespace CUB_DETAIL_MAGIC_NS_NAME(CUB_VERSION, MUSA_ARCH_LIST) {
 #define CUB_DETAIL_MAGIC_NS_END }
-#else // not defined(_NVHPC_CUDA) and not defined(__MUSACC_VER_MAJOR__)
+#else // not defined(_NVHPC_CUDA) and not defined(__MUSACC_VER_MAJOR__) and not defined(CUB_MUSA_ARCH)
 #define CUB_DETAIL_MAGIC_NS_BEGIN inline namespace CUB_DETAIL_MAGIC_NS_NAME(CUB_VERSION, __CUDA_ARCH_LIST__) {
 #define CUB_DETAIL_MAGIC_NS_END }
 #endif // not defined(_NVHPC_CUDA)

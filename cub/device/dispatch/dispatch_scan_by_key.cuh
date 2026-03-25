@@ -139,7 +139,7 @@ struct DeviceScanByKeyPolicy
     static constexpr size_t MaxInputBytes = (sizeof(KeyT) > sizeof(ValueT) ? sizeof(KeyT) : sizeof(ValueT));
     static constexpr size_t CombinedInputBytes = sizeof(KeyT) + sizeof(ValueT);
 
-#if defined(__MUSACC_VER_MAJOR__)
+#if defined(__MUSACC_VER_MAJOR__) || defined(CUB_MUSA_ARCH)
     /// MUSA MP_21 (S3000 series) - Most conservative settings
     struct Policy210 : ChainedPolicy<210, Policy210, Policy210>
     {

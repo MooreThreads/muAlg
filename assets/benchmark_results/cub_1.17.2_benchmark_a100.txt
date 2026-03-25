@@ -1,0 +1,241 @@
+=== CUB 1.17.2 Benchmark on NVIDIA A100 80GB ===
+Date: Tue Mar 24 02:04:50 UTC 2026
+
+=== Device Reduce ===
+Using device 0: NVIDIA A100 80GB PCIe (PTX version 800, SM800, 108 SMs, 80729 free / 81152 total MB physmem, 1935.360 GB/s @ 1512000 kHz mem clock, ECC on)
+cub::DeviceReduce::Sum() 150 items (4-byte elements)
+	PASS
+
+
+=== Device Scan ===
+Using device 0: NVIDIA A100 80GB PCIe (PTX version 800, SM800, 108 SMs, 80729 free / 81152 total MB physmem, 1935.360 GB/s @ 1512000 kHz mem clock, ECC on)
+cub::DeviceScan::ExclusiveSum 150 items (4-byte elements)
+	PASS
+
+
+=== Device Radix Sort ===
+Using device 0: NVIDIA A100 80GB PCIe (PTX version 800, SM800, 108 SMs, 80729 free / 81152 total MB physmem, 1935.360 GB/s @ 1512000 kHz mem clock, ECC on)
+cub::DeviceRadixSort::SortPairs() 150 items (4-byte keys 4-byte values)
+	 Compare keys (selector 1): PASS
+	 Compare values (selector 1): PASS
+
+
+
+=== Block Reduce ===
+Using device 0: NVIDIA A100 80GB PCIe (PTX version 800, SM800, 108 SMs, 80729 free / 81152 total MB physmem, 1935.360 GB/s @ 1512000 kHz mem clock, ECC on)
+BlockReduce algorithm BLOCK_REDUCE_RAKING on 1024 items (100 timing iterations, 1 blocks, 1024 threads, 1 items per thread, 2 SM occupancy):
+	Aggregate: PASS
+	Average BlockReduce::Sum clocks: 781.360
+	Average BlockReduce::Sum clocks per item: 0.763
+	Average kernel millis: 0.0058
+	Average million items / sec: 176.6786
+BlockReduce algorithm BLOCK_REDUCE_RAKING on 1024 items (100 timing iterations, 1 blocks, 512 threads, 2 items per thread, 4 SM occupancy):
+	Aggregate: PASS
+	Average BlockReduce::Sum clocks: 727.760
+	Average BlockReduce::Sum clocks per item: 0.711
+	Average kernel millis: 0.0058
+	Average million items / sec: 177.3051
+BlockReduce algorithm BLOCK_REDUCE_RAKING on 1024 items (100 timing iterations, 1 blocks, 256 threads, 4 items per thread, 8 SM occupancy):
+	Aggregate: PASS
+	Average BlockReduce::Sum clocks: 686.180
+	Average BlockReduce::Sum clocks per item: 0.670
+	Average kernel millis: 0.0057
+	Average million items / sec: 179.2116
+BlockReduce algorithm BLOCK_REDUCE_RAKING on 1024 items (100 timing iterations, 1 blocks, 128 threads, 8 items per thread, 16 SM occupancy):
+	Aggregate: PASS
+	Average BlockReduce::Sum clocks: 689.520
+	Average BlockReduce::Sum clocks per item: 0.673
+	Average kernel millis: 0.0057
+	Average million items / sec: 178.5715
+BlockReduce algorithm BLOCK_REDUCE_RAKING on 1024 items (100 timing iterations, 1 blocks, 64 threads, 16 items per thread, 32 SM occupancy):
+	Aggregate: PASS
+	Average BlockReduce::Sum clocks: 648.370
+	Average BlockReduce::Sum clocks per item: 0.633
+	Average kernel millis: 0.0059
+	Average million items / sec: 174.8253
+BlockReduce algorithm BLOCK_REDUCE_RAKING on 1024 items (100 timing iterations, 1 blocks, 32 threads, 32 items per thread, 32 SM occupancy):
+	Aggregate: PASS
+	Average BlockReduce::Sum clocks: 591.330
+	Average BlockReduce::Sum clocks per item: 0.577
+	Average kernel millis: 0.0058
+	Average million items / sec: 176.3669
+BlockReduce algorithm BLOCK_REDUCE_RAKING on 1024 items (100 timing iterations, 1 blocks, 16 threads, 64 items per thread, 28 SM occupancy):
+	Aggregate: PASS
+	Average BlockReduce::Sum clocks: 649.030
+	Average BlockReduce::Sum clocks per item: 0.634
+	Average kernel millis: 0.0061
+	Average million items / sec: 167.7854
+-------------
+BlockReduce algorithm BLOCK_REDUCE_WARP_REDUCTIONS on 1024 items (100 timing iterations, 1 blocks, 1024 threads, 1 items per thread, 2 SM occupancy):
+	Aggregate: PASS
+	Average BlockReduce::Sum clocks: 817.080
+	Average BlockReduce::Sum clocks per item: 0.798
+	Average kernel millis: 0.0057
+	Average million items / sec: 178.8910
+BlockReduce algorithm BLOCK_REDUCE_WARP_REDUCTIONS on 1024 items (100 timing iterations, 1 blocks, 512 threads, 2 items per thread, 4 SM occupancy):
+	Aggregate: PASS
+	Average BlockReduce::Sum clocks: 759.440
+	Average BlockReduce::Sum clocks per item: 0.742
+	Average kernel millis: 0.0058
+	Average million items / sec: 176.6786
+BlockReduce algorithm BLOCK_REDUCE_WARP_REDUCTIONS on 1024 items (100 timing iterations, 1 blocks, 256 threads, 4 items per thread, 8 SM occupancy):
+	Aggregate: PASS
+	Average BlockReduce::Sum clocks: 686.470
+	Average BlockReduce::Sum clocks per item: 0.670
+	Average kernel millis: 0.0056
+	Average million items / sec: 182.4818
+BlockReduce algorithm BLOCK_REDUCE_WARP_REDUCTIONS on 1024 items (100 timing iterations, 1 blocks, 128 threads, 8 items per thread, 16 SM occupancy):
+	Aggregate: PASS
+	Average BlockReduce::Sum clocks: 647.310
+	Average BlockReduce::Sum clocks per item: 0.632
+	Average kernel millis: 0.0056
+	Average million items / sec: 182.1494
+BlockReduce algorithm BLOCK_REDUCE_WARP_REDUCTIONS on 1024 items (100 timing iterations, 1 blocks, 64 threads, 16 items per thread, 32 SM occupancy):
+	Aggregate: PASS
+	Average BlockReduce::Sum clocks: 631.010
+	Average BlockReduce::Sum clocks per item: 0.616
+	Average kernel millis: 0.0057
+	Average million items / sec: 178.8910
+BlockReduce algorithm BLOCK_REDUCE_WARP_REDUCTIONS on 1024 items (100 timing iterations, 1 blocks, 32 threads, 32 items per thread, 32 SM occupancy):
+	Aggregate: PASS
+	Average BlockReduce::Sum clocks: 603.140
+	Average BlockReduce::Sum clocks per item: 0.589
+	Average kernel millis: 0.0058
+	Average million items / sec: 176.3670
+BlockReduce algorithm BLOCK_REDUCE_WARP_REDUCTIONS on 1024 items (100 timing iterations, 1 blocks, 16 threads, 64 items per thread, 28 SM occupancy):
+	Aggregate: PASS
+	Average BlockReduce::Sum clocks: 663.160
+	Average BlockReduce::Sum clocks per item: 0.648
+	Average kernel millis: 0.0061
+	Average million items / sec: 169.2049
+
+=== Block Scan ===
+Using device 0: NVIDIA A100 80GB PCIe (PTX version 800, SM800, 108 SMs, 80729 free / 81152 total MB physmem, 1935.360 GB/s @ 1512000 kHz mem clock, ECC on)
+BlockScan algorithm BLOCK_SCAN_RAKING on 1024 items (100 timing iterations, 1 blocks, 1024 threads, 1 items per thread, 2 SM occupancy):
+	Output items: PASS
+	Aggregate: PASS
+	Average BlockScan::Sum clocks: 935.090
+	Average BlockScan::Sum clocks per item: 0.913
+	Average kernel millis: 0.0062
+	Average million items / sec: 165.2894
+BlockScan algorithm BLOCK_SCAN_RAKING on 1024 items (100 timing iterations, 1 blocks, 512 threads, 2 items per thread, 4 SM occupancy):
+	Output items: PASS
+	Aggregate: PASS
+	Average BlockScan::Sum clocks: 560.570
+	Average BlockScan::Sum clocks per item: 0.547
+	Average kernel millis: 0.0059
+	Average million items / sec: 172.7117
+BlockScan algorithm BLOCK_SCAN_RAKING on 1024 items (100 timing iterations, 1 blocks, 256 threads, 4 items per thread, 8 SM occupancy):
+	Output items: PASS
+	Aggregate: PASS
+	Average BlockScan::Sum clocks: 451.040
+	Average BlockScan::Sum clocks per item: 0.440
+	Average kernel millis: 0.0058
+	Average million items / sec: 177.6200
+BlockScan algorithm BLOCK_SCAN_RAKING on 1024 items (100 timing iterations, 1 blocks, 128 threads, 8 items per thread, 16 SM occupancy):
+	Output items: PASS
+	Aggregate: PASS
+	Average BlockScan::Sum clocks: 438.690
+	Average BlockScan::Sum clocks per item: 0.428
+	Average kernel millis: 0.0058
+	Average million items / sec: 176.0565
+BlockScan algorithm BLOCK_SCAN_RAKING on 1024 items (100 timing iterations, 1 blocks, 64 threads, 16 items per thread, 31 SM occupancy):
+	Output items: PASS
+	Aggregate: PASS
+	Average BlockScan::Sum clocks: 455.000
+	Average BlockScan::Sum clocks per item: 0.444
+	Average kernel millis: 0.0060
+	Average million items / sec: 170.6486
+BlockScan algorithm BLOCK_SCAN_RAKING on 1024 items (100 timing iterations, 1 blocks, 32 threads, 32 items per thread, 24 SM occupancy):
+	Output items: PASS
+	Aggregate: PASS
+	Average BlockScan::Sum clocks: 373.000
+	Average BlockScan::Sum clocks per item: 0.364
+	Average kernel millis: 0.0062
+	Average million items / sec: 166.1131
+-------------
+BlockScan algorithm BLOCK_SCAN_RAKING_MEMOIZE on 1024 items (100 timing iterations, 1 blocks, 1024 threads, 1 items per thread, 1 SM occupancy):
+	Output items: PASS
+	Aggregate: PASS
+	Average BlockScan::Sum clocks: 799.090
+	Average BlockScan::Sum clocks per item: 0.780
+	Average kernel millis: 0.0061
+	Average million items / sec: 168.9191
+BlockScan algorithm BLOCK_SCAN_RAKING_MEMOIZE on 1024 items (100 timing iterations, 1 blocks, 512 threads, 2 items per thread, 4 SM occupancy):
+	Output items: PASS
+	Aggregate: PASS
+	Average BlockScan::Sum clocks: 524.670
+	Average BlockScan::Sum clocks per item: 0.512
+	Average kernel millis: 0.0059
+	Average million items / sec: 173.3104
+BlockScan algorithm BLOCK_SCAN_RAKING_MEMOIZE on 1024 items (100 timing iterations, 1 blocks, 256 threads, 4 items per thread, 8 SM occupancy):
+	Output items: PASS
+	Aggregate: PASS
+	Average BlockScan::Sum clocks: 425.210
+	Average BlockScan::Sum clocks per item: 0.415
+	Average kernel millis: 0.0058
+	Average million items / sec: 177.9360
+BlockScan algorithm BLOCK_SCAN_RAKING_MEMOIZE on 1024 items (100 timing iterations, 1 blocks, 128 threads, 8 items per thread, 16 SM occupancy):
+	Output items: PASS
+	Aggregate: PASS
+	Average BlockScan::Sum clocks: 409.000
+	Average BlockScan::Sum clocks per item: 0.399
+	Average kernel millis: 0.0058
+	Average million items / sec: 175.7470
+BlockScan algorithm BLOCK_SCAN_RAKING_MEMOIZE on 1024 items (100 timing iterations, 1 blocks, 64 threads, 16 items per thread, 24 SM occupancy):
+	Output items: PASS
+	Aggregate: PASS
+	Average BlockScan::Sum clocks: 431.980
+	Average BlockScan::Sum clocks per item: 0.422
+	Average kernel millis: 0.0060
+	Average million items / sec: 171.5267
+BlockScan algorithm BLOCK_SCAN_RAKING_MEMOIZE on 1024 items (100 timing iterations, 1 blocks, 32 threads, 32 items per thread, 24 SM occupancy):
+	Output items: PASS
+	Aggregate: PASS
+	Average BlockScan::Sum clocks: 373.000
+	Average BlockScan::Sum clocks per item: 0.364
+	Average kernel millis: 0.0062
+	Average million items / sec: 166.1131
+-------------
+BlockScan algorithm BLOCK_SCAN_WARP_SCANS on 1024 items (100 timing iterations, 1 blocks, 1024 threads, 1 items per thread, 2 SM occupancy):
+	Output items: PASS
+	Aggregate: PASS
+	Average BlockScan::Sum clocks: 1545.410
+	Average BlockScan::Sum clocks per item: 1.509
+	Average kernel millis: 0.0066
+	Average million items / sec: 154.3211
+BlockScan algorithm BLOCK_SCAN_WARP_SCANS on 1024 items (100 timing iterations, 1 blocks, 512 threads, 2 items per thread, 4 SM occupancy):
+	Output items: PASS
+	Aggregate: PASS
+	Average BlockScan::Sum clocks: 601.970
+	Average BlockScan::Sum clocks per item: 0.588
+	Average kernel millis: 0.0060
+	Average million items / sec: 171.2330
+BlockScan algorithm BLOCK_SCAN_WARP_SCANS on 1024 items (100 timing iterations, 1 blocks, 256 threads, 4 items per thread, 8 SM occupancy):
+	Output items: PASS
+	Aggregate: PASS
+	Average BlockScan::Sum clocks: 365.340
+	Average BlockScan::Sum clocks per item: 0.357
+	Average kernel millis: 0.0056
+	Average million items / sec: 182.8154
+BlockScan algorithm BLOCK_SCAN_WARP_SCANS on 1024 items (100 timing iterations, 1 blocks, 128 threads, 8 items per thread, 16 SM occupancy):
+	Output items: PASS
+	Aggregate: PASS
+	Average BlockScan::Sum clocks: 324.000
+	Average BlockScan::Sum clocks per item: 0.316
+	Average kernel millis: 0.0058
+	Average million items / sec: 177.3051
+BlockScan algorithm BLOCK_SCAN_WARP_SCANS on 1024 items (100 timing iterations, 1 blocks, 64 threads, 16 items per thread, 20 SM occupancy):
+	Output items: PASS
+	Aggregate: PASS
+	Average BlockScan::Sum clocks: 346.000
+	Average BlockScan::Sum clocks per item: 0.338
+	Average kernel millis: 0.0060
+	Average million items / sec: 171.2330
+BlockScan algorithm BLOCK_SCAN_WARP_SCANS on 1024 items (100 timing iterations, 1 blocks, 32 threads, 32 items per thread, 31 SM occupancy):
+	Output items: PASS
+	Aggregate: PASS
+	Average BlockScan::Sum clocks: 390.000
+	Average BlockScan::Sum clocks per item: 0.381
+	Average kernel millis: 0.0062
+	Average million items / sec: 166.1131

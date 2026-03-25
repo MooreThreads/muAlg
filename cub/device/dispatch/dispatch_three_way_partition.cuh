@@ -167,7 +167,7 @@ struct DispatchThreeWayPartitionIf
    * Tuning policies
    ****************************************************************************/
 
-#if defined(__MUSACC_VER_MAJOR__)
+#if defined(__MUSACC_VER_MAJOR__) || defined(CUB_MUSA_ARCH)
   /// MUSA MP_21 (S3000 series) - Most conservative settings
   struct Policy210
   {
@@ -228,7 +228,7 @@ struct DispatchThreeWayPartitionIf
    * Tuning policies of current PTX compiler pass
    ****************************************************************************/
 
-#if defined(__MUSACC_VER_MAJOR__)
+#if defined(__MUSACC_VER_MAJOR__) || defined(CUB_MUSA_ARCH)
   #if (CUB_PTX_ARCH >= 310)
     using PtxPolicy = Policy310;
   #elif (CUB_PTX_ARCH >= 220)

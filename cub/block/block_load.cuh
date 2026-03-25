@@ -1016,7 +1016,10 @@ private:
     {
         enum
         {
-            WARP_THREADS = CUB_WARP_THREADS(PTX_ARCH)
+            WARP_THREADS = CUB_WARP_THREADS(PTX_ARCH),
+            LOG_WARP_THREADS = CUB_LOG_WARP_THREADS(PTX_ARCH),
+            WARP_TIME_SLICED_THREADS = CUB_MIN(BLOCK_THREADS, WARP_THREADS),
+            WARP_TIME_SLICED_ITEMS = WARP_TIME_SLICED_THREADS * ITEMS_PER_THREAD,
         };
 
         // Assert BLOCK_THREADS must be a multiple of WARP_THREADS
@@ -1051,7 +1054,7 @@ private:
         template <typename InputIteratorT>
         __device__ __forceinline__ void Load(
             InputIteratorT  block_itr,                      ///< [in] The thread block's base input iterator for loading from
-            InputT          (&items)[ITEMS_PER_THREAD])     ///< [out] Data to load{
+            InputT          (&items)[ITEMS_PER_THREAD])     ///< [out] Data to load
         {
             LoadDirectWarpStriped(linear_tid, block_itr, items);
             BlockExchange(temp_storage).WarpStripedToBlocked(items, items);

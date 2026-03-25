@@ -5,8 +5,7 @@ cmake_minimum_required(VERSION 3.15)
 project(CUBBenchmarks)
 
 # MUSA Configuration
-list(APPEND CMAKE_MODULE_PATH /usr/local/musa/cmake)
-find_package(MUSA REQUIRED)
+include(${CMAKE_CURRENT_SOURCE_DIR}/../cmake/SimpleMUSA.cmake)
 
 # muRAND Configuration
 find_library(MURAND_LIBRARY murand HINTS /usr/local/musa/lib)

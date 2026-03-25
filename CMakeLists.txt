@@ -11,8 +11,7 @@ endif()
 # CXX is only needed for AppendOptionIfAvailable.
 project(CUB NONE)
 # MUSA Configuration
-list(APPEND CMAKE_MODULE_PATH /usr/local/musa/cmake)
-find_package(MUSA REQUIRED)
+include(cmake/SimpleMUSA.cmake)
 
 # MUSA Architecture Configuration
 set(MUSA_SUPPORTED_ARCHS mp_21 mp_22 mp_31)

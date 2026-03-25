@@ -57,7 +57,7 @@ CUB_NAMESPACE_BEGIN
         // when compiling both host code and device code. Currently, only one
         // PTX version can be targeted.
         #define CUB_PTX_ARCH __NVCOMPILER_CUDA_ARCH__
-    #elif defined(__MUSACC_VER_MAJOR__)
+    #elif defined(__MUSACC_VER_MAJOR__) || defined(CUB_MUSA_ARCH)
         // MUSA: Both host and device code use CUB_MUSA_ARCH
         // Note: __MUSA_ARCH__ is defined as 1 in device code, not the arch version
         #ifndef CUB_MUSA_ARCH
@@ -126,13 +126,14 @@ CUB_NAMESPACE_BEGIN
 
 
 /// Number of threads per warp
-/// MUSA: mp21/mp22 have 128 threads per warp (log2 = 7), mp31 has 32 (log2 = 5)
-/// CUDA: Always 32 threads per warp (log2 = 5)
+/// MUSA: mp21/mp22 have 128 threads per warp, mp31 has 32
+/// CUDA: Always 32 threads per warp
+/// NOTE: We keep CUB_WARP_THREADS at 32 for all architectures for code compatibility.
+/// The 128-thread warp handling is done in specific places where needed.
 #ifndef CUB_LOG_WARP_THREADS
     #define CUB_LOG_WARP_THREADS(arch)                      \
-        (((arch) >= 210 && (arch) < 310) ?                  \
-            (7) :                                           \
-            (5))
+        (5)
+
     #define CUB_WARP_THREADS(arch)                          \
         (1 << CUB_LOG_WARP_THREADS(arch))
 
