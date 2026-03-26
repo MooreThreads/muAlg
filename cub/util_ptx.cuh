@@ -428,18 +428,9 @@ __device__ __forceinline__ int RowMajorTid(int block_dim_x, int block_dim_y, int
 /**
  * \brief Returns the warp lane ID of the calling thread
  */
-// MUSA: S4000 (SM220) 的 warp 是 128 线程，但 __get_laneid() 只返回 0-31
-// 需要使用 threadIdx 计算完整的 lane ID
 __device__ __forceinline__ unsigned int LaneId()
 {
-#if defined(__MUSA_ARCH__)
-    // MUSA: warp 大小可能是 32 (mp31) 或 128 (mp21/mp22/mp32+)
-    // __get_laneid() 只返回 32 线程组内的 lane (0-31)
-    // 使用 threadIdx.x 获取完整的 warp 内 lane ID
-    return threadIdx.x & (CUB_PTX_WARP_THREADS - 1);
-#else
     return __get_laneid() % 32;
-#endif
 }
 
 
