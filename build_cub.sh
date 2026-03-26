@@ -157,7 +157,13 @@ echo "=========================================="
 echo "CMake 配置 (Ninja)..."
 echo "MUSA 架构: ${MUSA_ARCH}"
 echo "=========================================="
-cmake -G Ninja -DMUSA_64_BIT_DEVICE_CODE=ON -DMUSA_ARCH_LIST="${MUSA_ARCH}" -S "${SOURCE_DIR}" -B build
+cmake -G Ninja \
+    -DMUSA_64_BIT_DEVICE_CODE=ON \
+    -DMUSA_ARCH_LIST="${MUSA_ARCH}" \
+    -DCUB_ENABLE_TESTING=ON \
+    -DCUB_ENABLE_EXAMPLES=ON \
+    -DCUB_ENABLE_HEADER_TESTING=OFF \
+    -S "${SOURCE_DIR}" -B build
 
 # 4. 并行编译
 echo ""

@@ -78,6 +78,11 @@ endif()
 # GNUInstallDirs CMake module.
 enable_language(CXX)
 
+# Set default installation prefix for MUSA
+if (NOT DEFINED CMAKE_INSTALL_PREFIX)
+  set(CMAKE_INSTALL_PREFIX "/usr/local/musa" CACHE PATH "Installation prefix" FORCE)
+endif()
+
 # Require C++17 for std::invoke_result_t support
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -92,7 +97,7 @@ set(CUB_ENABLE_DIALECT_CPP14 OFF CACHE BOOL "Disable C++14 dialect" FORCE)
 # In these cases the add_subdirectory(dependencies/cub) line in Thrust won't get
 # called so we can't rely on CUB providing its own rules.
 if (NOT CUB_IN_THRUST)
-  option(CUB_ENABLE_INSTALL_RULES "Enable installation of CUB" ${CUB_TOPLEVEL_PROJECT})
+  option(CUB_ENABLE_INSTALL_RULES "Enable installation of CUB" ON)
   if (CUB_ENABLE_INSTALL_RULES)
     include(cmake/CubInstallRules.cmake)
   endif()
@@ -106,8 +111,8 @@ if (NOT CUB_TOPLEVEL_PROJECT AND NOT CUB_IN_THRUST)
 endif()
 
 option(CUB_ENABLE_HEADER_TESTING "Test that all public headers compile." OFF)
-option(CUB_ENABLE_TESTING "Build CUB testing suite." ON)
-option(CUB_ENABLE_EXAMPLES "Build CUB examples." ON)
+option(CUB_ENABLE_TESTING "Build CUB testing suite." OFF)
+option(CUB_ENABLE_EXAMPLES "Build CUB examples." OFF)
 # This is needed for NVCXX QA, which requires a static set of executable names.
 # Only a single dialect may be enabled when this is off.
 option(CUB_ENABLE_CPP_DIALECT_IN_NAMES
