@@ -68,9 +68,13 @@ function(cub_build_compiler_targets)
   endif()
 
   # MUSA compiler warnings that are safe to suppress
-  # Check if using MUSA by looking for musa in the compiler path
-  if ("Clang" STREQUAL "${CMAKE_CXX_COMPILER_ID}" AND
-      (DEFINED CMAKE_MUSA_COMPILER OR "${CMAKE_CXX_COMPILER}" MATCHES "musa"))
+  # Check if using MUSA by looking for musa in the compiler path or MUSA architecture flags
+  # Note: mcc may be detected as GNU or Clang depending on version, so check path too
+  if (DEFINED CMAKE_MUSA_COMPILER OR
+      "${CMAKE_CXX_COMPILER}" MATCHES "musa" OR
+      "${CMAKE_C_COMPILER}" MATCHES "musa" OR
+      DEFINED MUSA_ARCH_LIST OR
+      DEFINED CUB_MUSA_ARCH)
     # MUSA/Clang specific warnings to suppress:
     # -Wunused-parameter: Many intentionally unused parameters in template code
     # -Wunknown-pragmas: NVIDIA-specific pragmas not recognized by MUSA

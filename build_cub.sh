@@ -15,7 +15,6 @@ set -e
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 CUB_DIR="${SCRIPT_DIR}"
-BUILD_DIR="${CUB_DIR}/build"
 SOURCE_DIR="${CUB_DIR}"
 
 # 默认值 - 可通过环境变量覆盖
@@ -24,12 +23,13 @@ TEST_JOBS="${CUB_TEST_JOBS:-1}"
 RUN_TEST=true
 TEST_VERBOSE="-V"
 MUSA_DEVICES="${CUB_MUSA_DEVICES:-}"  # 默认所有GPU可见
-LOG_FILE="${CUB_DIR}/test_verbose.log"
-REPORT_FILE="${CUB_DIR}/test_report.md"
 SKIP_CLEAN="${CUB_NO_CLEAN:-false}"
 BUILD_ONLY="${CUB_BUILD_ONLY:-false}"
 EXCLUDE_TESTS="${CUB_EXCLUDE_TESTS:-grid_barrier|namespace_wrapped}"  # grid_barrier 和 namespace_wrapped 会挂起
 MUSA_ARCH="${CUB_MUSA_ARCH:-mp_31}"  # 默认 MUSA 架构
+BUILD_DIR=""  # 将在参数解析后设置
+LOG_FILE=""
+REPORT_FILE=""
 
 # Thrust 相关
 MUSA_INCLUDE_DIR="/usr/local/musa/include"
@@ -49,6 +49,7 @@ show_help() {
   -T, --test-jobs N 测试并行数 (默认: 8)
   -g, --gpus DEVICES 设置 MUSA_VISIBLE_DEVICES (如: 0,1,2,3)
   -a, --arch ARCH   MUSA 目标架构 (默认: mp_31, 支持: mp_21, mp_22, mp_31)
+  -b, --build-dir DIR 指定构建目录名 (默认: build_<arch>, 如 build_mp_31)
   -n, --no-clean    不删除 build 目录 (增量编译)
   -E, --exclude RE  排除匹配正则表达式的测试 (默认: ${EXCLUDE_TESTS})
                     传空字符串 "" 可取消默认排除
@@ -63,10 +64,12 @@ show_help() {
   6. 生成 markdown 报告
 
 示例:
-  $0                          # 完整流程：清理、编译、测试、生成报告
+  $0                          # 完整流程：清理、编译、测试、生成报告 (使用 build_mp_31)
+  $0 -a mp_22                 # 使用 build_mp_22 目录
   $0 build                    # 仅编译
   $0 -n                       # 增量编译并测试
   $0 -T 4 -g 0,1,2,3          # 用4个并行测试，只用GPU 0-3
+  $0 --build-dir custom       # 使用自定义构建目录 build_custom
 EOF
 }
 
@@ -92,6 +95,8 @@ check_and_install_thrust() {
 }
 
 # 解析参数
+CUSTOM_BUILD_DIR=""
+DO_CLEAN=false
 while [[ $# -gt 0 ]]; do
     case $1 in
         -j|--jobs)
@@ -110,6 +115,10 @@ while [[ $# -gt 0 ]]; do
             MUSA_ARCH="$2"
             shift 2
             ;;
+        -b|--build-dir)
+            CUSTOM_BUILD_DIR="$2"
+            shift 2
+            ;;
         -E|--exclude)
             EXCLUDE_TESTS="$2"
             shift 2
@@ -119,9 +128,8 @@ while [[ $# -gt 0 ]]; do
             shift
             ;;
         clean)
-            echo "清理 build 目录..."
-            rm -rf "${BUILD_DIR}"
-            exit 0
+            DO_CLEAN=true
+            shift
             ;;
         build)
             BUILD_ONLY=true
@@ -139,6 +147,22 @@ while [[ $# -gt 0 ]]; do
             ;;
     esac
 done
+
+# 设置构建目录 (基于架构自动命名，除非指定了自定义目录)
+if [ -n "$CUSTOM_BUILD_DIR" ]; then
+    BUILD_DIR="${CUB_DIR}/build_${CUSTOM_BUILD_DIR}"
+else
+    BUILD_DIR="${CUB_DIR}/build_${MUSA_ARCH}"
+fi
+LOG_FILE="${BUILD_DIR}/test_verbose.log"
+REPORT_FILE="${CUB_DIR}/test_report_${MUSA_ARCH}.md"
+
+# 处理 clean 命令 (需要在设置 BUILD_DIR 后)
+if [ "$DO_CLEAN" = true ]; then
+    echo "清理构建目录: ${BUILD_DIR}"
+    rm -rf "${BUILD_DIR}"
+    exit 0
+fi
 
 # 1. 检查并安装 thrust
 check_and_install_thrust
@@ -163,14 +187,14 @@ cmake -G Ninja \
     -DCUB_ENABLE_TESTING=ON \
     -DCUB_ENABLE_EXAMPLES=ON \
     -DCUB_ENABLE_HEADER_TESTING=OFF \
-    -S "${SOURCE_DIR}" -B build
+    -S "${SOURCE_DIR}" -B "${BUILD_DIR}"
 
 # 4. 并行编译
 echo ""
 echo "=========================================="
 echo "编译 (并行数: ${JOBS})..."
 echo "=========================================="
-cmake --build build -j "${JOBS}"
+cmake --build "${BUILD_DIR}" -j "${JOBS}"
 
 if [ "$RUN_TEST" = true ]; then
     echo ""
@@ -191,7 +215,7 @@ if [ "$RUN_TEST" = true ]; then
         EXCLUDE_ARG="-E ${EXCLUDE_TESTS}"
         echo "排除测试: ${EXCLUDE_TESTS}"
     fi
-    ctest --test-dir build -j "${TEST_JOBS}" ${TEST_VERBOSE} ${EXCLUDE_ARG} 2>&1 | tee "${LOG_FILE}"
+    ctest --test-dir "${BUILD_DIR}" -j "${TEST_JOBS}" ${TEST_VERBOSE} ${EXCLUDE_ARG} 2>&1 | tee "${LOG_FILE}"
 
     # 生成 markdown 报告
     echo ""
