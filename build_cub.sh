@@ -31,11 +31,6 @@ BUILD_DIR=""  # 将在参数解析后设置
 LOG_FILE=""
 REPORT_FILE=""
 
-# Thrust 相关
-MUSA_INCLUDE_DIR="/usr/local/musa/include"
-THRUST_REPO="git@sh-code.mthreads.com:sw/muThrust.git"
-THRUST_BRANCH="develop-1.17"
-
 show_help() {
     cat << EOF
 用法: $0 [选项] [命令]
@@ -56,12 +51,11 @@ show_help() {
   -h, --help        显示帮助
 
 默认行为:
-  1. 检查并安装 thrust (如果缺失)
-  2. 删除 build 目录
-  3. CMake 配置
-  4. 编译
-  5. 运行测试 (ctest -V)
-  6. 生成 markdown 报告
+  1. 删除 build 目录
+  2. CMake 配置
+  3. 编译
+  4. 运行测试 (ctest -V)
+  5. 生成 markdown 报告
 
 示例:
   $0                          # 完整流程：清理、编译、测试、生成报告 (使用 build_mp_31)
@@ -71,27 +65,6 @@ show_help() {
   $0 -T 4 -g 0,1,2,3          # 用4个并行测试，只用GPU 0-3
   $0 --build-dir custom       # 使用自定义构建目录 build_custom
 EOF
-}
-
-check_and_install_thrust() {
-    if [ -d "${MUSA_INCLUDE_DIR}/thrust" ]; then
-        echo "Thrust 已安装: ${MUSA_INCLUDE_DIR}/thrust"
-        return 0
-    fi
-
-    echo "检测到 Thrust 未安装，正在从 ${THRUST_REPO} 下载..."
-
-    TEMP_DIR=$(mktemp -d)
-    trap "rm -rf ${TEMP_DIR}" EXIT
-
-    cd "${TEMP_DIR}"
-    git clone --depth 1 --branch "${THRUST_BRANCH}" "${THRUST_REPO}" muThrust
-
-    echo "正在安装 Thrust 到 ${MUSA_INCLUDE_DIR}..."
-    sudo cp -r muThrust/thrust "${MUSA_INCLUDE_DIR}/"
-
-    echo "Thrust 安装完成"
-    cd "${CUB_DIR}"
 }
 
 # 解析参数
@@ -164,16 +137,7 @@ if [ "$DO_CLEAN" = true ]; then
     exit 0
 fi
 
-# 1. 检查并安装 thrust
-check_and_install_thrust
-
-cd "${CUB_DIR}"
-
-# 更新 git 子模块
-echo "更新 git 子模块..."
-git submodule update --init --recursive
-
-# 2. 清理 build 目录
+# 1. 清理 build 目录
 if [ "$SKIP_CLEAN" = false ] && [ -d "${BUILD_DIR}" ]; then
     echo "删除 build 目录..."
     rm -rf "${BUILD_DIR}"
