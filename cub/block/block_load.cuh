@@ -1026,7 +1026,9 @@ private:
         CUB_STATIC_ASSERT((int(BLOCK_THREADS) % int(WARP_THREADS) == 0), "BLOCK_THREADS must be a multiple of WARP_THREADS");
 
         // BlockExchange utility type for keys
-        typedef BlockExchange<InputT, BLOCK_DIM_X, ITEMS_PER_THREAD, true, BLOCK_DIM_Y, BLOCK_DIM_Z, PTX_ARCH> BlockExchange;
+        // Only use WARP_TIME_SLICING when it provides benefit (BLOCK_THREADS > WARP_THREADS)
+        static constexpr bool USE_WARP_TIME_SLICING = (BLOCK_THREADS > WARP_THREADS);
+        typedef BlockExchange<InputT, BLOCK_DIM_X, ITEMS_PER_THREAD, USE_WARP_TIME_SLICING, BLOCK_DIM_Y, BLOCK_DIM_Z, PTX_ARCH> BlockExchange;
 
         /// Shared memory storage layout type
         struct _TempStorage : BlockExchange::TempStorage
@@ -1090,8 +1092,16 @@ private:
      * Type definitions
      ******************************************************************************/
 
+    /// For small types (sizeof == 1), WARP_TRANSPOSE algorithms may have alignment issues on MUSA platform
+    /// Automatically fall back to BLOCK_LOAD_TRANSPOSE for these cases
+    static constexpr BlockLoadAlgorithm SAFE_ALGORITHM =
+        (sizeof(InputT) == 1 && (ALGORITHM == BLOCK_LOAD_WARP_TRANSPOSE ||
+                                 ALGORITHM == BLOCK_LOAD_WARP_TRANSPOSE_TIMESLICED))
+        ? BLOCK_LOAD_TRANSPOSE
+        : ALGORITHM;
+
     /// Internal load implementation to use
-    typedef LoadInternal<ALGORITHM, 0> InternalLoad;
+    typedef LoadInternal<SAFE_ALGORITHM, 0> InternalLoad;
 
 
     /// Shared memory storage layout type

@@ -138,9 +138,13 @@ private:
 
         TILE_ITEMS                  = BLOCK_THREADS * ITEMS_PER_THREAD,
 
-        TIME_SLICES                 = (WARP_TIME_SLICING) ? WARPS : 1,
+        // Only enable WARP_TIME_SLICING when it provides benefit
+        // (i.e., when BLOCK_THREADS > WARP_THREADS)
+        EFFECTIVE_WARP_TIME_SLICING = (WARP_TIME_SLICING && (BLOCK_THREADS > WARP_THREADS)) ? true : false,
 
-        TIME_SLICED_THREADS         = (WARP_TIME_SLICING) ? CUB_MIN(BLOCK_THREADS, WARP_THREADS) : BLOCK_THREADS,
+        TIME_SLICES                 = (EFFECTIVE_WARP_TIME_SLICING) ? WARPS : 1,
+
+        TIME_SLICED_THREADS         = (EFFECTIVE_WARP_TIME_SLICING) ? CUB_MIN(BLOCK_THREADS, WARP_THREADS) : BLOCK_THREADS,
         TIME_SLICED_ITEMS           = TIME_SLICED_THREADS * ITEMS_PER_THREAD,
 
         WARP_TIME_SLICED_THREADS    = CUB_MIN(BLOCK_THREADS, WARP_THREADS),
@@ -156,7 +160,9 @@ private:
      ******************************************************************************/
 
     /// Shared memory storage layout type
-    struct __align__(16) _TempStorage
+    /// For MUSA platform, avoid overly strict alignment that causes misaligned address errors for small types
+    /// Use minimum of alignof(InputT) or compiler default
+    struct _TempStorage
     {
         InputT buff[TIME_SLICED_ITEMS + PADDING_ITEMS];
     };

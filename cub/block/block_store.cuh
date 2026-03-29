@@ -236,14 +236,14 @@ __device__ __forceinline__ void StoreDirectStriped(
     T                   (&items)[ITEMS_PER_THREAD], ///< [in] Data to store
     int                 valid_items)                ///< [in] Number of valid items to write
 {
-    OutputIteratorT thread_itr = block_itr + linear_tid;
-
     // Store directly in striped order
     #pragma unroll
     for (int ITEM = 0; ITEM < ITEMS_PER_THREAD; ITEM++)
     {
         if ((ITEM * BLOCK_THREADS) + linear_tid < valid_items)
         {
+            // Only construct iterator when we're sure it's valid
+            OutputIteratorT thread_itr = block_itr + linear_tid;
             thread_itr[(ITEM * BLOCK_THREADS)] = items[ITEM];
         }
     }
@@ -320,14 +320,14 @@ __device__ __forceinline__ void StoreDirectWarpStriped(
     int wid         = linear_tid >> CUB_PTX_LOG_WARP_THREADS;
     int warp_offset = wid * CUB_PTX_WARP_THREADS * ITEMS_PER_THREAD;
 
-    OutputIteratorT thread_itr = block_itr + warp_offset + tid;
-
     // Store directly in warp-striped order
     #pragma unroll
     for (int ITEM = 0; ITEM < ITEMS_PER_THREAD; ITEM++)
     {
         if (warp_offset + tid + (ITEM * CUB_PTX_WARP_THREADS) < valid_items)
         {
+            // Only construct iterator when we're sure it's valid
+            OutputIteratorT thread_itr = block_itr + warp_offset + tid;
             thread_itr[(ITEM * CUB_PTX_WARP_THREADS)] = items[ITEM];
         }
     }
@@ -827,7 +827,9 @@ private:
         CUB_STATIC_ASSERT((int(BLOCK_THREADS) % int(WARP_THREADS) == 0), "BLOCK_THREADS must be a multiple of WARP_THREADS");
 
         // BlockExchange utility type for keys
-        typedef BlockExchange<T, BLOCK_DIM_X, ITEMS_PER_THREAD, true, BLOCK_DIM_Y, BLOCK_DIM_Z, PTX_ARCH> BlockExchange;
+        // Only use WARP_TIME_SLICING when it provides benefit (BLOCK_THREADS > WARP_THREADS)
+        static constexpr bool USE_WARP_TIME_SLICING = (BLOCK_THREADS > WARP_THREADS);
+        typedef BlockExchange<T, BLOCK_DIM_X, ITEMS_PER_THREAD, USE_WARP_TIME_SLICING, BLOCK_DIM_Y, BLOCK_DIM_Z, PTX_ARCH> BlockExchange;
 
         /// Shared memory storage layout type
         struct _TempStorage : BlockExchange::TempStorage
@@ -884,8 +886,16 @@ private:
      * Type definitions
      ******************************************************************************/
 
-    /// Internal load implementation to use
-    typedef StoreInternal<ALGORITHM, 0> InternalStore;
+    /// For small types (sizeof == 1), WARP_TRANSPOSE algorithms may have alignment issues on MUSA platform
+    /// Automatically fall back to BLOCK_STORE_TRANSPOSE for these cases
+    static constexpr BlockStoreAlgorithm SAFE_ALGORITHM =
+        (sizeof(T) == 1 && (ALGORITHM == BLOCK_STORE_WARP_TRANSPOSE ||
+                            ALGORITHM == BLOCK_STORE_WARP_TRANSPOSE_TIMESLICED))
+        ? BLOCK_STORE_TRANSPOSE
+        : ALGORITHM;
+
+    /// Internal store implementation to use
+    typedef StoreInternal<SAFE_ALGORITHM, 0> InternalStore;
 
 
     /// Shared memory storage layout type
