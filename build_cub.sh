@@ -30,6 +30,10 @@ MUSA_ARCH="${CUB_MUSA_ARCH:-mp_31}"  # 默认 MUSA 架构
 BUILD_DIR=""  # 将在参数解析后设置
 LOG_FILE=""
 REPORT_FILE=""
+THRUST_CMAKE_ARG=""
+if [ -n "${Thrust_DIR:-}" ]; then
+    THRUST_CMAKE_ARG="-DThrust_DIR=${Thrust_DIR}"
+fi
 
 show_help() {
     cat << EOF
@@ -150,6 +154,7 @@ echo "CMake 配置 (Ninja)..."
 echo "MUSA 架构: ${MUSA_ARCH}"
 echo "=========================================="
 cmake -G Ninja \
+    ${THRUST_CMAKE_ARG} \
     -DMUSA_64_BIT_DEVICE_CODE=ON \
     -DMUSA_ARCH_LIST="${MUSA_ARCH}" \
     -DCUB_ENABLE_TESTING=ON \

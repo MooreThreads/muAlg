@@ -57,6 +57,7 @@ MUSA 架构决定了编译目标硬件：
 | `CUB_NO_CLEAN` | 设置为 1 不删除 build 目录 |
 | `CUB_EXCLUDE_TESTS` | 排除匹配正则表达式的测试 |
 | `CUB_BUILD_ONLY` | 设置为 1 仅编译不测试 |
+| `Thrust_DIR` | 指定 `thrust-config.cmake` 所在目录，用于测试 toolkit 安装版 Thrust |
 
 ### 示例
 
@@ -86,6 +87,21 @@ export CUB_TEST_JOBS=4
 
 # 取消默认排除（运行所有测试）
 ./build_cub.sh -E ""
+```
+
+## Test CUB With Toolkit Thrust
+
+新增支持通过 `Thrust_DIR` 显式指定 toolkit 中安装的 `Thrust`，用于验证
+"当前仓库 CUB + toolkit Thrust" 这条组合链路。
+
+
+```bash
+git submodule update --init module_version
+
+cd /home/wenjingke/thrust_alg/muAlg
+
+Thrust_DIR=/usr/local/musa/lib64/cmake/thrust \
+./build_cub.sh
 ```
 
 ### 输出文件
