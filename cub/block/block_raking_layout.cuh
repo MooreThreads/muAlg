@@ -44,7 +44,7 @@ CUB_NAMESPACE_BEGIN
  * \ingroup BlockModule
  *
  * \par Overview
- * This type facilitates a shared memory usage pattern where a block of CUDA
+ * This type facilitates a shared memory usage pattern where a block of MUSA
  * threads places elements into shared memory and then reduces the active
  * parallelism to one "raking" warp of threads for serially aggregating consecutive
  * sequences of shared items.  Padding is inserted to eliminate bank conflicts

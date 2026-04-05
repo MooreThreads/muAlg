@@ -253,7 +253,7 @@ struct CachingDeviceAllocator
     size_t          max_bin_bytes;      /// Maximum bin size
     size_t          max_cached_bytes;   /// Maximum aggregate cached bytes per device
 
-    const bool      skip_cleanup;       /// Whether or not to skip a call to FreeAllCached() when destructor is called.  (The CUDA runtime may have already shut down for statically declared allocators)
+    const bool      skip_cleanup;       /// Whether or not to skip a call to FreeAllCached() when destructor is called.  (The MUSA runtime may have already shut down for statically declared allocators)
     bool            debug;              /// Whether or not to print (de)allocation events to stdout
 
     GpuCachedBytes  cached_bytes;       /// Map of device ordinal to aggregate cached bytes on that device

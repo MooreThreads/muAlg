@@ -30,7 +30,7 @@
  * Test of DeviceRadixSort utilities
  ******************************************************************************/
 
-// Ensure printing of CUDA runtime errors to console
+// Ensure printing of MUSA runtime errors to console
 #define CUB_STDERR
 
 #include <algorithm>
@@ -43,11 +43,11 @@
 #include <typeinfo>
 #include <vector>
 
-#if (__CUDACC_VER_MAJOR__ >= 9 || CUDA_VERSION >= 9000) && !_NVHPC_CUDA
+#if (__MUSACC_VER_MAJOR__ >= 9 || MUSA_VERSION >= 9000) && !_NVHPC_MUSA
     #include <musa_fp16.h>
 #endif
 
-#if (__CUDACC_VER_MAJOR__ >= 11 || CUDA_VERSION >= 11000) && !_NVHPC_CUDA
+#if (__MUSACC_VER_MAJOR__ >= 11 || MUSA_VERSION >= 11000) && !_NVHPC_MUSA
     #include <musa_bf16.h>
 #endif
 
@@ -488,7 +488,7 @@ musaError_t Dispatch(
 }
 
 //---------------------------------------------------------------------
-// CUDA Nested Parallelism Test Kernel
+// MUSA Nested Parallelism Test Kernel
 //---------------------------------------------------------------------
 
 /**

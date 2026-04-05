@@ -113,9 +113,9 @@ CUB_NAMESPACE_BEGIN
     static_assert(CUB_MAX_DEVICES > 0, "CUB_MAX_DEVICES must be greater than 0.");
 #endif
 
-/// Whether or not the source targeted by the active compiler pass is allowed to  invoke device kernels or methods from the CUDA runtime API.
+/// Whether or not the source targeted by the active compiler pass is allowed to  invoke device kernels or methods from the MUSA runtime API.
 #ifndef CUB_RUNTIME_FUNCTION
-    // MUSA 不支持 CDP (CUDA Dynamic Parallelism)，设备端不启用运行时
+    // MUSA 不支持 CDP (MUSA Dynamic Parallelism)，设备端不启用运行时
     #if (!defined(__MUSA_ARCH__) && (!defined(__CUDA_ARCH__) || (__CUDA_ARCH__>= 350 && defined(__CUDACC_RDC__))))
         #define CUB_RUNTIME_ENABLED
         #define CUB_RUNTIME_FUNCTION __host__ __device__
@@ -127,7 +127,7 @@ CUB_NAMESPACE_BEGIN
 
 /// Number of threads per warp
 /// MUSA: mp21/mp22 have 128 threads per warp, mp31 has 32
-/// CUDA: Always 32 threads per warp
+/// MUSA: Always 32 threads per warp
 /// NOTE: We keep CUB_WARP_THREADS at 32 for all architectures for code compatibility.
 /// The 128-thread warp handling is done in specific places where needed.
 #ifndef CUB_LOG_WARP_THREADS

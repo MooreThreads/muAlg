@@ -34,7 +34,7 @@
  *
  ******************************************************************************/
 
-// Ensure printing of CUDA runtime errors to console (define before including cub.h)
+// Ensure printing of MUSA runtime errors to console (define before including cub.h)
 #define CUB_STDERR
 
 #include <stdio.h>

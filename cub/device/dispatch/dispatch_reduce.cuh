@@ -46,7 +46,7 @@
 #include "../../util_debug.cuh"
 #include "../../util_device.cuh"
 
-#include <thrust/system/cuda/detail/core/triple_chevron_launch.h>
+#include <thrust/system/musa/detail/core/triple_chevron_launch.h>
 
 CUB_NAMESPACE_BEGIN
 
@@ -288,7 +288,7 @@ struct DeviceReducePolicy
     /// MaxPolicy for MUSA
     typedef Policy310 MaxPolicy;
 
-#else // CUDA
+#else // MUSA
 
     /// SM30
     struct Policy300 : ChainedPolicy<300, Policy300, Policy300>
@@ -345,7 +345,7 @@ struct DeviceReducePolicy
         typedef ReducePolicy SegmentedReducePolicy;
     };
 
-    /// MaxPolicy for CUDA
+    /// MaxPolicy for MUSA
     typedef Policy600 MaxPolicy;
 
 #endif // __MUSACC_VER_MAJOR__
@@ -389,7 +389,7 @@ struct DispatchReduce :
     OffsetT             num_items;                      ///< [in] Total number of input items (i.e., length of \p d_in)
     ReductionOpT        reduction_op;                   ///< [in] Binary reduction functor
     OutputT             init;                           ///< [in] The initial value of the reduction
-    musaStream_t        stream;                         ///< [in] CUDA stream to launch kernels within.  Default is stream<sub>0</sub>.
+    musaStream_t        stream;                         ///< [in] MUSA stream to launch kernels within.  Default is stream<sub>0</sub>.
     bool                debug_synchronous;              ///< [in] Whether or not to synchronize the stream after every kernel launch to check for errors.  Also causes launch configurations to be printed to the console.  Default is \p false.
     int                 ptx_version;                    ///< [in] PTX version
 
@@ -459,7 +459,7 @@ struct DispatchReduce :
                 ActivePolicyT::SingleTilePolicy::ITEMS_PER_THREAD);
 
             // Invoke single_reduce_sweep_kernel
-            THRUST_NS_QUALIFIER::cuda_cub::launcher::triple_chevron(
+            THRUST_NS_QUALIFIER::musa_cub::launcher::triple_chevron(
                 1, ActivePolicyT::SingleTilePolicy::BLOCK_THREADS, 0, stream
             ).doit(single_tile_kernel,
                 d_in,
@@ -555,7 +555,7 @@ struct DispatchReduce :
                 reduce_config.sm_occupancy);
 
             // Invoke DeviceReduceKernel
-            THRUST_NS_QUALIFIER::cuda_cub::launcher::triple_chevron(
+            THRUST_NS_QUALIFIER::musa_cub::launcher::triple_chevron(
                 reduce_grid_size, ActivePolicyT::ReducePolicy::BLOCK_THREADS,
                 0, stream
             ).doit(reduce_kernel,
@@ -578,7 +578,7 @@ struct DispatchReduce :
                 ActivePolicyT::SingleTilePolicy::ITEMS_PER_THREAD);
 
             // Invoke DeviceReduceSingleTileKernel
-            THRUST_NS_QUALIFIER::cuda_cub::launcher::triple_chevron(
+            THRUST_NS_QUALIFIER::musa_cub::launcher::triple_chevron(
                 1, ActivePolicyT::SingleTilePolicy::BLOCK_THREADS, 0, stream
             ).doit(single_tile_kernel,
                 d_block_reductions,
@@ -647,7 +647,7 @@ struct DispatchReduce :
         OffsetT         num_items,                          ///< [in] Total number of input items (i.e., length of \p d_in)
         ReductionOpT    reduction_op,                       ///< [in] Binary reduction functor
         OutputT         init,                               ///< [in] The initial value of the reduction
-        musaStream_t    stream,                             ///< [in] <b>[optional]</b> CUDA stream to launch kernels within.  Default is stream<sub>0</sub>.
+        musaStream_t    stream,                             ///< [in] <b>[optional]</b> MUSA stream to launch kernels within.  Default is stream<sub>0</sub>.
         bool            debug_synchronous)                  ///< [in] <b>[optional]</b> Whether or not to synchronize the stream after every kernel launch to check for errors.  Also causes launch configurations to be printed to the console.  Default is \p false.
     {
         typedef typename DispatchReduce::MaxPolicy MaxPolicyT;
@@ -714,7 +714,7 @@ struct DispatchSegmentedReduce :
     EndOffsetIteratorT   d_end_offsets;          ///< [in] Random-access input iterator to the sequence of ending offsets of length \p num_segments, such that <tt>d_end_offsets[i]-1</tt> is the last element of the <em>i</em><sup>th</sup> data segment in <tt>d_keys_*</tt> and <tt>d_values_*</tt>.  If <tt>d_end_offsets[i]-1</tt> <= <tt>d_begin_offsets[i]</tt>, the <em>i</em><sup>th</sup> is considered empty.
     ReductionOpT         reduction_op;           ///< [in] Binary reduction functor
     OutputT              init;                   ///< [in] The initial value of the reduction
-    musaStream_t         stream;                 ///< [in] CUDA stream to launch kernels within.  Default is stream<sub>0</sub>.
+    musaStream_t         stream;                 ///< [in] MUSA stream to launch kernels within.  Default is stream<sub>0</sub>.
     bool                 debug_synchronous;      ///< [in] Whether or not to synchronize the stream after every kernel launch to check for errors.  Also causes launch configurations to be printed to the console.  Default is \p false.
     int                  ptx_version;            ///< [in] PTX version
 
@@ -794,7 +794,7 @@ struct DispatchSegmentedReduce :
                 segmented_reduce_config.sm_occupancy);
 
             // Invoke DeviceReduceKernel
-            THRUST_NS_QUALIFIER::cuda_cub::launcher::triple_chevron(
+            THRUST_NS_QUALIFIER::musa_cub::launcher::triple_chevron(
                 num_segments,
                 ActivePolicyT::SegmentedReducePolicy::BLOCK_THREADS, 0, stream
             ).doit(segmented_reduce_kernel,
@@ -852,7 +852,7 @@ struct DispatchSegmentedReduce :
         EndOffsetIteratorT   d_end_offsets,                      ///< [in] Random-access input iterator to the sequence of ending offsets of length \p num_segments, such that <tt>d_end_offsets[i]-1</tt> is the last element of the <em>i</em><sup>th</sup> data segment in <tt>d_keys_*</tt> and <tt>d_values_*</tt>.  If <tt>d_end_offsets[i]-1</tt> <= <tt>d_begin_offsets[i]</tt>, the <em>i</em><sup>th</sup> is considered empty.
         ReductionOpT         reduction_op,                       ///< [in] Binary reduction functor
         OutputT              init,                               ///< [in] The initial value of the reduction
-        musaStream_t         stream,                             ///< [in] <b>[optional]</b> CUDA stream to launch kernels within.  Default is stream<sub>0</sub>.
+        musaStream_t         stream,                             ///< [in] <b>[optional]</b> MUSA stream to launch kernels within.  Default is stream<sub>0</sub>.
         bool                 debug_synchronous)                  ///< [in] <b>[optional]</b> Whether or not to synchronize the stream after every kernel launch to check for errors.  Also causes launch configurations to be printed to the console.  Default is \p false.
     {
         typedef typename DispatchSegmentedReduce::MaxPolicy MaxPolicyT;

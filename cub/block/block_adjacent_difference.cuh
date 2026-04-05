@@ -30,7 +30,7 @@
  * @file
  * The cub::BlockAdjacentDifference class provides
  * [<em>collective</em>](index.html#sec0) methods for computing the differences
- * of adjacent elements partitioned across a CUDA thread block.
+ * of adjacent elements partitioned across a MUSA thread block.
  */
 
 #pragma once
@@ -45,14 +45,14 @@ CUB_NAMESPACE_BEGIN
 /**
  * @brief BlockAdjacentDifference provides
  *        [<em>collective</em>](index.html#sec0) methods for computing the
- *        differences of adjacent elements partitioned across a CUDA thread
+ *        differences of adjacent elements partitioned across a MUSA thread
  *        block.
  *
  * @ingroup BlockModule
  *
  * @par Overview
  * - BlockAdjacentDifference calculates the differences of adjacent elements in
- *   the elements partitioned across a CUDA thread block. Because the binary
+ *   the elements partitioned across a MUSA thread block. Because the binary
  *   operation could be noncommutative, there are two sets of methods.
  *   Methods named SubtractLeft subtract left element `i - 1` of input sequence
  *   from current element `i`. Methods named SubtractRight subtract current
@@ -295,7 +295,7 @@ public:
 
     /**
      * @brief Subtracts the left element of each adjacent pair of elements
-     *        partitioned across a CUDA thread block.
+     *        partitioned across a MUSA thread block.
      *
      * @par
      * - \rowmajor
@@ -387,7 +387,7 @@ public:
 
     /**
      * @brief Subtracts the left element of each adjacent pair of elements
-     *        partitioned across a CUDA thread block.
+     *        partitioned across a MUSA thread block.
      *
      * @par
      * - \rowmajor
@@ -491,7 +491,7 @@ public:
 
     /**
      * @brief Subtracts the left element of each adjacent pair of elements 
-     *        partitioned across a CUDA thread block.
+     *        partitioned across a MUSA thread block.
      *
      * @par
      * - \rowmajor
@@ -609,7 +609,7 @@ public:
 
     /**
      * @brief Subtracts the left element of each adjacent pair of elements 
-     *        partitioned across a CUDA thread block.
+     *        partitioned across a MUSA thread block.
      *
      * @par
      * - \rowmajor
@@ -746,7 +746,7 @@ public:
 
     /**
      * @brief Subtracts the right element of each adjacent pair of elements
-     *        partitioned across a CUDA thread block.
+     *        partitioned across a MUSA thread block.
      *
      * @par
      * - \rowmajor
@@ -839,7 +839,7 @@ public:
 
     /**
      * @brief Subtracts the right element of each adjacent pair of elements
-     *        partitioned across a CUDA thread block.
+     *        partitioned across a MUSA thread block.
      *
      * @par
      * - \rowmajor
@@ -941,7 +941,7 @@ public:
 
     /**
      * @brief Subtracts the right element of each adjacent pair in range of
-     *        elements partitioned across a CUDA thread block.
+     *        elements partitioned across a MUSA thread block.
      *
      * @par
      * - \rowmajor

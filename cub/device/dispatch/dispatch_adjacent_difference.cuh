@@ -34,7 +34,7 @@
 #include <cub/util_math.cuh>
 #include <cub/util_namespace.cuh>
 
-#include <thrust/system/cuda/detail/core/triple_chevron_launch.h>
+#include <thrust/system/musa/detail/core/triple_chevron_launch.h>
 
 #include <iterator>
 
@@ -152,7 +152,7 @@ struct DeviceAdjacentDifferencePolicy
 
   using MaxPolicy = Policy310;
 
-#else // CUDA
+#else // MUSA
 
   struct Policy300 : ChainedPolicy<300, Policy300, Policy300>
   {
@@ -287,7 +287,7 @@ struct DispatchAdjacentDifference : public SelectedPolicy
                   reinterpret_cast<long long>(stream));
         }
 
-        THRUST_NS_QUALIFIER::cuda_cub::launcher::triple_chevron(init_grid_size,
+        THRUST_NS_QUALIFIER::musa_cub::launcher::triple_chevron(init_grid_size,
                                                                 init_block_size,
                                                                 0,
                                                                 stream)
@@ -324,7 +324,7 @@ struct DispatchAdjacentDifference : public SelectedPolicy
                 reinterpret_cast<long long>(stream));
       }
 
-      THRUST_NS_QUALIFIER::cuda_cub::launcher::triple_chevron(
+      THRUST_NS_QUALIFIER::musa_cub::launcher::triple_chevron(
         num_tiles,
         AdjacentDifferencePolicyT::BLOCK_THREADS,
         0,

@@ -28,7 +28,7 @@
 
 /**
  * \file
- * The cub::BlockHistogramSort class provides sorting-based methods for constructing block-wide histograms from data samples partitioned across a CUDA thread block.
+ * The cub::BlockHistogramSort class provides sorting-based methods for constructing block-wide histograms from data samples partitioned across a MUSA thread block.
  */
 
 #pragma once
@@ -43,7 +43,7 @@ CUB_NAMESPACE_BEGIN
 
 
 /**
- * \brief The BlockHistogramSort class provides sorting-based methods for constructing block-wide histograms from data samples partitioned across a CUDA thread block.
+ * \brief The BlockHistogramSort class provides sorting-based methods for constructing block-wide histograms from data samples partitioned across a MUSA thread block.
  */
 template <
     typename    T,                  ///< Sample type

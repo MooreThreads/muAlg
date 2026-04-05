@@ -29,7 +29,7 @@ namespace detail
 
 /**
  * Call `cudaDeviceSynchronize()` using the proper API for the current CUB and
- * CUDA configuration.
+ * MUSA configuration.
  */
 CUB_EXEC_CHECK_DISABLE
 CUB_RUNTIME_FUNCTION inline musaError_t device_synchronize()

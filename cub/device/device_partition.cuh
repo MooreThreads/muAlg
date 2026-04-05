@@ -63,7 +63,7 @@ CUB_NAMESPACE_BEGIN
  *
  * @par
  * The following chart illustrates DevicePartition::If
- * performance across different CUDA architectures for @p int32 items,
+ * performance across different MUSA architectures for @p int32 items,
  * where 50% of the items are randomly selected for the first partition.
  * \plots_below
  *
@@ -163,7 +163,7 @@ struct DevicePartition
      *   Total number of items to select from
      *
      * @param[in] stream
-     *   **[optional]** CUDA stream to launch kernels within.
+     *   **[optional]** MUSA stream to launch kernels within.
      *   Default is stream<sub>0</sub>.
      *
      * @param[in] debug_synchronous
@@ -226,7 +226,7 @@ struct DevicePartition
      *
      * @par Performance
      * The following charts illustrate saturated partition-if performance across
-     * different CUDA architectures for @p int32 and @p int64 items,
+     * different MUSA architectures for @p int32 and @p int64 items,
      * respectively. Items are selected for the first partition with 50%
      * probability.
      *
@@ -333,7 +333,7 @@ struct DevicePartition
      *   Unary selection operator
      *
      * @param[in] stream
-     *   **[optional]** CUDA stream to launch kernels within.
+     *   **[optional]** MUSA stream to launch kernels within.
      *   Default is stream<sub>0</sub>.
      *
      * @param[in] debug_synchronous
@@ -559,7 +559,7 @@ struct DevicePartition
      *   Unary selection operator to select @p d_second_part_out
      *
      * @param[in] stream
-     *   **[optional]** CUDA stream to launch kernels within.
+     *   **[optional]** MUSA stream to launch kernels within.
      *   Default is stream<sub>0</sub>.
      *
      * @param[in] debug_synchronous

@@ -27,7 +27,7 @@
 
 /**
  * @file
- * Operations for writing linear segments of data from the CUDA warp
+ * Operations for writing linear segments of data from the MUSA warp
  */
 
 #pragma once
@@ -47,7 +47,7 @@ CUB_NAMESPACE_BEGIN
 
 /**
  * @brief cub::WarpStoreAlgorithm enumerates alternative algorithms for
- *        cub::WarpStore to write a blocked arrangement of items across a CUDA
+ *        cub::WarpStore to write a blocked arrangement of items across a MUSA
  *        warp to a linear segment of memory.
  */
 enum WarpStoreAlgorithm
@@ -78,7 +78,7 @@ enum WarpStoreAlgorithm
    * @par Overview
    *
    * A [<em>blocked arrangement</em>](index.html#sec5sec3) of data is written
-   * directly to memory using CUDA's built-in vectorized stores as a coalescing
+   * directly to memory using MUSA's built-in vectorized stores as a coalescing
    * optimization. For example, <tt>st.global.v4.s32</tt> instructions will be
    * generated when @p T = @p int and @p ITEMS_PER_THREAD % 4 == 0.
    *
@@ -92,7 +92,7 @@ enum WarpStoreAlgorithm
    *   - @p ITEMS_PER_THREAD is odd
    *   - The @p OutputIteratorT is not a simple pointer type
    *   - The block output offset is not quadword-aligned
-   *   - The data type @p T is not a built-in primitive or CUDA vector type
+   *   - The data type @p T is not a built-in primitive or MUSA vector type
    *     (e.g., @p short, @p int2, @p double, @p float2, etc.)
    */
   WARP_STORE_VECTORIZE,
@@ -116,7 +116,7 @@ enum WarpStoreAlgorithm
 /**
  * @brief The WarpStore class provides [<em>collective</em>](index.html#sec0)
  *        data movement methods for writing a [<em>blocked arrangement</em>](index.html#sec5sec3)
- *        of items partitioned across a CUDA warp to a linear segment of memory.
+ *        of items partitioned across a MUSA warp to a linear segment of memory.
  * @ingroup WarpModule
  * @ingroup UtilIo
  *
@@ -133,7 +133,7 @@ enum WarpStoreAlgorithm
  * @tparam LOGICAL_WARP_THREADS
  *   <b>[optional]</b> The number of threads per "logical" warp (may be less
  *   than the number of hardware warp threads). Default is the warp size of the
- *   targeted CUDA compute-capability (e.g., 32 threads for SM86). Must be a
+ *   targeted MUSA compute-capability (e.g., 32 threads for SM86). Must be a
  *   power of two.
  *
  * @tparam PTX_ARCH
@@ -150,7 +150,7 @@ enum WarpStoreAlgorithm
  *   -# <b>cub::WARP_STORE_STRIPED</b>. A [<em>striped arrangement</em>](index.html#sec5sec3)
  *      of data is written directly to memory. [More...](@ref cub::WarpStoreAlgorithm)
  *   -# <b>cub::WARP_STORE_VECTORIZE</b>. A [<em>blocked arrangement</em>](index.html#sec5sec3)
- *      of data is written directly to memory using CUDA's built-in vectorized
+ *      of data is written directly to memory using MUSA's built-in vectorized
  *      stores as a coalescing optimization. [More...](@ref cub::WarpStoreAlgorithm)
  *   -# <b>cub::WARP_STORE_TRANSPOSE</b>. A [<em>blocked arrangement</em>](index.html#sec5sec3)
  *      is locally transposed into a [<em>striped arrangement</em>](index.html#sec5sec3)

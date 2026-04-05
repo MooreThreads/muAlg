@@ -49,7 +49,7 @@
 #include "../../util_device.cuh"
 #include "../../util_math.cuh"
 
-#include <thrust/system/cuda/detail/core/triple_chevron_launch.h>
+#include <thrust/system/musa/detail/core/triple_chevron_launch.h>
 
 // suppress warnings triggered by #pragma unroll:
 // "warning: loop not unrolled: the optimizer was unable to perform the requested transformation; the transformation might be disabled or specified as part of an unsupported transformation ordering [-Wpass-failed=transform-warning]"
@@ -1165,7 +1165,7 @@ struct DispatchRadixSort :
     OffsetT                 num_items;              ///< [in] Number of items to sort
     int                     begin_bit;              ///< [in] The beginning (least-significant) bit index needed for key comparison
     int                     end_bit;                ///< [in] The past-the-end (most-significant) bit index needed for key comparison
-    musaStream_t            stream;                 ///< [in] CUDA stream to launch kernels within.  Default is stream<sub>0</sub>.
+    musaStream_t            stream;                 ///< [in] MUSA stream to launch kernels within.  Default is stream<sub>0</sub>.
     bool                    debug_synchronous;      ///< [in] Whether or not to synchronize the stream after every kernel launch to check for errors.  Also causes launch configurations to be printed to the console.  Default is \p false.
     int                     ptx_version;            ///< [in] PTX version
     bool                    is_overwrite_okay;      ///< [in] Whether is okay to overwrite source buffers
@@ -1238,7 +1238,7 @@ struct DispatchRadixSort :
                     ActivePolicyT::SingleTilePolicy::ITEMS_PER_THREAD, 1, begin_bit, ActivePolicyT::SingleTilePolicy::RADIX_BITS);
 
             // Invoke upsweep_kernel with same grid size as downsweep_kernel
-            THRUST_NS_QUALIFIER::cuda_cub::launcher::triple_chevron(
+            THRUST_NS_QUALIFIER::musa_cub::launcher::triple_chevron(
                 1, ActivePolicyT::SingleTilePolicy::BLOCK_THREADS, 0, stream
             ).doit(single_tile_kernel,
                 d_keys.Current(),
@@ -1301,7 +1301,7 @@ struct DispatchRadixSort :
             int pass_spine_length = pass_config.even_share.grid_size * pass_config.radix_digits;
 
             // Invoke upsweep_kernel with same grid size as downsweep_kernel
-            THRUST_NS_QUALIFIER::cuda_cub::launcher::triple_chevron(
+            THRUST_NS_QUALIFIER::musa_cub::launcher::triple_chevron(
                 pass_config.even_share.grid_size,
                 pass_config.upsweep_config.block_threads, 0, stream
             ).doit(pass_config.upsweep_kernel,
@@ -1323,7 +1323,7 @@ struct DispatchRadixSort :
                 1, pass_config.scan_config.block_threads, (long long) stream, pass_config.scan_config.items_per_thread);
 
             // Invoke scan_kernel
-            THRUST_NS_QUALIFIER::cuda_cub::launcher::triple_chevron(
+            THRUST_NS_QUALIFIER::musa_cub::launcher::triple_chevron(
                 1, pass_config.scan_config.block_threads, 0, stream
             ).doit(pass_config.scan_kernel,
                 d_spine,
@@ -1341,7 +1341,7 @@ struct DispatchRadixSort :
                 pass_config.downsweep_config.items_per_thread, pass_config.downsweep_config.sm_occupancy);
 
             // Invoke downsweep_kernel
-            THRUST_NS_QUALIFIER::cuda_cub::launcher::triple_chevron(
+            THRUST_NS_QUALIFIER::musa_cub::launcher::triple_chevron(
                 pass_config.even_share.grid_size,
                 pass_config.downsweep_config.block_threads, 0, stream
             ).doit(pass_config.downsweep_kernel,
@@ -1790,7 +1790,7 @@ struct DispatchRadixSort :
         int                     begin_bit,              ///< [in] The beginning (least-significant) bit index needed for key comparison
         int                     end_bit,                ///< [in] The past-the-end (most-significant) bit index needed for key comparison
         bool                    is_overwrite_okay,      ///< [in] Whether is okay to overwrite source buffers
-        musaStream_t            stream,                 ///< [in] CUDA stream to launch kernels within.  Default is stream<sub>0</sub>.
+        musaStream_t            stream,                 ///< [in] MUSA stream to launch kernels within.  Default is stream<sub>0</sub>.
         bool                    debug_synchronous)      ///< [in] Whether or not to synchronize the stream after every kernel launch to check for errors.  Also causes launch configurations to be printed to the console.  Default is \p false.
     {
         typedef typename DispatchRadixSort::MaxPolicy MaxPolicyT;
@@ -1859,7 +1859,7 @@ struct DispatchSegmentedRadixSort :
     EndOffsetIteratorT      d_end_offsets;          ///< [in] Random-access input iterator to the sequence of ending offsets of length \p num_segments, such that <tt>d_end_offsets[i]-1</tt> is the last element of the <em>i</em><sup>th</sup> data segment in <tt>d_keys_*</tt> and <tt>d_values_*</tt>.  If <tt>d_end_offsets[i]-1</tt> <= <tt>d_begin_offsets[i]</tt>, the <em>i</em><sup>th</sup> is considered empty.
     int                     begin_bit;              ///< [in] The beginning (least-significant) bit index needed for key comparison
     int                     end_bit;                ///< [in] The past-the-end (most-significant) bit index needed for key comparison
-    musaStream_t            stream;                 ///< [in] CUDA stream to launch kernels within.  Default is stream<sub>0</sub>.
+    musaStream_t            stream;                 ///< [in] MUSA stream to launch kernels within.  Default is stream<sub>0</sub>.
     bool                    debug_synchronous;      ///< [in] Whether or not to synchronize the stream after every kernel launch to check for errors.  Also causes launch configurations to be printed to the console.  Default is \p false.
     int                     ptx_version;            ///< [in] PTX version
     bool                    is_overwrite_okay;      ///< [in] Whether is okay to overwrite source buffers
@@ -1939,7 +1939,7 @@ struct DispatchSegmentedRadixSort :
                       pass_bits);
             }
 
-            THRUST_NS_QUALIFIER::cuda_cub::launcher::triple_chevron(
+            THRUST_NS_QUALIFIER::musa_cub::launcher::triple_chevron(
                 num_segments, pass_config.segmented_config.block_threads, 0,
                 stream
             ).doit(pass_config.segmented_kernel,
@@ -2134,7 +2134,7 @@ struct DispatchSegmentedRadixSort :
         int                     begin_bit,              ///< [in] The beginning (least-significant) bit index needed for key comparison
         int                     end_bit,                ///< [in] The past-the-end (most-significant) bit index needed for key comparison
         bool                    is_overwrite_okay,      ///< [in] Whether is okay to overwrite source buffers
-        musaStream_t            stream,                 ///< [in] CUDA stream to launch kernels within.  Default is stream<sub>0</sub>.
+        musaStream_t            stream,                 ///< [in] MUSA stream to launch kernels within.  Default is stream<sub>0</sub>.
         bool                    debug_synchronous)      ///< [in] Whether or not to synchronize the stream after every kernel launch to check for errors.  Also causes launch configurations to be printed to the console.  Default is \p false.
     {
         typedef typename DispatchSegmentedRadixSort::MaxPolicy MaxPolicyT;

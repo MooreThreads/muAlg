@@ -28,7 +28,7 @@
 
 /**
  * \file
- * cub::BlockReduceWarpReductions provides variants of warp-reduction-based parallel reduction across a CUDA thread block.  Supports non-commutative reduction operators.
+ * cub::BlockReduceWarpReductions provides variants of warp-reduction-based parallel reduction across a MUSA thread block.  Supports non-commutative reduction operators.
  */
 
 #pragma once
@@ -41,7 +41,7 @@ CUB_NAMESPACE_BEGIN
 
 
 /**
- * \brief BlockReduceWarpReductions provides variants of warp-reduction-based parallel reduction across a CUDA thread block.  Supports non-commutative reduction operators.
+ * \brief BlockReduceWarpReductions provides variants of warp-reduction-based parallel reduction across a MUSA thread block.  Supports non-commutative reduction operators.
  */
 template <
     typename    T,              ///< Data type being reduced

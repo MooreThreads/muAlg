@@ -28,7 +28,7 @@
 
 // No-Thrust version of test_device_select_if.cu for MUSA platform compatibility
 
-// Ensure printing of CUDA runtime errors to console
+// Ensure printing of MUSA runtime errors to console
 #define CUB_STDERR
 
 #include <cub/cub.cuh>

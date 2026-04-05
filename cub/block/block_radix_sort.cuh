@@ -28,7 +28,7 @@
 
 /**
  * \file
- * The cub::BlockRadixSort class provides [<em>collective</em>](index.html#sec0) methods for radix sorting of items partitioned across a CUDA thread block.
+ * The cub::BlockRadixSort class provides [<em>collective</em>](index.html#sec0) methods for radix sorting of items partitioned across a MUSA thread block.
  */
 
 
@@ -44,7 +44,7 @@
 CUB_NAMESPACE_BEGIN
 
 /**
- * \brief The BlockRadixSort class provides [<em>collective</em>](index.html#sec0) methods for sorting items partitioned across a CUDA thread block using a radix sorting method.  ![](sorting_logo.png)
+ * \brief The BlockRadixSort class provides [<em>collective</em>](index.html#sec0) methods for sorting items partitioned across a MUSA thread block using a radix sorting method.  ![](sorting_logo.png)
  * \ingroup BlockModule
  *
  * \tparam KeyT                 KeyT type
@@ -72,7 +72,7 @@ CUB_NAMESPACE_BEGIN
  *
  * \par Supported Types
  * BlockRadixSort can sort all of the built-in C++ numeric primitive types
- * (<tt>unsigned char</tt>, \p int, \p double, etc.) as well as CUDA's \p __half
+ * (<tt>unsigned char</tt>, \p int, \p double, etc.) as well as MUSA's \p __half
  * half-precision floating-point type.
  *
  * \par Floating-Point Special Cases

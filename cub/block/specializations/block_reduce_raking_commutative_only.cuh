@@ -28,7 +28,7 @@
 
 /**
  * \file
- * cub::BlockReduceRakingCommutativeOnly provides raking-based methods of parallel reduction across a CUDA thread block.  Does not support non-commutative reduction operators.
+ * cub::BlockReduceRakingCommutativeOnly provides raking-based methods of parallel reduction across a MUSA thread block.  Does not support non-commutative reduction operators.
  */
 
 #pragma once
@@ -43,7 +43,7 @@ CUB_NAMESPACE_BEGIN
 
 
 /**
- * \brief BlockReduceRakingCommutativeOnly provides raking-based methods of parallel reduction across a CUDA thread block.  Does not support non-commutative reduction operators.  Does not support block sizes that are not a multiple of the warp size.
+ * \brief BlockReduceRakingCommutativeOnly provides raking-based methods of parallel reduction across a MUSA thread block.  Does not support non-commutative reduction operators.  Does not support block sizes that are not a multiple of the warp size.
  */
 template <
     typename    T,              ///< Data type being reduced

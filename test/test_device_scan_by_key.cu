@@ -29,7 +29,7 @@
  * Test of DeviceScan utilities
  ******************************************************************************/
 
-// Ensure printing of CUDA runtime errors to console
+// Ensure printing of MUSA runtime errors to console
 #define CUB_STDERR
 
 #include <stdio.h>
@@ -243,7 +243,7 @@ musaError_t Dispatch(
 }
 
 //---------------------------------------------------------------------
-// CUDA Nested Parallelism Test Kernel
+// MUSA Nested Parallelism Test Kernel
 //---------------------------------------------------------------------
 
 /**

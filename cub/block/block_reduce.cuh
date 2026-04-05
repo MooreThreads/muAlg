@@ -28,7 +28,7 @@
 
 /**
  * \file
- * The cub::BlockReduce class provides [<em>collective</em>](index.html#sec0) methods for computing a parallel reduction of items partitioned across a CUDA thread block.
+ * The cub::BlockReduce class provides [<em>collective</em>](index.html#sec0) methods for computing a parallel reduction of items partitioned across a MUSA thread block.
  */
 
 #pragma once
@@ -51,7 +51,7 @@ CUB_NAMESPACE_BEGIN
 
 /**
  * BlockReduceAlgorithm enumerates alternative algorithms for parallel
- * reduction across a CUDA thread block.
+ * reduction across a MUSA thread block.
  */
 enum BlockReduceAlgorithm
 {
@@ -150,7 +150,7 @@ enum BlockReduceAlgorithm
  ******************************************************************************/
 
 /**
- * \brief The BlockReduce class provides [<em>collective</em>](index.html#sec0) methods for computing a parallel reduction of items partitioned across a CUDA thread block. ![](reduce_logo.png)
+ * \brief The BlockReduce class provides [<em>collective</em>](index.html#sec0) methods for computing a parallel reduction of items partitioned across a MUSA thread block. ![](reduce_logo.png)
  * \ingroup BlockModule
  *
  * \tparam T                Data type being reduced

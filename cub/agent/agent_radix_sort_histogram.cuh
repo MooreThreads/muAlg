@@ -27,7 +27,7 @@
 
 /**
  * \file
- * agent_radix_sort_histogram.cuh implements a stateful abstraction of CUDA
+ * agent_radix_sort_histogram.cuh implements a stateful abstraction of MUSA
  * thread blocks for participating in the device histogram kernel used for
  * one-sweep radix sorting.
  */

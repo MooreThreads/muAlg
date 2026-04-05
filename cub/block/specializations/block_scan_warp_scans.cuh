@@ -28,7 +28,7 @@
 
 /**
  * \file
- * cub::BlockScanWarpscans provides warpscan-based variants of parallel prefix scan across a CUDA thread block.
+ * cub::BlockScanWarpscans provides warpscan-based variants of parallel prefix scan across a MUSA thread block.
  */
 
 #pragma once
@@ -40,7 +40,7 @@
 CUB_NAMESPACE_BEGIN
 
 /**
- * \brief BlockScanWarpScans provides warpscan-based variants of parallel prefix scan across a CUDA thread block.
+ * \brief BlockScanWarpScans provides warpscan-based variants of parallel prefix scan across a MUSA thread block.
  */
 template <
     typename    T,

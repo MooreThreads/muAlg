@@ -223,7 +223,7 @@ public:
   }
 
   /**
-   * @brief Sorts items partitioned across a CUDA thread block using
+   * @brief Sorts items partitioned across a MUSA thread block using
    *        a merge sorting method.
    *
    * @par
@@ -253,7 +253,7 @@ public:
   }
 
   /**
-   * @brief Sorts items partitioned across a CUDA thread block using
+   * @brief Sorts items partitioned across a MUSA thread block using
    *        a merge sorting method.
    *
    * @par
@@ -297,7 +297,7 @@ public:
   }
 
   /**
-   * @brief Sorts items partitioned across a CUDA thread block using a merge sorting method.
+   * @brief Sorts items partitioned across a MUSA thread block using a merge sorting method.
    *
    * @par
    * Sort is not guaranteed to be stable. That is, suppose that `i` and `j` are
@@ -329,7 +329,7 @@ public:
   }
 
   /**
-   * @brief Sorts items partitioned across a CUDA thread block using
+   * @brief Sorts items partitioned across a MUSA thread block using
    *        a merge sorting method.
    *
    * @par
@@ -497,7 +497,7 @@ public:
   } // func block_merge_sort
 
   /**
-   * @brief Sorts items partitioned across a CUDA thread block using
+   * @brief Sorts items partitioned across a MUSA thread block using
    *        a merge sorting method.
    *
    * @par
@@ -527,7 +527,7 @@ public:
   }
 
   /**
-   * @brief Sorts items partitioned across a CUDA thread block using
+   * @brief Sorts items partitioned across a MUSA thread block using
    *        a merge sorting method.
    *
    * @par
@@ -561,7 +561,7 @@ public:
   }
 
   /**
-   * @brief Sorts items partitioned across a CUDA thread block using
+   * @brief Sorts items partitioned across a MUSA thread block using
    *        a merge sorting method.
    *
    * @par
@@ -606,7 +606,7 @@ public:
   }
 
   /**
-   * @brief Sorts items partitioned across a CUDA thread block using
+   * @brief Sorts items partitioned across a MUSA thread block using
    *        a merge sorting method.
    *
    * @par
@@ -671,7 +671,7 @@ private:
 
 /**
  * @brief The BlockMergeSort class provides methods for sorting items
- *        partitioned across a CUDA thread block using a merge sorting method.
+ *        partitioned across a MUSA thread block using a merge sorting method.
  * @ingroup BlockModule
  *
  * @tparam KeyT

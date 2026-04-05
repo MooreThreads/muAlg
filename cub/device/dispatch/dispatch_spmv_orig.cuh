@@ -48,7 +48,7 @@
 #include "../../grid/grid_queue.cuh"
 #include "../../config.cuh"
 
-#include <thrust/system/cuda/detail/core/triple_chevron_launch.h>
+#include <thrust/system/musa/detail/core/triple_chevron_launch.h>
 
 CUB_NAMESPACE_BEGIN
 
@@ -479,7 +479,7 @@ struct DispatchSpmv
         void*                   d_temp_storage,                     ///< [in] Device-accessible allocation of temporary storage.  When NULL, the required allocation size is written to \p temp_storage_bytes and no work is done.
         size_t&                 temp_storage_bytes,                 ///< [in,out] Reference to size in bytes of \p d_temp_storage allocation
         SpmvParamsT&            spmv_params,                        ///< SpMV input parameter bundle
-        musaStream_t            stream,                             ///< [in] CUDA stream to launch kernels within.  Default is stream<sub>0</sub>.
+        musaStream_t            stream,                             ///< [in] MUSA stream to launch kernels within.  Default is stream<sub>0</sub>.
         bool                    debug_synchronous,                  ///< [in] Whether or not to synchronize the stream after every kernel launch to check for errors.  Also causes launch configurations to be printed to the console.  Default is \p false.
         Spmv1ColKernelT         spmv_1col_kernel,                   ///< [in] Kernel function pointer to parameterization of DeviceSpmv1ColKernel
         SpmvSearchKernelT       spmv_search_kernel,                 ///< [in] Kernel function pointer to parameterization of AgentSpmvSearchKernel
@@ -529,7 +529,7 @@ struct DispatchSpmv
                     degen_col_kernel_grid_size, degen_col_kernel_block_size, (long long) stream);
 
                 // Invoke spmv_search_kernel
-                THRUST_NS_QUALIFIER::cuda_cub::launcher::triple_chevron(
+                THRUST_NS_QUALIFIER::musa_cub::launcher::triple_chevron(
                     degen_col_kernel_grid_size, degen_col_kernel_block_size, 0,
                     stream
                 ).doit(spmv_1col_kernel,
@@ -633,7 +633,7 @@ struct DispatchSpmv
                     search_grid_size, search_block_size, (long long) stream);
 
                 // Invoke spmv_search_kernel
-                THRUST_NS_QUALIFIER::cuda_cub::launcher::triple_chevron(
+                THRUST_NS_QUALIFIER::musa_cub::launcher::triple_chevron(
                     search_grid_size, search_block_size, 0, stream
                 ).doit(spmv_search_kernel,
                     num_merge_tiles,
@@ -652,7 +652,7 @@ struct DispatchSpmv
                 spmv_grid_size.x, spmv_grid_size.y, spmv_grid_size.z, spmv_config.block_threads, (long long) stream, spmv_config.items_per_thread, spmv_sm_occupancy);
 
             // Invoke spmv_kernel
-            THRUST_NS_QUALIFIER::cuda_cub::launcher::triple_chevron(
+            THRUST_NS_QUALIFIER::musa_cub::launcher::triple_chevron(
                 spmv_grid_size, spmv_config.block_threads, 0, stream
             ).doit(spmv_kernel,
                 spmv_params,
@@ -676,7 +676,7 @@ struct DispatchSpmv
                     segment_fixup_grid_size.x, segment_fixup_grid_size.y, segment_fixup_grid_size.z, segment_fixup_config.block_threads, (long long) stream, segment_fixup_config.items_per_thread, segment_fixup_sm_occupancy);
 
                 // Invoke segment_fixup_kernel
-                THRUST_NS_QUALIFIER::cuda_cub::launcher::triple_chevron(
+                THRUST_NS_QUALIFIER::musa_cub::launcher::triple_chevron(
                     segment_fixup_grid_size, segment_fixup_config.block_threads,
                     0, stream
                 ).doit(segment_fixup_kernel,
@@ -709,7 +709,7 @@ struct DispatchSpmv
         void*                   d_temp_storage,                     ///< [in] Device-accessible allocation of temporary storage.  When NULL, the required allocation size is written to \p temp_storage_bytes and no work is done.
         size_t&                 temp_storage_bytes,                 ///< [in,out] Reference to size in bytes of \p d_temp_storage allocation
         SpmvParamsT&            spmv_params,                        ///< SpMV input parameter bundle
-        musaStream_t            stream                  = 0,        ///< [in] <b>[optional]</b> CUDA stream to launch kernels within.  Default is stream<sub>0</sub>.
+        musaStream_t            stream                  = 0,        ///< [in] <b>[optional]</b> MUSA stream to launch kernels within.  Default is stream<sub>0</sub>.
         bool                    debug_synchronous       = false)    ///< [in] <b>[optional]</b> Whether or not to synchronize the stream after every kernel launch to check for errors.  May cause significant slowdown.  Default is \p false.
     {
         musaError error = musaSuccess;

@@ -62,7 +62,7 @@ CUB_NAMESPACE_BEGIN
  *
  * \par
  * The following chart illustrates DeviceRunLengthEncode::RunLengthEncode performance across
- * different CUDA architectures for \p int32 items.
+ * different MUSA architectures for \p int32 items.
  * Segments have lengths uniformly sampled from [1,1000].
  *
  * \image html rle_int32_len_500.png
@@ -87,7 +87,7 @@ struct DeviceRunLengthEncode
      *
      * \par Performance
      * The following charts illustrate saturated encode performance across different
-     * CUDA architectures for \p int32 and \p int64 items, respectively.  Segments have
+     * MUSA architectures for \p int32 and \p int64 items, respectively.  Segments have
      * lengths uniformly sampled from [1,1000].
      *
      * \image html rle_int32_len_500.png
@@ -149,7 +149,7 @@ struct DeviceRunLengthEncode
         LengthsOutputIteratorT      d_counts_out,                   ///< [out] Pointer to the output sequence of run-lengths (one count per run)
         NumRunsOutputIteratorT      d_num_runs_out,                 ///< [out] Pointer to total number of runs
         int                         num_items,                      ///< [in] Total number of associated key+value pairs (i.e., the length of \p d_in_keys and \p d_in_values)
-        musaStream_t                stream             = 0,         ///< [in] <b>[optional]</b> CUDA stream to launch kernels within.  Default is stream<sub>0</sub>.
+        musaStream_t                stream             = 0,         ///< [in] <b>[optional]</b> MUSA stream to launch kernels within.  Default is stream<sub>0</sub>.
         bool                        debug_synchronous  = false)     ///< [in] <b>[optional]</b> Whether or not to synchronize the stream after every kernel launch to check for errors.  May cause significant slowdown.  Default is \p false.
     {
         using OffsetT      = int;        // Signed integer type for global offsets
@@ -244,7 +244,7 @@ struct DeviceRunLengthEncode
         LengthsOutputIteratorT  d_lengths_out,                  ///< [out] Pointer to output sequence of run-lengths (one count per non-trivial run)
         NumRunsOutputIteratorT  d_num_runs_out,                 ///< [out] Pointer to total number of runs (i.e., length of \p d_offsets_out)
         int                     num_items,                      ///< [in] Total number of associated key+value pairs (i.e., the length of \p d_in_keys and \p d_in_values)
-        musaStream_t            stream             = 0,         ///< [in] <b>[optional]</b> CUDA stream to launch kernels within.  Default is stream<sub>0</sub>.
+        musaStream_t            stream             = 0,         ///< [in] <b>[optional]</b> MUSA stream to launch kernels within.  Default is stream<sub>0</sub>.
         bool                    debug_synchronous  = false)     ///< [in] <b>[optional]</b> Whether or not to synchronize the stream after every kernel launch to check for errors.  May cause significant slowdown.  Default is \p false.
     {
         typedef int         OffsetT;                    // Signed integer type for global offsets

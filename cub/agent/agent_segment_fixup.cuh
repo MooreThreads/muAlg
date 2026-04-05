@@ -28,7 +28,7 @@
 
 /**
  * \file
- * cub::AgentSegmentFixup implements a stateful abstraction of CUDA thread blocks for participating in device-wide reduce-value-by-key.
+ * cub::AgentSegmentFixup implements a stateful abstraction of MUSA thread blocks for participating in device-wide reduce-value-by-key.
  */
 
 #pragma once
@@ -79,7 +79,7 @@ struct AgentSegmentFixupPolicy
  ******************************************************************************/
 
 /**
- * \brief AgentSegmentFixup implements a stateful abstraction of CUDA thread blocks for participating in device-wide reduce-value-by-key
+ * \brief AgentSegmentFixup implements a stateful abstraction of MUSA thread blocks for participating in device-wide reduce-value-by-key
  */
 template <
     typename    AgentSegmentFixupPolicyT,       ///< Parameterized AgentSegmentFixupPolicy tuning policy type

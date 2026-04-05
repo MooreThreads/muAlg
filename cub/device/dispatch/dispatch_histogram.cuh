@@ -46,7 +46,7 @@
 #include "../../grid/grid_queue.cuh"
 #include "../../config.cuh"
 
-#include <thrust/system/cuda/detail/core/triple_chevron_launch.h>
+#include <thrust/system/musa/detail/core/triple_chevron_launch.h>
 
 CUB_NAMESPACE_BEGIN
 
@@ -383,7 +383,7 @@ struct DispatchHistogram
             HistogramSweepPolicy;
     };
 
-#else // CUDA
+#else // MUSA
 
     /// SM35
     struct Policy350
@@ -433,7 +433,7 @@ struct DispatchHistogram
         typedef Policy210 PtxPolicy;
     #endif
 #else
-    // CUDA architecture selection
+    // MUSA architecture selection
     #if (CUB_PTX_ARCH >= 500)
         typedef Policy500 PtxPolicy;
     #else
@@ -481,7 +481,7 @@ struct DispatchHistogram
                         result = histogram_sweep_config.template Init<typename Policy220::HistogramSweepPolicy>();
                     }
                 #else
-                    // CUDA architecture selection
+                    // MUSA architecture selection
                     if (ptx_version >= 500)
                     {
                         result = histogram_sweep_config.template Init<typename Policy500::HistogramSweepPolicy>();
@@ -546,7 +546,7 @@ struct DispatchHistogram
         DeviceHistogramInitKernelT          histogram_init_kernel,                          ///< [in] Kernel function pointer to parameterization of cub::DeviceHistogramInitKernel
         DeviceHistogramSweepKernelT         histogram_sweep_kernel,                         ///< [in] Kernel function pointer to parameterization of cub::DeviceHistogramSweepKernel
         KernelConfig                        histogram_sweep_config,                         ///< [in] Dispatch parameters that match the policy that \p histogram_sweep_kernel was compiled for
-        musaStream_t                        stream,                                         ///< [in] CUDA stream to launch kernels within.  Default is stream<sub>0</sub>.
+        musaStream_t                        stream,                                         ///< [in] MUSA stream to launch kernels within.  Default is stream<sub>0</sub>.
         bool                                debug_synchronous)                              ///< [in] Whether or not to synchronize the stream after every kernel launch to check for errors.  May cause significant slowdown.  Default is \p false.
     {
     #ifndef CUB_RUNTIME_ENABLED
@@ -658,7 +658,7 @@ struct DispatchHistogram
                 histogram_init_grid_dims, histogram_init_block_threads, (long long) stream);
 
             // Invoke histogram_init_kernel
-            THRUST_NS_QUALIFIER::cuda_cub::launcher::triple_chevron(
+            THRUST_NS_QUALIFIER::musa_cub::launcher::triple_chevron(
                 histogram_init_grid_dims, histogram_init_block_threads, 0,
                 stream
             ).doit(histogram_init_kernel,
@@ -676,7 +676,7 @@ struct DispatchHistogram
                 histogram_sweep_config.block_threads, (long long) stream, histogram_sweep_config.pixels_per_thread, histogram_sweep_sm_occupancy);
 
             // Invoke histogram_sweep_kernel
-            THRUST_NS_QUALIFIER::cuda_cub::launcher::triple_chevron(
+            THRUST_NS_QUALIFIER::musa_cub::launcher::triple_chevron(
                 sweep_grid_dims, histogram_sweep_config.block_threads, 0, stream
             ).doit(histogram_sweep_kernel,
                 d_samples,
@@ -722,7 +722,7 @@ struct DispatchHistogram
         OffsetT             num_row_pixels,                             ///< [in] The number of multi-channel pixels per row in the region of interest
         OffsetT             num_rows,                                   ///< [in] The number of rows in the region of interest
         OffsetT             row_stride_samples,                         ///< [in] The number of samples between starts of consecutive rows in the region of interest
-        musaStream_t        stream,                                     ///< [in] CUDA stream to launch kernels within.  Default is stream<sub>0</sub>.
+        musaStream_t        stream,                                     ///< [in] MUSA stream to launch kernels within.  Default is stream<sub>0</sub>.
         bool                debug_synchronous,                          ///< [in] Whether or not to synchronize the stream after every kernel launch to check for errors.  May cause significant slowdown.  Default is \p false.
         Int2Type<false>     /*is_byte_sample*/)                         ///< [in] Marker type indicating whether or not SampleT is a 8b type
     {
@@ -826,7 +826,7 @@ struct DispatchHistogram
         OffsetT             num_row_pixels,                             ///< [in] The number of multi-channel pixels per row in the region of interest
         OffsetT             num_rows,                                   ///< [in] The number of rows in the region of interest
         OffsetT             row_stride_samples,                         ///< [in] The number of samples between starts of consecutive rows in the region of interest
-        musaStream_t        stream,                                     ///< [in] CUDA stream to launch kernels within.  Default is stream<sub>0</sub>.
+        musaStream_t        stream,                                     ///< [in] MUSA stream to launch kernels within.  Default is stream<sub>0</sub>.
         bool                debug_synchronous,                          ///< [in] Whether or not to synchronize the stream after every kernel launch to check for errors.  May cause significant slowdown.  Default is \p false.
         Int2Type<true>      /*is_byte_sample*/)                         ///< [in] Marker type indicating whether or not SampleT is a 8b type
     {
@@ -905,7 +905,7 @@ struct DispatchHistogram
         OffsetT             num_row_pixels,                             ///< [in] The number of multi-channel pixels per row in the region of interest
         OffsetT             num_rows,                                   ///< [in] The number of rows in the region of interest
         OffsetT             row_stride_samples,                         ///< [in] The number of samples between starts of consecutive rows in the region of interest
-        musaStream_t        stream,                                     ///< [in] CUDA stream to launch kernels within.  Default is stream<sub>0</sub>.
+        musaStream_t        stream,                                     ///< [in] MUSA stream to launch kernels within.  Default is stream<sub>0</sub>.
         bool                debug_synchronous,                          ///< [in] Whether or not to synchronize the stream after every kernel launch to check for errors.  May cause significant slowdown.  Default is \p false.
         Int2Type<false>     /*is_byte_sample*/)                         ///< [in] Marker type indicating whether or not SampleT is a 8b type
     {
@@ -1013,7 +1013,7 @@ struct DispatchHistogram
         OffsetT             num_row_pixels,                             ///< [in] The number of multi-channel pixels per row in the region of interest
         OffsetT             num_rows,                                   ///< [in] The number of rows in the region of interest
         OffsetT             row_stride_samples,                         ///< [in] The number of samples between starts of consecutive rows in the region of interest
-        musaStream_t        stream,                                     ///< [in] CUDA stream to launch kernels within.  Default is stream<sub>0</sub>.
+        musaStream_t        stream,                                     ///< [in] MUSA stream to launch kernels within.  Default is stream<sub>0</sub>.
         bool                debug_synchronous,                          ///< [in] Whether or not to synchronize the stream after every kernel launch to check for errors.  May cause significant slowdown.  Default is \p false.
         Int2Type<true>      /*is_byte_sample*/)                         ///< [in] Marker type indicating whether or not SampleT is a 8b type
     {

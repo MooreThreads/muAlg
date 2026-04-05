@@ -198,14 +198,14 @@ public:
     }
 
 
-    /// Drain \p num_items from the queue.  Returns offset from which to read items.  To be called from CUDA kernel.
+    /// Drain \p num_items from the queue.  Returns offset from which to read items.  To be called from MUSA kernel.
     __device__ __forceinline__ OffsetT Drain(OffsetT num_items)
     {
         return atomicAdd(d_counters + DRAIN, num_items);
     }
 
 
-    /// Fill \p num_items into the queue.  Returns offset from which to write items.    To be called from CUDA kernel.
+    /// Fill \p num_items into the queue.  Returns offset from which to write items.    To be called from MUSA kernel.
     __device__ __forceinline__ OffsetT Fill(OffsetT num_items)
     {
         return atomicAdd(d_counters + FILL, num_items);

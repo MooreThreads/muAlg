@@ -28,7 +28,7 @@
 
 /**
  * \file
- * The cub::BlockHistogramAtomic class provides atomic-based methods for constructing block-wide histograms from data samples partitioned across a CUDA thread block.
+ * The cub::BlockHistogramAtomic class provides atomic-based methods for constructing block-wide histograms from data samples partitioned across a MUSA thread block.
  */
 
 #pragma once
@@ -39,7 +39,7 @@ CUB_NAMESPACE_BEGIN
 
 
 /**
- * \brief The BlockHistogramAtomic class provides atomic-based methods for constructing block-wide histograms from data samples partitioned across a CUDA thread block.
+ * \brief The BlockHistogramAtomic class provides atomic-based methods for constructing block-wide histograms from data samples partitioned across a MUSA thread block.
  */
 template <int BINS>
 struct BlockHistogramAtomic

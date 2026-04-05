@@ -28,7 +28,7 @@
 
 /**
  * \file
- * cub::AgentSpmv implements a stateful abstraction of CUDA thread blocks for participating in device-wide SpMV.
+ * cub::AgentSpmv implements a stateful abstraction of MUSA thread blocks for participating in device-wide SpMV.
  */
 
 #pragma once
@@ -107,7 +107,7 @@ struct SpmvParams
 
 
 /**
- * \brief AgentSpmv implements a stateful abstraction of CUDA thread blocks for participating in device-wide SpMV.
+ * \brief AgentSpmv implements a stateful abstraction of MUSA thread blocks for participating in device-wide SpMV.
  */
 template <
     typename    AgentSpmvPolicyT,           ///< Parameterized AgentSpmvPolicy tuning policy type

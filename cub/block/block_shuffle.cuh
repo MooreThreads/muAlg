@@ -28,7 +28,7 @@
 
 /**
  * \file
- * The cub::BlockShuffle class provides [<em>collective</em>](index.html#sec0) methods for shuffling data partitioned across a CUDA thread block.
+ * The cub::BlockShuffle class provides [<em>collective</em>](index.html#sec0) methods for shuffling data partitioned across a MUSA thread block.
  */
 
 #pragma once
@@ -40,7 +40,7 @@
 CUB_NAMESPACE_BEGIN
 
 /**
- * \brief The BlockShuffle class provides [<em>collective</em>](index.html#sec0) methods for shuffling data partitioned across a CUDA thread block.
+ * \brief The BlockShuffle class provides [<em>collective</em>](index.html#sec0) methods for shuffling data partitioned across a MUSA thread block.
  * \ingroup BlockModule
  *
  * \tparam T                    The data type to be exchanged.

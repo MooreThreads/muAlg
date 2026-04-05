@@ -28,7 +28,7 @@
 
 /**
  * \file
- * The cub::BlockExchange class provides [<em>collective</em>](index.html#sec0) methods for rearranging data partitioned across a CUDA thread block.
+ * The cub::BlockExchange class provides [<em>collective</em>](index.html#sec0) methods for rearranging data partitioned across a MUSA thread block.
  */
 
 #pragma once
@@ -41,7 +41,7 @@
 CUB_NAMESPACE_BEGIN
 
 /**
- * \brief The BlockExchange class provides [<em>collective</em>](index.html#sec0) methods for rearranging data partitioned across a CUDA thread block. ![](transpose_logo.png)
+ * \brief The BlockExchange class provides [<em>collective</em>](index.html#sec0) methods for rearranging data partitioned across a MUSA thread block. ![](transpose_logo.png)
  * \ingroup BlockModule
  *
  * \tparam T                    The data type to be exchanged.

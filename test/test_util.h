@@ -1143,7 +1143,7 @@ std::ostream& operator<<(std::ostream& os, const CUB_NS_QUALIFIER::KeyValuePair<
 
 
 /******************************************************************************
- * Comparison and ostream operators for CUDA vector types
+ * Comparison and ostream operators for MUSA vector types
  ******************************************************************************/
 
 /**

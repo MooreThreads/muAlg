@@ -37,7 +37,7 @@
 #include <cub/util_device.cuh>
 #include <cub/util_math.cuh>
 
-#include <thrust/system/cuda/detail/core/triple_chevron_launch.h>
+#include <thrust/system/musa/detail/core/triple_chevron_launch.h>
 
 CUB_NAMESPACE_BEGIN
 
@@ -207,7 +207,7 @@ struct DispatchThreeWayPartitionIf
                                         cub::BLOCK_SCAN_WARP_SCANS>;
   };
 
-#else // CUDA
+#else // MUSA
 
   /// SM35
   struct Policy350
@@ -404,7 +404,7 @@ struct DispatchThreeWayPartitionIf
       }
 
       // Invoke three_way_partition_init_kernel to initialize tile descriptors
-      THRUST_NS_QUALIFIER::cuda_cub::launcher::triple_chevron(
+      THRUST_NS_QUALIFIER::musa_cub::launcher::triple_chevron(
         init_grid_size, INIT_KERNEL_THREADS, 0, stream
       ).doit(three_way_partition_init_kernel,
              tile_status_1,
@@ -467,7 +467,7 @@ struct DispatchThreeWayPartitionIf
       }
 
       // Invoke select_if_kernel
-      THRUST_NS_QUALIFIER::cuda_cub::launcher::triple_chevron(
+      THRUST_NS_QUALIFIER::musa_cub::launcher::triple_chevron(
         scan_grid_size, three_way_partition_config.block_threads, 0, stream
       ).doit(three_way_partition_kernel,
              d_in,

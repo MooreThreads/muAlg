@@ -28,7 +28,7 @@
 
 /**
  * \file
- * The cub::BlockScan class provides [<em>collective</em>](index.html#sec0) methods for computing a parallel prefix sum/scan of items partitioned across a CUDA thread block.
+ * The cub::BlockScan class provides [<em>collective</em>](index.html#sec0) methods for computing a parallel prefix sum/scan of items partitioned across a MUSA thread block.
  */
 
 #pragma once
@@ -47,7 +47,7 @@ CUB_NAMESPACE_BEGIN
  ******************************************************************************/
 
 /**
- * \brief BlockScanAlgorithm enumerates alternative algorithms for cub::BlockScan to compute a parallel prefix scan across a CUDA thread block.
+ * \brief BlockScanAlgorithm enumerates alternative algorithms for cub::BlockScan to compute a parallel prefix scan across a MUSA thread block.
  */
 enum BlockScanAlgorithm
 {
@@ -109,7 +109,7 @@ enum BlockScanAlgorithm
  ******************************************************************************/
 
 /**
- * \brief The BlockScan class provides [<em>collective</em>](index.html#sec0) methods for computing a parallel prefix sum/scan of items partitioned across a CUDA thread block. ![](block_scan_logo.png)
+ * \brief The BlockScan class provides [<em>collective</em>](index.html#sec0) methods for computing a parallel prefix sum/scan of items partitioned across a MUSA thread block. ![](block_scan_logo.png)
  * \ingroup BlockModule
  *
  * \tparam T                Data type being scanned

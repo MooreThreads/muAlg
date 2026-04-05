@@ -44,7 +44,7 @@
 #include "../../util_device.cuh"
 #include "../../util_math.cuh"
 
-#include <thrust/system/cuda/detail/core/triple_chevron_launch.h>
+#include <thrust/system/musa/detail/core/triple_chevron_launch.h>
 
 CUB_NAMESPACE_BEGIN
 
@@ -191,7 +191,7 @@ struct DeviceScanPolicy
     /// MaxPolicy for MUSA
     typedef Policy310 MaxPolicy;
 
-#else // CUDA
+#else // MUSA
 
     /// SM350
     struct Policy350 : ChainedPolicy<350, Policy350, Policy350>
@@ -234,7 +234,7 @@ struct DeviceScanPolicy
             ScanPolicyT;
     };
 
-    /// MaxPolicy for CUDA
+    /// MaxPolicy for MUSA
     typedef Policy600 MaxPolicy;
 
 #endif // __MUSACC_VER_MAJOR__
@@ -290,7 +290,7 @@ struct DispatchScan:
     ScanOpT         scan_op;                ///< [in] Binary scan functor
     InitValueT      init_value;             ///< [in] Initial value to seed the exclusive scan
     OffsetT         num_items;              ///< [in] Total number of input items (i.e., the length of \p d_in)
-    musaStream_t    stream;                 ///< [in] <b>[optional]</b> CUDA stream to launch kernels within.  Default is stream<sub>0</sub>.
+    musaStream_t    stream;                 ///< [in] <b>[optional]</b> MUSA stream to launch kernels within.  Default is stream<sub>0</sub>.
     bool            debug_synchronous;
     int             ptx_version;
 
@@ -303,7 +303,7 @@ struct DispatchScan:
         OffsetT         num_items,              ///< [in] Total number of input items (i.e., the length of \p d_in)
         ScanOpT         scan_op,                ///< [in] Binary scan functor
         InitValueT      init_value,             ///< [in] Initial value to seed the exclusive scan
-        musaStream_t    stream,                 ///< [in] <b>[optional]</b> CUDA stream to launch kernels within.  Default is stream<sub>0</sub>.
+        musaStream_t    stream,                 ///< [in] <b>[optional]</b> MUSA stream to launch kernels within.  Default is stream<sub>0</sub>.
         bool            debug_synchronous,
         int             ptx_version
     ):
@@ -373,7 +373,7 @@ struct DispatchScan:
             if (debug_synchronous) _CubLog("Invoking init_kernel<<<%d, %d, 0, %lld>>>()\n", init_grid_size, INIT_KERNEL_THREADS, (long long) stream);
 
             // Invoke init_kernel to initialize tile descriptors
-            THRUST_NS_QUALIFIER::cuda_cub::launcher::triple_chevron(
+            THRUST_NS_QUALIFIER::musa_cub::launcher::triple_chevron(
                 init_grid_size, INIT_KERNEL_THREADS, 0, stream
             ).doit(init_kernel,
                 tile_state,
@@ -406,7 +406,7 @@ struct DispatchScan:
                     start_tile, scan_grid_size, Policy::BLOCK_THREADS, (long long) stream, Policy::ITEMS_PER_THREAD, scan_sm_occupancy);
 
                 // Invoke scan_kernel
-                THRUST_NS_QUALIFIER::cuda_cub::launcher::triple_chevron(
+                THRUST_NS_QUALIFIER::musa_cub::launcher::triple_chevron(
                     scan_grid_size, Policy::BLOCK_THREADS, 0, stream
                 ).doit(scan_kernel,
                     d_in,
@@ -457,7 +457,7 @@ struct DispatchScan:
         ScanOpT         scan_op,                ///< [in] Binary scan functor
         InitValueT      init_value,             ///< [in] Initial value to seed the exclusive scan
         OffsetT         num_items,              ///< [in] Total number of input items (i.e., the length of \p d_in)
-        musaStream_t    stream,                 ///< [in] <b>[optional]</b> CUDA stream to launch kernels within.  Default is stream<sub>0</sub>.
+        musaStream_t    stream,                 ///< [in] <b>[optional]</b> MUSA stream to launch kernels within.  Default is stream<sub>0</sub>.
         bool            debug_synchronous)      ///< [in] <b>[optional]</b> Whether or not to synchronize the stream after every kernel launch to check for errors.  Also causes launch configurations to be printed to the console.  Default is \p false.
     {
         typedef typename DispatchScan::MaxPolicy MaxPolicyT;

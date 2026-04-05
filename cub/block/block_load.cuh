@@ -28,7 +28,7 @@
 
 /**
  * \file
- * Operations for reading linear tiles of data into the CUDA thread block.
+ * Operations for reading linear tiles of data into the MUSA thread block.
  */
 
 #pragma once
@@ -222,7 +222,7 @@ __device__ __forceinline__ void InternalLoadDirectBlockedVectorized(
  *
  * The following conditions will prevent vectorization and loading will fall back to cub::BLOCK_LOAD_DIRECT:
  *   - \p ITEMS_PER_THREAD is odd
- *   - The data type \p T is not a built-in primitive or CUDA vector type (e.g., \p short, \p int2, \p double, \p float2, etc.)
+ *   - The data type \p T is not a built-in primitive or MUSA vector type (e.g., \p short, \p int2, \p double, \p float2, etc.)
  *
  * \tparam T                    <b>[inferred]</b> The data type to load.
  * \tparam ITEMS_PER_THREAD     <b>[inferred]</b> The number of consecutive items partitioned onto each thread.
@@ -462,7 +462,7 @@ __device__ __forceinline__ void LoadDirectWarpStriped(
 //-----------------------------------------------------------------------------
 
 /**
- * \brief cub::BlockLoadAlgorithm enumerates alternative algorithms for cub::BlockLoad to read a linear segment of data from memory into a blocked arrangement across a CUDA thread block.
+ * \brief cub::BlockLoadAlgorithm enumerates alternative algorithms for cub::BlockLoad to read a linear segment of data from memory into a blocked arrangement across a MUSA thread block.
  */
 enum BlockLoadAlgorithm
 {
@@ -494,7 +494,7 @@ enum BlockLoadAlgorithm
      * \par Overview
      *
      * A [<em>blocked arrangement</em>](index.html#sec5sec3) of data is read
-     * from memory using CUDA's built-in vectorized loads as a coalescing optimization.
+     * from memory using MUSA's built-in vectorized loads as a coalescing optimization.
      * For example, <tt>ld.global.v4.s32</tt> instructions will be generated
      * when \p T = \p int and \p ITEMS_PER_THREAD % 4 == 0.
      *
@@ -507,7 +507,7 @@ enum BlockLoadAlgorithm
      *   - \p ITEMS_PER_THREAD is odd
      *   - The \p InputIteratorT is not a simple pointer type
      *   - The block input offset is not quadword-aligned
-     *   - The data type \p T is not a built-in primitive or CUDA vector type
+     *   - The data type \p T is not a built-in primitive or MUSA vector type
      *     (e.g., \p short, \p int2, \p double, \p float2, etc.)
      */
     BLOCK_LOAD_VECTORIZE,
@@ -570,7 +570,7 @@ enum BlockLoadAlgorithm
 
 
 /**
- * \brief The BlockLoad class provides [<em>collective</em>](index.html#sec0) data movement methods for loading a linear segment of items from memory into a [<em>blocked arrangement</em>](index.html#sec5sec3) across a CUDA thread block.  ![](block_load_logo.png)
+ * \brief The BlockLoad class provides [<em>collective</em>](index.html#sec0) data movement methods for loading a linear segment of items from memory into a [<em>blocked arrangement</em>](index.html#sec5sec3) across a MUSA thread block.  ![](block_load_logo.png)
  * \ingroup BlockModule
  * \ingroup UtilIo
  *
@@ -593,7 +593,7 @@ enum BlockLoadAlgorithm
 *    -# <b>cub::BLOCK_LOAD_STRIPED,</b>.  A [<em>striped arrangement</em>](index.html#sec5sec3)
  *      of data is read directly from memory.  [More...](\ref cub::BlockLoadAlgorithm)
  *   -# <b>cub::BLOCK_LOAD_VECTORIZE</b>.  A [<em>blocked arrangement</em>](index.html#sec5sec3)
- *      of data is read directly from memory using CUDA's built-in vectorized loads as a
+ *      of data is read directly from memory using MUSA's built-in vectorized loads as a
  *      coalescing optimization.    [More...](\ref cub::BlockLoadAlgorithm)
  *   -# <b>cub::BLOCK_LOAD_TRANSPOSE</b>.  A [<em>striped arrangement</em>](index.html#sec5sec3)
  *      of data is read directly from memory and is then locally transposed into a

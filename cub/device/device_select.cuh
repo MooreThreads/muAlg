@@ -60,14 +60,14 @@ CUB_NAMESPACE_BEGIN
  *
  * \par
  * The following chart illustrates DeviceSelect::If
- * performance across different CUDA architectures for \p int32 items,
+ * performance across different MUSA architectures for \p int32 items,
  * where 50% of the items are randomly selected.
  *
  * \image html select_if_int32_50_percent.png
  *
  * \par
  * The following chart illustrates DeviceSelect::Unique
- * performance across different CUDA architectures for \p int32 items
+ * performance across different MUSA architectures for \p int32 items
  * where segments have lengths uniformly sampled from [1,1000].
  *
  * \image html select_unique_int32_len_500.png
@@ -135,7 +135,7 @@ struct DeviceSelect
         OutputIteratorT             d_out,                          ///< [out] Pointer to the output sequence of selected data items
         NumSelectedIteratorT        d_num_selected_out,             ///< [out] Pointer to the output total number of items selected (i.e., length of \p d_out)
         int                         num_items,                      ///< [in] Total number of input items (i.e., length of \p d_in)
-        musaStream_t                stream             = 0,         ///< [in] <b>[optional]</b> CUDA stream to launch kernels within.  Default is stream<sub>0</sub>.
+        musaStream_t                stream             = 0,         ///< [in] <b>[optional]</b> MUSA stream to launch kernels within.  Default is stream<sub>0</sub>.
         bool                        debug_synchronous  = false)     ///< [in] <b>[optional]</b> Whether or not to synchronize the stream after every kernel launch to check for errors.  May cause significant slowdown.  Default is \p false.
     {
         typedef int                     OffsetT;         // Signed integer type for global offsets
@@ -166,7 +166,7 @@ struct DeviceSelect
      *
      * \par Performance
      * The following charts illustrate saturated select-if performance across different
-     * CUDA architectures for \p int32 and \p int64 items, respectively.  Items are
+     * MUSA architectures for \p int32 and \p int64 items, respectively.  Items are
      * selected with 50% probability.
      *
      * \image html select_if_int32_50_percent.png
@@ -241,7 +241,7 @@ struct DeviceSelect
         NumSelectedIteratorT        d_num_selected_out,             ///< [out] Pointer to the output total number of items selected (i.e., length of \p d_out)
         int                         num_items,                      ///< [in] Total number of input items (i.e., length of \p d_in)
         SelectOp                    select_op,                      ///< [in] Unary selection operator
-        musaStream_t                stream             = 0,         ///< [in] <b>[optional]</b> CUDA stream to launch kernels within.  Default is stream<sub>0</sub>.
+        musaStream_t                stream             = 0,         ///< [in] <b>[optional]</b> MUSA stream to launch kernels within.  Default is stream<sub>0</sub>.
         bool                        debug_synchronous  = false)     ///< [in] <b>[optional]</b> Whether or not to synchronize the stream after every kernel launch to check for errors.  May cause significant slowdown.  Default is \p false.
     {
         typedef int                     OffsetT;         // Signed integer type for global offsets
@@ -273,7 +273,7 @@ struct DeviceSelect
      *
      * \par Performance
      * The following charts illustrate saturated select-unique performance across different
-     * CUDA architectures for \p int32 and \p int64 items, respectively.  Segments have
+     * MUSA architectures for \p int32 and \p int64 items, respectively.  Segments have
      * lengths uniformly sampled from [1,1000].
      *
      * \image html select_unique_int32_len_500.png
@@ -330,7 +330,7 @@ struct DeviceSelect
         OutputIteratorT             d_out,                          ///< [out] Pointer to the output sequence of selected data items
         NumSelectedIteratorT        d_num_selected_out,             ///< [out] Pointer to the output total number of items selected (i.e., length of \p d_out)
         int                         num_items,                      ///< [in] Total number of input items (i.e., length of \p d_in)
-        musaStream_t                stream             = 0,         ///< [in] <b>[optional]</b> CUDA stream to launch kernels within.  Default is stream<sub>0</sub>.
+        musaStream_t                stream             = 0,         ///< [in] <b>[optional]</b> MUSA stream to launch kernels within.  Default is stream<sub>0</sub>.
         bool                        debug_synchronous  = false)     ///< [in] <b>[optional]</b> Whether or not to synchronize the stream after every kernel launch to check for errors.  May cause significant slowdown.  Default is \p false.
     {
         typedef int                     OffsetT;        // Signed integer type for global offsets
@@ -415,7 +415,7 @@ struct DeviceSelect
         ValueOutputIteratorT        d_values_out,                   ///< [out] Pointer to the output sequence of selected values
         NumSelectedIteratorT        d_num_selected_out,             ///< [out] Pointer to the total number of items selected (i.e., length of \p d_keys_out or \p d_values_out)
         int                         num_items,                      ///< [in] Total number of input items (i.e., length of \p d_keys_in or \p d_values_in)
-        musaStream_t                stream             = 0,         ///< [in] <b>[optional]</b> CUDA stream to launch kernels within.  Default is stream<sub>0</sub>.
+        musaStream_t                stream             = 0,         ///< [in] <b>[optional]</b> MUSA stream to launch kernels within.  Default is stream<sub>0</sub>.
         bool                        debug_synchronous  = false)     ///< [in] <b>[optional]</b> Whether or not to synchronize the stream after every kernel launch to check for errors.  May cause significant slowdown.  Default is \p false.
     {
         using OffsetT = int;

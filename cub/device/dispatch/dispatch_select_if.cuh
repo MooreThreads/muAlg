@@ -45,7 +45,7 @@
 #include "../../util_device.cuh"
 #include "../../util_math.cuh"
 
-#include <thrust/system/cuda/detail/core/triple_chevron_launch.h>
+#include <thrust/system/musa/detail/core/triple_chevron_launch.h>
 
 CUB_NAMESPACE_BEGIN
 
@@ -200,7 +200,7 @@ struct DispatchSelectIf
             SelectIfPolicyT;
     };
 
-#else // CUDA
+#else // MUSA
 
     /// SM35
     struct Policy350
@@ -316,7 +316,7 @@ struct DispatchSelectIf
         SelectOpT                   select_op,                      ///< [in] Selection operator
         EqualityOpT                 equality_op,                    ///< [in] Equality operator
         OffsetT                     num_items,                      ///< [in] Total number of input items (i.e., length of \p d_in)
-        musaStream_t                stream,                         ///< [in] CUDA stream to launch kernels within.  Default is stream<sub>0</sub>.
+        musaStream_t                stream,                         ///< [in] MUSA stream to launch kernels within.  Default is stream<sub>0</sub>.
         bool                        debug_synchronous,              ///< [in] Whether or not to synchronize the stream after every kernel launch to check for errors.  Also causes launch configurations to be printed to the console.  Default is \p false.
         int                         /*ptx_version*/,                ///< [in] PTX version of dispatch kernels
         ScanInitKernelPtrT          scan_init_kernel,               ///< [in] Kernel function pointer to parameterization of cub::DeviceScanInitKernel
@@ -378,7 +378,7 @@ struct DispatchSelectIf
             if (debug_synchronous) _CubLog("Invoking scan_init_kernel<<<%d, %d, 0, %lld>>>()\n", init_grid_size, INIT_KERNEL_THREADS, (long long) stream);
 
             // Invoke scan_init_kernel to initialize tile descriptors
-            THRUST_NS_QUALIFIER::cuda_cub::launcher::triple_chevron(
+            THRUST_NS_QUALIFIER::musa_cub::launcher::triple_chevron(
                 init_grid_size, INIT_KERNEL_THREADS, 0, stream
             ).doit(scan_init_kernel,
                 tile_status,
@@ -429,7 +429,7 @@ struct DispatchSelectIf
             }
 
             // Invoke select_if_kernel
-            THRUST_NS_QUALIFIER::cuda_cub::launcher::triple_chevron(
+            THRUST_NS_QUALIFIER::musa_cub::launcher::triple_chevron(
                 scan_grid_size, select_if_config.block_threads, 0, stream
             ).doit(select_if_kernel,
                 d_in,
@@ -470,7 +470,7 @@ struct DispatchSelectIf
         SelectOpT                   select_op,                      ///< [in] Selection operator
         EqualityOpT                 equality_op,                    ///< [in] Equality operator
         OffsetT                     num_items,                      ///< [in] Total number of input items (i.e., length of \p d_in)
-        musaStream_t                stream,                         ///< [in] <b>[optional]</b> CUDA stream to launch kernels within.  Default is stream<sub>0</sub>.
+        musaStream_t                stream,                         ///< [in] <b>[optional]</b> MUSA stream to launch kernels within.  Default is stream<sub>0</sub>.
         bool                        debug_synchronous)              ///< [in] <b>[optional]</b> Whether or not to synchronize the stream after every kernel launch to check for errors.  Also causes launch configurations to be printed to the console.  Default is \p false.
     {
         musaError error = musaSuccess;

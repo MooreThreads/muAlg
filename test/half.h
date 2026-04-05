@@ -30,7 +30,7 @@
 
 /**
  * \file
- * Utilities for interacting with the opaque CUDA __half type
+ * Utilities for interacting with the opaque MUSA __half type
  */
 
 #include <cub/util_type.cuh>

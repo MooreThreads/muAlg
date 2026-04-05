@@ -30,7 +30,7 @@
  * Test evaluation for software global barrier throughput
  ******************************************************************************/
 
-// Ensure printing of CUDA runtime errors to console
+// Ensure printing of MUSA runtime errors to console
 #define CUB_STDERR
 
 #include <stdio.h>

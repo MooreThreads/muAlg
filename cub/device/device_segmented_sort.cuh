@@ -69,7 +69,7 @@ CUB_NAMESPACE_BEGIN
  * The algorithm has to satisfy the underlying algorithms restrictions. Radix
  * sort usage restricts the list of supported types. Therefore,
  * DeviceSegmentedSort can sort all of the built-in C++ numeric primitive types
- * (`unsigned char`, `int`, `double`, etc.) as well as CUDA's `__half` and
+ * (`unsigned char`, `int`, `double`, etc.) as well as MUSA's `__half` and
  * `__nv_bfloat16` 16-bit floating-point types.
  *
  * @par A simple example
@@ -213,7 +213,7 @@ struct DeviceSegmentedSort
    *   considered empty.
    *
    * @param[in] stream
-   *   <b>[optional]</b> CUDA stream to launch kernels within. Default is
+   *   <b>[optional]</b> MUSA stream to launch kernels within. Default is
    *   stream<sub>0</sub>.
    *
    * @param[in] debug_synchronous
@@ -357,7 +357,7 @@ struct DeviceSegmentedSort
    *   considered empty.
    *
    * @param[in] stream
-   *   <b>[optional]</b> CUDA stream to launch kernels within. Default is
+   *   <b>[optional]</b> MUSA stream to launch kernels within. Default is
    *   stream<sub>0</sub>.
    *
    * @param[in] debug_synchronous
@@ -510,7 +510,7 @@ struct DeviceSegmentedSort
    *   considered empty.
    *
    * @param[in] stream
-   *   <b>[optional]</b> CUDA stream to launch kernels within. Default is
+   *   <b>[optional]</b> MUSA stream to launch kernels within. Default is
    *   stream<sub>0</sub>.
    *
    * @param[in] debug_synchronous
@@ -662,7 +662,7 @@ struct DeviceSegmentedSort
    *   considered empty.
    *
    * @param[in] stream
-   *   <b>[optional]</b> CUDA stream to launch kernels within. Default is
+   *   <b>[optional]</b> MUSA stream to launch kernels within. Default is
    *   stream<sub>0</sub>.
    *
    * @param[in] debug_synchronous
@@ -806,7 +806,7 @@ struct DeviceSegmentedSort
    *   considered empty.
    *
    * @param[in] stream
-   *   <b>[optional]</b> CUDA stream to launch kernels within. Default is
+   *   <b>[optional]</b> MUSA stream to launch kernels within. Default is
    *   stream<sub>0</sub>.
    *
    * @param[in] debug_synchronous
@@ -939,7 +939,7 @@ struct DeviceSegmentedSort
    *   considered empty.
    *
    * @param[in] stream
-   *   <b>[optional]</b> CUDA stream to launch kernels within. Default is
+   *   <b>[optional]</b> MUSA stream to launch kernels within. Default is
    *   stream<sub>0</sub>.
    *
    * @param[in] debug_synchronous
@@ -1082,7 +1082,7 @@ struct DeviceSegmentedSort
    *   considered empty.
    *
    * @param[in] stream
-   *   <b>[optional]</b> CUDA stream to launch kernels within. Default is
+   *   <b>[optional]</b> MUSA stream to launch kernels within. Default is
    *   stream<sub>0</sub>.
    *
    * @param[in] debug_synchronous
@@ -1222,7 +1222,7 @@ struct DeviceSegmentedSort
    *   i-th segment is considered empty.
    *
    * @param[in] stream
-   *   <b>[optional]</b> CUDA stream to launch kernels within. Default is
+   *   <b>[optional]</b> MUSA stream to launch kernels within. Default is
    *   stream<sub>0</sub>.
    *
    * @param[in] debug_synchronous
@@ -1377,7 +1377,7 @@ struct DeviceSegmentedSort
    *   considered empty.
    *
    * @param[in] stream
-   *   <b>[optional]</b> CUDA stream to launch kernels within. Default is
+   *   <b>[optional]</b> MUSA stream to launch kernels within. Default is
    *   stream<sub>0</sub>.
    *
    * @param[in] debug_synchronous
@@ -1541,7 +1541,7 @@ struct DeviceSegmentedSort
    *   considered empty.
    *
    * @param[in] stream
-   *   <b>[optional]</b> CUDA stream to launch kernels within. Default is
+   *   <b>[optional]</b> MUSA stream to launch kernels within. Default is
    *   stream<sub>0</sub>.
    *
    * @param[in] debug_synchronous
@@ -1713,7 +1713,7 @@ struct DeviceSegmentedSort
    *   considered empty.
    *
    * @param[in] stream
-   *   <b>[optional]</b> CUDA stream to launch kernels within. Default is
+   *   <b>[optional]</b> MUSA stream to launch kernels within. Default is
    *   stream<sub>0</sub>.
    *
    * @param[in] debug_synchronous
@@ -1880,7 +1880,7 @@ struct DeviceSegmentedSort
    *   considered empty.
    *
    * @param[in] stream
-   *   <b>[optional]</b> CUDA stream to launch kernels within. Default is
+   *   <b>[optional]</b> MUSA stream to launch kernels within. Default is
    *   stream<sub>0</sub>.
    *
    * @param[in] debug_synchronous
@@ -2039,7 +2039,7 @@ struct DeviceSegmentedSort
    *   considered empty.
    *
    * @param[in] stream
-   *   <b>[optional]</b> CUDA stream to launch kernels within. Default is
+   *   <b>[optional]</b> MUSA stream to launch kernels within. Default is
    *   stream<sub>0</sub>.
    *
    * @param[in] debug_synchronous
@@ -2197,7 +2197,7 @@ struct DeviceSegmentedSort
    *   considered empty.
    *
    * @param[in] stream
-   *   <b>[optional]</b> CUDA stream to launch kernels within. Default is
+   *   <b>[optional]</b> MUSA stream to launch kernels within. Default is
    *   stream<sub>0</sub>.
    *
    * @param[in] debug_synchronous
@@ -2362,7 +2362,7 @@ struct DeviceSegmentedSort
    *   considered empty.
    *
    * @param[in] stream
-   *   <b>[optional]</b> CUDA stream to launch kernels within. Default is
+   *   <b>[optional]</b> MUSA stream to launch kernels within. Default is
    *   stream<sub>0</sub>.
    *
    * @param[in] debug_synchronous
@@ -2522,7 +2522,7 @@ struct DeviceSegmentedSort
    *   considered empty.
    *
    * @param[in] stream
-   *   <b>[optional]</b> CUDA stream to launch kernels within. Default is
+   *   <b>[optional]</b> MUSA stream to launch kernels within. Default is
    *   stream<sub>0</sub>.
    *
    * @param[in] debug_synchronous

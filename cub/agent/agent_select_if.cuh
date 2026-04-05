@@ -28,7 +28,7 @@
 
 /**
  * \file
- * cub::AgentSelectIf implements a stateful abstraction of CUDA thread blocks for participating in device-wide select.
+ * cub::AgentSelectIf implements a stateful abstraction of MUSA thread blocks for participating in device-wide select.
  */
 
 #pragma once
@@ -83,7 +83,7 @@ struct AgentSelectIfPolicy
 
 
 /**
- * \brief AgentSelectIf implements a stateful abstraction of CUDA thread blocks for participating in device-wide selection
+ * \brief AgentSelectIf implements a stateful abstraction of MUSA thread blocks for participating in device-wide selection
  *
  * Performs functor-based selection if SelectOpT functor type != NullType
  * Otherwise performs flag-based selection if FlagsInputIterator's value type != NullType

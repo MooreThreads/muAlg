@@ -28,7 +28,7 @@
 
 /**
  * \file
- * cub::AgentScan implements a stateful abstraction of CUDA thread blocks for participating in device-wide prefix scan .
+ * cub::AgentScan implements a stateful abstraction of MUSA thread blocks for participating in device-wide prefix scan .
  */
 
 #pragma once
@@ -80,7 +80,7 @@ struct AgentScanPolicy :
  ******************************************************************************/
 
 /**
- * \brief AgentScan implements a stateful abstraction of CUDA thread blocks for participating in device-wide prefix scan .
+ * \brief AgentScan implements a stateful abstraction of MUSA thread blocks for participating in device-wide prefix scan .
  */
 template <
     typename AgentScanPolicyT,      ///< Parameterized AgentScanPolicyT tuning policy type

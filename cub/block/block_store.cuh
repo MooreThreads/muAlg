@@ -28,7 +28,7 @@
 
 /**
  * \file
- * Operations for writing linear segments of data from the CUDA thread block
+ * Operations for writing linear segments of data from the MUSA thread block
  */
 
 #pragma once
@@ -127,7 +127,7 @@ __device__ __forceinline__ void StoreDirectBlocked(
  * \par
  * The following conditions will prevent vectorization and storing will fall back to cub::BLOCK_STORE_DIRECT:
  *   - \p ITEMS_PER_THREAD is odd
- *   - The data type \p T is not a built-in primitive or CUDA vector type (e.g., \p short, \p int2, \p double, \p float2, etc.)
+ *   - The data type \p T is not a built-in primitive or MUSA vector type (e.g., \p short, \p int2, \p double, \p float2, etc.)
  *
  * \tparam T                    <b>[inferred]</b> The data type to store.
  * \tparam ITEMS_PER_THREAD     <b>[inferred]</b> The number of consecutive items partitioned onto each thread.
@@ -143,7 +143,7 @@ __device__ __forceinline__ void StoreDirectBlockedVectorized(
 {
     enum
     {
-        // Maximum CUDA vector size is 4 elements
+        // Maximum MUSA vector size is 4 elements
         MAX_VEC_SIZE = CUB_MIN(4, ITEMS_PER_THREAD),
 
         // Vector size must be a power of two and an even divisor of the items per thread
@@ -345,7 +345,7 @@ __device__ __forceinline__ void StoreDirectWarpStriped(
 //-----------------------------------------------------------------------------
 
 /**
- * \brief cub::BlockStoreAlgorithm enumerates alternative algorithms for cub::BlockStore to write a blocked arrangement of items across a CUDA thread block to a linear segment of memory.
+ * \brief cub::BlockStoreAlgorithm enumerates alternative algorithms for cub::BlockStore to write a blocked arrangement of items across a MUSA thread block to a linear segment of memory.
  */
 enum BlockStoreAlgorithm
 {
@@ -376,7 +376,7 @@ enum BlockStoreAlgorithm
      * \par Overview
      *
      * A [<em>blocked arrangement</em>](index.html#sec5sec3) of data is written directly
-     * to memory using CUDA's built-in vectorized stores as a coalescing optimization.
+     * to memory using MUSA's built-in vectorized stores as a coalescing optimization.
      * For example, <tt>st.global.v4.s32</tt> instructions will be generated
      * when \p T = \p int and \p ITEMS_PER_THREAD % 4 == 0.
      *
@@ -388,7 +388,7 @@ enum BlockStoreAlgorithm
      *   - \p ITEMS_PER_THREAD is odd
      *   - The \p OutputIteratorT is not a simple pointer type
      *   - The block output offset is not quadword-aligned
-     *   - The data type \p T is not a built-in primitive or CUDA vector type (e.g., \p short, \p int2, \p double, \p float2, etc.)
+     *   - The data type \p T is not a built-in primitive or MUSA vector type (e.g., \p short, \p int2, \p double, \p float2, etc.)
      */
     BLOCK_STORE_VECTORIZE,
 
@@ -444,7 +444,7 @@ enum BlockStoreAlgorithm
 
 
 /**
- * \brief The BlockStore class provides [<em>collective</em>](index.html#sec0) data movement methods for writing a [<em>blocked arrangement</em>](index.html#sec5sec3) of items partitioned across a CUDA thread block to a linear segment of memory.  ![](block_store_logo.png)
+ * \brief The BlockStore class provides [<em>collective</em>](index.html#sec0) data movement methods for writing a [<em>blocked arrangement</em>](index.html#sec5sec3) of items partitioned across a MUSA thread block to a linear segment of memory.  ![](block_store_logo.png)
  * \ingroup BlockModule
  * \ingroup UtilIo
  *
@@ -466,7 +466,7 @@ enum BlockStoreAlgorithm
  *   -# <b>cub::BLOCK_STORE_STRIPED</b>.  A [<em>striped arrangement</em>](index.html#sec5sec3)
  *      of data is written directly to memory. [More...](\ref cub::BlockStoreAlgorithm)
  *   -# <b>cub::BLOCK_STORE_VECTORIZE</b>.  A [<em>blocked arrangement</em>](index.html#sec5sec3)
- *      of data is written directly to memory using CUDA's built-in vectorized stores as a
+ *      of data is written directly to memory using MUSA's built-in vectorized stores as a
  *      coalescing optimization.  [More...](\ref cub::BlockStoreAlgorithm)
  *   -# <b>cub::BLOCK_STORE_TRANSPOSE</b>.  A [<em>blocked arrangement</em>](index.html#sec5sec3)
  *      is locally transposed into a [<em>striped arrangement</em>](index.html#sec5sec3) which is

@@ -34,7 +34,7 @@
 #include "../block/block_store.cuh"
 #include "../block/block_adjacent_difference.cuh"
 
-#include <thrust/system/cuda/detail/core/util.h>
+#include <thrust/system/musa/detail/core/util.h>
 
 
 CUB_NAMESPACE_BEGIN
@@ -68,7 +68,7 @@ template <typename Policy,
           bool ReadLeft>
 struct AgentDifference
 {
-  using LoadIt = typename THRUST_NS_QUALIFIER::cuda_cub::core::LoadIterator<Policy, InputIteratorT>::type;
+  using LoadIt = typename THRUST_NS_QUALIFIER::musa_cub::core::LoadIterator<Policy, InputIteratorT>::type;
 
   using BlockLoad = typename cub::BlockLoadType<Policy, LoadIt>::type;
   using BlockStore = typename cub::BlockStoreType<Policy, OutputIteratorT, OutputT>::type;
@@ -108,7 +108,7 @@ struct AgentDifference
       : temp_storage(temp_storage.Alias())
       , input_it(input_it)
       , load_it(
-          THRUST_NS_QUALIFIER::cuda_cub::core::make_load_iterator(Policy(),
+          THRUST_NS_QUALIFIER::musa_cub::core::make_load_iterator(Policy(),
                                                                   input_it))
       , first_tile_previous(first_tile_previous)
       , result(result)

@@ -28,7 +28,7 @@
 
 /**
  * \file
- * cub::BlockRadixRank provides operations for ranking unsigned integer types within a CUDA thread block
+ * cub::BlockRadixRank provides operations for ranking unsigned integer types within a MUSA thread block
  */
 
 #pragma once
@@ -93,7 +93,7 @@ struct BlockRadixRankEmptyCallback
 
 
 /**
- * \brief BlockRadixRank provides operations for ranking unsigned integer types within a CUDA thread block.
+ * \brief BlockRadixRank provides operations for ranking unsigned integer types within a MUSA thread block.
  * \ingroup BlockModule
  *
  * \tparam BLOCK_DIM_X          The thread block length in threads along the X dimension

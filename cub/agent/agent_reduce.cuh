@@ -28,7 +28,7 @@
 
 /**
  * \file
- * cub::AgentReduce implements a stateful abstraction of CUDA thread blocks for participating in device-wide reduction .
+ * cub::AgentReduce implements a stateful abstraction of MUSA thread blocks for participating in device-wide reduction .
  */
 
 #pragma once
@@ -81,7 +81,7 @@ struct AgentReducePolicy :
  ******************************************************************************/
 
 /**
- * \brief AgentReduce implements a stateful abstraction of CUDA thread blocks for participating in device-wide reduction .
+ * \brief AgentReduce implements a stateful abstraction of MUSA thread blocks for participating in device-wide reduction .
  *
  * Each thread reduces only the values it loads. If \p FIRST_TILE, this
  * partial reduction is stored into \p thread_aggregate.  Otherwise it is

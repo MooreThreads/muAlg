@@ -3,7 +3,7 @@
  * Copyright (c) 2024, Moore Threads Corporation.  All rights reserved.
  *
  * MUSA benchmark helper - replacement for nvbench_helper.cuh
- * Provides compatibility layer for porting CUDA benchmarks to MUSA.
+ * Provides compatibility layer for porting MUSA benchmarks to MUSA.
  ******************************************************************************/
 
 #pragma once

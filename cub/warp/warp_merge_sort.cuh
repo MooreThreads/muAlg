@@ -38,7 +38,7 @@ CUB_NAMESPACE_BEGIN
 
 /**
  * @brief The WarpMergeSort class provides methods for sorting items partitioned
- *        across a CUDA warp using a merge sorting method.
+ *        across a MUSA warp using a merge sorting method.
  * @ingroup WarpModule
  *
  * @tparam KeyT
@@ -50,7 +50,7 @@ CUB_NAMESPACE_BEGIN
  * @tparam LOGICAL_WARP_THREADS
  *   <b>[optional]</b> The number of threads per "logical" warp (may be less
  *   than the number of hardware warp threads). Default is the warp size of the
- *   targeted CUDA compute-capability (e.g., 32 threads for SM86). Must be a
+ *   targeted MUSA compute-capability (e.g., 32 threads for SM86). Must be a
  *   power of two.
  *
  * @tparam ValueT

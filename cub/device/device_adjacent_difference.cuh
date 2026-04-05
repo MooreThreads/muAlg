@@ -233,7 +233,7 @@ public:
    *   The binary function used to compute differences
    *
    * @param[in] stream
-   *   <b>[optional]</b> CUDA stream to launch kernels within. Default is
+   *   <b>[optional]</b> MUSA stream to launch kernels within. Default is
    *   stream<sub>0</sub>
    *
    * @param[in] debug_synchronous
@@ -352,7 +352,7 @@ public:
    *   The binary function used to compute differences
    *
    * @param[in] stream
-   *   <b>[optional]</b> CUDA stream to launch kernels within. Default is
+   *   <b>[optional]</b> MUSA stream to launch kernels within. Default is
    *   stream<sub>0</sub>.
    *
    * @param[in] debug_synchronous
@@ -482,7 +482,7 @@ public:
    *   The binary function used to compute differences.
    *
    * @param[in] stream
-   *   <b>[optional]</b> CUDA stream to launch kernels within. Default is
+   *   <b>[optional]</b> MUSA stream to launch kernels within. Default is
    *   stream<sub>0</sub>.
    *
    * @param[in] debug_synchronous
@@ -591,7 +591,7 @@ public:
    *   The binary function used to compute differences
    *
    * @param[in] stream
-   *   <b>[optional]</b> CUDA stream to launch kernels within. Default is
+   *   <b>[optional]</b> MUSA stream to launch kernels within. Default is
    *   stream<sub>0</sub>.
    *
    * @param[in] debug_synchronous

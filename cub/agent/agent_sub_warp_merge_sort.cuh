@@ -33,7 +33,7 @@
 #include <cub/warp/warp_merge_sort.cuh>
 #include <cub/warp/warp_store.cuh>
 
-#include <thrust/system/cuda/detail/core/util.h>
+#include <thrust/system/musa/detail/core/util.h>
 
 
 CUB_NAMESPACE_BEGIN
@@ -146,9 +146,9 @@ public:
   using WarpMergeSortT =
     WarpMergeSort<KeyT, PolicyT::ITEMS_PER_THREAD, PolicyT::WARP_THREADS, ValueT>;
 
-  using KeysLoadItT = typename THRUST_NS_QUALIFIER::cuda_cub::core::
+  using KeysLoadItT = typename THRUST_NS_QUALIFIER::musa_cub::core::
     LoadIterator<PolicyT, const KeyT *>::type;
-  using ItemsLoadItT = typename THRUST_NS_QUALIFIER::cuda_cub::core::
+  using ItemsLoadItT = typename THRUST_NS_QUALIFIER::musa_cub::core::
     LoadIterator<PolicyT, const ValueT *>::type;
 
   using WarpLoadKeysT  = cub::WarpLoad<KeyT,

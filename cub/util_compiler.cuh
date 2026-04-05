@@ -73,7 +73,7 @@
 #elif CUB_HOST_COMPILER == CUB_HOST_COMPILER_GCC
 #  define CUB_DEVICE_COMPILER CUB_DEVICE_COMPILER_GCC
 #elif CUB_HOST_COMPILER == CUB_HOST_COMPILER_CLANG
-// CUDA-capable clang should behave similar to NVCC.
+// MUSA-capable clang should behave similar to NVCC.
 #  if defined(__CUDA__)
 #    define CUB_DEVICE_COMPILER CUB_DEVICE_COMPILER_NVCC
 #  else

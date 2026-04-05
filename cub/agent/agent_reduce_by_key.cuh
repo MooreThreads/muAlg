@@ -28,7 +28,7 @@
 
 /**
  * \file
- * cub::AgentReduceByKey implements a stateful abstraction of CUDA thread blocks for participating in device-wide reduce-value-by-key.
+ * cub::AgentReduceByKey implements a stateful abstraction of MUSA thread blocks for participating in device-wide reduce-value-by-key.
  */
 
 #pragma once
@@ -79,7 +79,7 @@ struct AgentReduceByKeyPolicy
  ******************************************************************************/
 
 /**
- * \brief AgentReduceByKey implements a stateful abstraction of CUDA thread blocks for participating in device-wide reduce-value-by-key
+ * \brief AgentReduceByKey implements a stateful abstraction of MUSA thread blocks for participating in device-wide reduce-value-by-key
  */
 template <
     typename    AgentReduceByKeyPolicyT,        ///< Parameterized AgentReduceByKeyPolicy tuning policy type

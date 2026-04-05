@@ -30,7 +30,7 @@
  * Test of BlockHistogram utilities
  ******************************************************************************/
 
-// Ensure printing of CUDA runtime errors to console
+// Ensure printing of MUSA runtime errors to console
 #define CUB_STDERR
 
 #include <cub/block/block_histogram.cuh>

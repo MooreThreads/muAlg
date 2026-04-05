@@ -62,13 +62,13 @@ CUB_NAMESPACE_BEGIN
  *
  * \par
  * The following chart illustrates DeviceReduce::Sum
- * performance across different CUDA architectures for \p int32 keys.
+ * performance across different MUSA architectures for \p int32 keys.
  *
  * \image html reduce_int32.png
  *
  * \par
  * The following chart illustrates DeviceReduce::ReduceByKey (summation)
- * performance across different CUDA architectures for \p fp32
+ * performance across different MUSA architectures for \p fp32
  * values.  Segments are identified by \p int32 keys, and have lengths uniformly sampled from [1,1000].
  *
  * \image html reduce_by_key_fp32_len_500.png
@@ -149,7 +149,7 @@ struct DeviceReduce
         int                         num_items,                          ///< [in] Total number of input items (i.e., length of \p d_in)
         ReductionOpT                reduction_op,                       ///< [in] Binary reduction functor
         T                           init,                               ///< [in] Initial value of the reduction
-        musaStream_t                stream              = 0,            ///< [in] <b>[optional]</b> CUDA stream to launch kernels within.  Default is stream<sub>0</sub>.
+        musaStream_t                stream              = 0,            ///< [in] <b>[optional]</b> MUSA stream to launch kernels within.  Default is stream<sub>0</sub>.
         bool                        debug_synchronous   = false)        ///< [in] <b>[optional]</b> Whether or not to synchronize the stream after every kernel launch to check for errors.  Also causes launch configurations to be printed to the console.  Default is \p false.
     {
         // Signed integer type for global offsets
@@ -183,7 +183,7 @@ struct DeviceReduce
      *
      * \par Performance
      * The following charts illustrate saturated sum-reduction performance across different
-     * CUDA architectures for \p int32 and \p int64 items, respectively.
+     * MUSA architectures for \p int32 and \p int64 items, respectively.
      *
      * \image html reduce_int32.png
      * \image html reduce_int64.png
@@ -228,7 +228,7 @@ struct DeviceReduce
         InputIteratorT              d_in,                               ///< [in] Pointer to the input sequence of data items
         OutputIteratorT             d_out,                              ///< [out] Pointer to the output aggregate
         int                         num_items,                          ///< [in] Total number of input items (i.e., length of \p d_in)
-        musaStream_t                stream              = 0,            ///< [in] <b>[optional]</b> CUDA stream to launch kernels within.  Default is stream<sub>0</sub>.
+        musaStream_t                stream              = 0,            ///< [in] <b>[optional]</b> MUSA stream to launch kernels within.  Default is stream<sub>0</sub>.
         bool                        debug_synchronous   = false)        ///< [in] <b>[optional]</b> Whether or not to synchronize the stream after every kernel launch to check for errors.  Also causes launch configurations to be printed to the console.  Default is \p false.
     {
         // Signed integer type for global offsets
@@ -305,7 +305,7 @@ struct DeviceReduce
         InputIteratorT              d_in,                               ///< [in] Pointer to the input sequence of data items
         OutputIteratorT             d_out,                              ///< [out] Pointer to the output aggregate
         int                         num_items,                          ///< [in] Total number of input items (i.e., length of \p d_in)
-        musaStream_t                stream              = 0,            ///< [in] <b>[optional]</b> CUDA stream to launch kernels within.  Default is stream<sub>0</sub>.
+        musaStream_t                stream              = 0,            ///< [in] <b>[optional]</b> MUSA stream to launch kernels within.  Default is stream<sub>0</sub>.
         bool                        debug_synchronous   = false)        ///< [in] <b>[optional]</b> Whether or not to synchronize the stream after every kernel launch to check for errors.  Also causes launch configurations to be printed to the console.  Default is \p false.
     {
         // Signed integer type for global offsets
@@ -382,7 +382,7 @@ struct DeviceReduce
         InputIteratorT              d_in,                               ///< [in] Pointer to the input sequence of data items
         OutputIteratorT             d_out,                              ///< [out] Pointer to the output aggregate
         int                         num_items,                          ///< [in] Total number of input items (i.e., length of \p d_in)
-        musaStream_t                stream              = 0,            ///< [in] <b>[optional]</b> CUDA stream to launch kernels within.  Default is stream<sub>0</sub>.
+        musaStream_t                stream              = 0,            ///< [in] <b>[optional]</b> MUSA stream to launch kernels within.  Default is stream<sub>0</sub>.
         bool                        debug_synchronous   = false)        ///< [in] <b>[optional]</b> Whether or not to synchronize the stream after every kernel launch to check for errors.  Also causes launch configurations to be printed to the console.  Default is \p false.
     {
         // Signed integer type for global offsets
@@ -474,7 +474,7 @@ struct DeviceReduce
         InputIteratorT              d_in,                               ///< [in] Pointer to the input sequence of data items
         OutputIteratorT             d_out,                              ///< [out] Pointer to the output aggregate
         int                         num_items,                          ///< [in] Total number of input items (i.e., length of \p d_in)
-        musaStream_t                stream              = 0,            ///< [in] <b>[optional]</b> CUDA stream to launch kernels within.  Default is stream<sub>0</sub>.
+        musaStream_t                stream              = 0,            ///< [in] <b>[optional]</b> MUSA stream to launch kernels within.  Default is stream<sub>0</sub>.
         bool                        debug_synchronous   = false)        ///< [in] <b>[optional]</b> Whether or not to synchronize the stream after every kernel launch to check for errors.  Also causes launch configurations to be printed to the console.  Default is \p false.
     {
         // Signed integer type for global offsets
@@ -551,7 +551,7 @@ struct DeviceReduce
         InputIteratorT              d_in,                               ///< [in] Pointer to the input sequence of data items
         OutputIteratorT             d_out,                              ///< [out] Pointer to the output aggregate
         int                         num_items,                          ///< [in] Total number of input items (i.e., length of \p d_in)
-        musaStream_t                stream              = 0,            ///< [in] <b>[optional]</b> CUDA stream to launch kernels within.  Default is stream<sub>0</sub>.
+        musaStream_t                stream              = 0,            ///< [in] <b>[optional]</b> MUSA stream to launch kernels within.  Default is stream<sub>0</sub>.
         bool                        debug_synchronous   = false)        ///< [in] <b>[optional]</b> Whether or not to synchronize the stream after every kernel launch to check for errors.  Also causes launch configurations to be printed to the console.  Default is \p false.
     {
         // Signed integer type for global offsets
@@ -613,7 +613,7 @@ struct DeviceReduce
      *
      * \par Performance
      * The following chart illustrates reduction-by-key (sum) performance across
-     * different CUDA architectures for \p fp32 and \p fp64 values, respectively.  Segments
+     * different MUSA architectures for \p fp32 and \p fp64 values, respectively.  Segments
      * are identified by \p int32 keys, and have lengths uniformly sampled from [1,1000].
      *
      * \image html reduce_by_key_fp32_len_500.png
@@ -694,7 +694,7 @@ struct DeviceReduce
         NumRunsOutputIteratorT      d_num_runs_out,                 ///< [out] Pointer to total number of runs encountered (i.e., the length of d_unique_out)
         ReductionOpT                reduction_op,                   ///< [in] Binary reduction functor
         int                         num_items,                      ///< [in] Total number of associated key+value pairs (i.e., the length of \p d_in_keys and \p d_in_values)
-        musaStream_t                stream             = 0,         ///< [in] <b>[optional]</b> CUDA stream to launch kernels within.  Default is stream<sub>0</sub>.
+        musaStream_t                stream             = 0,         ///< [in] <b>[optional]</b> MUSA stream to launch kernels within.  Default is stream<sub>0</sub>.
         bool                        debug_synchronous  = false)     ///< [in] <b>[optional]</b> Whether or not to synchronize the stream after every kernel launch to check for errors.  May cause significant slowdown.  Default is \p false.
     {
         // Signed integer type for global offsets

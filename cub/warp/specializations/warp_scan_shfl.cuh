@@ -28,7 +28,7 @@
 
 /**
  * \file
- * cub::WarpScanShfl provides SHFL-based variants of parallel prefix scan of items partitioned across a CUDA thread warp.
+ * cub::WarpScanShfl provides SHFL-based variants of parallel prefix scan of items partitioned across a MUSA thread warp.
  */
 
 #pragma once
@@ -41,7 +41,7 @@
 CUB_NAMESPACE_BEGIN
 
 /**
- * \brief WarpScanShfl provides SHFL-based variants of parallel prefix scan of items partitioned across a CUDA thread warp.
+ * \brief WarpScanShfl provides SHFL-based variants of parallel prefix scan of items partitioned across a MUSA thread warp.
  *
  * LOGICAL_WARP_THREADS must be a power-of-two
  */

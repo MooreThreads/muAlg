@@ -42,7 +42,7 @@
 #include <cub/util_namespace.cuh>
 #include <cub/warp/warp_merge_sort.cuh>
 
-#include <thrust/system/cuda/detail/core/triple_chevron_launch.h>
+#include <thrust/system/musa/detail/core/triple_chevron_launch.h>
 #include <thrust/iterator/counting_iterator.h>
 #include <thrust/iterator/reverse_iterator.h>
 
@@ -580,7 +580,7 @@ DeviceSegmentedSortContinuation(
               (long long)stream);
     }
 
-    THRUST_NS_QUALIFIER::cuda_cub::launcher::triple_chevron(
+    THRUST_NS_QUALIFIER::musa_cub::launcher::triple_chevron(
       blocks_in_grid,
       LargeSegmentPolicyT::BLOCK_THREADS,
       0,
@@ -641,7 +641,7 @@ DeviceSegmentedSortContinuation(
               (long long)stream);
     }
 
-    THRUST_NS_QUALIFIER::cuda_cub::launcher::triple_chevron(
+    THRUST_NS_QUALIFIER::musa_cub::launcher::triple_chevron(
       small_and_medium_blocks_in_grid,
       SmallAndMediumPolicyT::BLOCK_THREADS,
       0,
@@ -890,7 +890,7 @@ struct DeviceSegmentedSortPolicy
   /// MaxPolicy for MUSA
   using MaxPolicy = Policy310;
 
-#else // CUDA
+#else // MUSA
 
   struct Policy350 : ChainedPolicy<350, Policy350, Policy350>
   {
@@ -1212,7 +1212,7 @@ struct DeviceSegmentedSortPolicy
                                          CacheLoadModifier::LOAD_LDG>>;
   };
 
-  /// MaxPolicy for CUDA
+  /// MaxPolicy for MUSA
   using MaxPolicy = Policy860;
 
 #endif // __MUSACC_VER_MAJOR__
@@ -1327,7 +1327,7 @@ struct DispatchSegmentedSort : SelectedPolicy
   /// Whether is okay to overwrite source buffers
   bool is_overwrite_okay;
 
-  /// CUDA stream to launch kernels within.
+  /// MUSA stream to launch kernels within.
   musaStream_t stream;
 
   /**
@@ -1771,7 +1771,7 @@ private:
       #if CUB_INCLUDE_DEVICE_CODE
       #ifdef CUB_RUNTIME_ENABLED
       using MaxPolicyT = typename DispatchSegmentedSort::MaxPolicy;
-      THRUST_NS_QUALIFIER::cuda_cub::launcher::triple_chevron(1, 1, 0, stream)
+      THRUST_NS_QUALIFIER::musa_cub::launcher::triple_chevron(1, 1, 0, stream)
         .doit(DeviceSegmentedSortContinuationKernel<MaxPolicyT,
                                                     LargeKernelT,
                                                     SmallKernelT,
@@ -1834,7 +1834,7 @@ private:
     }
 
     // Invoke fallback kernel
-    THRUST_NS_QUALIFIER::cuda_cub::launcher::triple_chevron(blocks_in_grid,
+    THRUST_NS_QUALIFIER::musa_cub::launcher::triple_chevron(blocks_in_grid,
                                                             threads_in_block,
                                                             0,
                                                             stream)

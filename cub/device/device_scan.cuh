@@ -78,7 +78,7 @@ CUB_NAMESPACE_BEGIN
  *
  * \par
  * The following chart illustrates DeviceScan::ExclusiveSum
- * performance across different CUDA architectures for \p int32 keys.
+ * performance across different MUSA architectures for \p int32 keys.
  * \plots_below
  *
  * \image html scan_int32.png
@@ -104,7 +104,7 @@ struct DeviceScan
      *
      * \par Performance
      * The following charts illustrate saturated exclusive sum performance across different
-     * CUDA architectures for \p int32 and \p int64 items, respectively.
+     * MUSA architectures for \p int32 and \p int64 items, respectively.
      *
      * \image html scan_int32.png
      * \image html scan_int64.png
@@ -151,7 +151,7 @@ struct DeviceScan
         InputIteratorT  d_in,                               ///< [in] Random-access iterator to the input sequence of data items
         OutputIteratorT d_out,                              ///< [out] Random-access iterator to the output sequence of data items
         int             num_items,                          ///< [in] Total number of input items (i.e., the length of \p d_in)
-        musaStream_t    stream              = 0,            ///< [in] <b>[optional]</b> CUDA stream to launch kernels within.  Default is stream<sub>0</sub>.
+        musaStream_t    stream              = 0,            ///< [in] <b>[optional]</b> MUSA stream to launch kernels within.  Default is stream<sub>0</sub>.
         bool            debug_synchronous   = false)        ///< [in] <b>[optional]</b> Whether or not to synchronize the stream after every kernel launch to check for errors.  May cause significant slowdown.  Default is \p false.
     {
         // Signed integer type for global offsets
@@ -248,7 +248,7 @@ struct DeviceScan
         ScanOpT         scan_op,                            ///< [in] Binary scan functor
         InitValueT      init_value,                         ///< [in] Initial value to seed the exclusive scan (and is assigned to *d_out)
         int             num_items,                          ///< [in] Total number of input items (i.e., the length of \p d_in)
-        musaStream_t    stream              = 0,            ///< [in] <b>[optional]</b> CUDA stream to launch kernels within.  Default is stream<sub>0</sub>.
+        musaStream_t    stream              = 0,            ///< [in] <b>[optional]</b> MUSA stream to launch kernels within.  Default is stream<sub>0</sub>.
         bool            debug_synchronous   = false)        ///< [in] <b>[optional]</b> Whether or not to synchronize the stream after every kernel launch to check for errors.  May cause significant slowdown.  Default is \p false.
     {
         // Signed integer type for global offsets
@@ -281,7 +281,7 @@ struct DeviceScan
         ScanOpT                                 scan_op,                            ///< [in] Binary scan functor
         FutureValue<InitValueT, InitValueIterT> init_value,                         ///< [in] Initial value to seed the exclusive scan (and is assigned to *d_out)
         int                                     num_items,                          ///< [in] Total number of input items (i.e., the length of \p d_in)
-        musaStream_t                            stream              = 0,            ///< [in] <b>[optional]</b> CUDA stream to launch kernels within.  Default is stream<sub>0</sub>.
+        musaStream_t                            stream              = 0,            ///< [in] <b>[optional]</b> MUSA stream to launch kernels within.  Default is stream<sub>0</sub>.
         bool                                    debug_synchronous   = false)        ///< [in] <b>[optional]</b> Whether or not to synchronize the stream after every kernel launch to check for errors.  May cause significant slowdown.  Default is \p false.
     {
         // Signed integer type for global offsets
@@ -360,7 +360,7 @@ struct DeviceScan
         InputIteratorT      d_in,                           ///< [in] Random-access iterator to the input sequence of data items
         OutputIteratorT     d_out,                          ///< [out] Random-access iterator to the output sequence of data items
         int                 num_items,                      ///< [in] Total number of input items (i.e., the length of \p d_in)
-        musaStream_t        stream             = 0,         ///< [in] <b>[optional]</b> CUDA stream to launch kernels within.  Default is stream<sub>0</sub>.
+        musaStream_t        stream             = 0,         ///< [in] <b>[optional]</b> MUSA stream to launch kernels within.  Default is stream<sub>0</sub>.
         bool                debug_synchronous  = false)     ///< [in] <b>[optional]</b> Whether or not to synchronize the stream after every kernel launch to check for errors.  May cause significant slowdown.  Default is \p false.
     {
         // Signed integer type for global offsets
@@ -447,7 +447,7 @@ struct DeviceScan
         OutputIteratorT d_out,                              ///< [out] Random-access iterator to the output sequence of data items
         ScanOpT         scan_op,                            ///< [in] Binary scan functor
         int             num_items,                          ///< [in] Total number of input items (i.e., the length of \p d_in)
-        musaStream_t    stream             = 0,             ///< [in] <b>[optional]</b> CUDA stream to launch kernels within.  Default is stream<sub>0</sub>.
+        musaStream_t    stream             = 0,             ///< [in] <b>[optional]</b> MUSA stream to launch kernels within.  Default is stream<sub>0</sub>.
         bool            debug_synchronous  = false)         ///< [in] <b>[optional]</b> Whether or not to synchronize the stream after every kernel launch to check for errors.  May cause significant slowdown.  Default is \p false.
     {
         // Signed integer type for global offsets
@@ -527,7 +527,7 @@ struct DeviceScan
         ValuesOutputIteratorT d_values_out,                 ///< [out] Random-access output iterator to the output sequence of value items
         int                   num_items,                    ///< [in] Total number of input items (i.e., the length of \p d_keys_in and \p d_values_in)
         EqualityOpT           equality_op = EqualityOpT(),  ///< [in] Binary functor that defines the equality of keys. Default is cub::Equality().
-        musaStream_t          stream=0,                     ///< [in] <b>[optional]</b> CUDA stream to launch kernels within.  Default is stream<sub>0</sub>.
+        musaStream_t          stream=0,                     ///< [in] <b>[optional]</b> MUSA stream to launch kernels within.  Default is stream<sub>0</sub>.
         bool                  debug_synchronous=false)      ///< [in] <b>[optional]</b> Whether or not to synchronize the stream after every kernel launch to check for errors.  May cause significant slowdown.  Default is \p false.
     {
         // Signed integer type for global offsets
@@ -647,7 +647,7 @@ struct DeviceScan
         InitValueT            init_value,                   ///< [in] Initial value to seed the exclusive scan (and is assigned to the beginning of each segment in \p d_values_out)
         int                   num_items,                    ///< [in] Total number of input items (i.e., the length of \p d_keys_in and \p d_values_in)
         EqualityOpT           equality_op = EqualityOpT(),  ///< [in] Binary functor that defines the equality of keys. Default is cub::Equality().
-        musaStream_t          stream=0,                     ///< [in] <b>[optional]</b> CUDA stream to launch kernels within.  Default is stream<sub>0</sub>.
+        musaStream_t          stream=0,                     ///< [in] <b>[optional]</b> MUSA stream to launch kernels within.  Default is stream<sub>0</sub>.
         bool                  debug_synchronous=false)      ///< [in] <b>[optional]</b> Whether or not to synchronize the stream after every kernel launch to check for errors.  May cause significant slowdown.  Default is \p false.
     {
         // Signed integer type for global offsets
@@ -729,7 +729,7 @@ struct DeviceScan
         ValuesOutputIteratorT d_values_out,                 ///< [out] Random-access output iterator to the output sequence of value items
         int                   num_items,                    ///< [in] Total number of input items (i.e., the length of \p d_keys_in and \p d_values_in)
         EqualityOpT           equality_op = EqualityOpT(),  ///< [in] Binary functor that defines the equality of keys. Default is cub::Equality().
-        musaStream_t          stream=0,                     ///< [in] <b>[optional]</b> CUDA stream to launch kernels within.  Default is stream<sub>0</sub>.
+        musaStream_t          stream=0,                     ///< [in] <b>[optional]</b> MUSA stream to launch kernels within.  Default is stream<sub>0</sub>.
         bool                  debug_synchronous=false)      ///< [in] <b>[optional]</b> Whether or not to synchronize the stream after every kernel launch to check for errors.  May cause significant slowdown.  Default is \p false.
     {
         // Signed integer type for global offsets
@@ -838,7 +838,7 @@ struct DeviceScan
         ScanOpT               scan_op,                      ///< [in] Binary scan functor
         int                   num_items,                    ///< [in] Total number of input items (i.e., the length of \p d_keys_in and \p d_values_in)
         EqualityOpT           equality_op = EqualityOpT(),  ///< [in] Binary functor that defines the equality of keys. Default is cub::Equality().
-        musaStream_t          stream=0,                     ///< [in] <b>[optional]</b> CUDA stream to launch kernels within.  Default is stream<sub>0</sub>.
+        musaStream_t          stream=0,                     ///< [in] <b>[optional]</b> MUSA stream to launch kernels within.  Default is stream<sub>0</sub>.
         bool                  debug_synchronous=false)      ///< [in] <b>[optional]</b> Whether or not to synchronize the stream after every kernel launch to check for errors.  May cause significant slowdown.  Default is \p false.
     {
         // Signed integer type for global offsets

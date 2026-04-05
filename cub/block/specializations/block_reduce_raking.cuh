@@ -28,7 +28,7 @@
 
 /**
  * \file
- * cub::BlockReduceRaking provides raking-based methods of parallel reduction across a CUDA thread block.  Supports non-commutative reduction operators.
+ * cub::BlockReduceRaking provides raking-based methods of parallel reduction across a MUSA thread block.  Supports non-commutative reduction operators.
  */
 
 #pragma once
@@ -43,7 +43,7 @@ CUB_NAMESPACE_BEGIN
 
 
 /**
- * \brief BlockReduceRaking provides raking-based methods of parallel reduction across a CUDA thread block.  Supports non-commutative reduction operators.
+ * \brief BlockReduceRaking provides raking-based methods of parallel reduction across a MUSA thread block.  Supports non-commutative reduction operators.
  *
  * Supports non-commutative binary reduction operators.  Unlike commutative
  * reduction operators (e.g., addition), the application of a non-commutative

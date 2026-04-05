@@ -28,7 +28,7 @@
 
 /**
  * \file
- * cub::AgentHistogram implements a stateful abstraction of CUDA thread blocks for participating in device-wide histogram .
+ * cub::AgentHistogram implements a stateful abstraction of MUSA thread blocks for participating in device-wide histogram .
  */
 
 #pragma once
@@ -91,7 +91,7 @@ struct AgentHistogramPolicy
  ******************************************************************************/
 
 /**
- * \brief AgentHistogram implements a stateful abstraction of CUDA thread blocks for participating in device-wide histogram .
+ * \brief AgentHistogram implements a stateful abstraction of MUSA thread blocks for participating in device-wide histogram .
  */
 template <
     typename    AgentHistogramPolicyT,     ///< Parameterized AgentHistogramPolicy tuning policy type

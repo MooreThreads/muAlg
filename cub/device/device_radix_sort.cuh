@@ -55,7 +55,7 @@ CUB_NAMESPACE_BEGIN
  *
  * \par Supported Types
  * DeviceRadixSort can sort all of the built-in C++ numeric primitive types
- * (`unsigned char`, `int`, `double`, etc.) as well as CUDA's `__half`
+ * (`unsigned char`, `int`, `double`, etc.) as well as MUSA's `__half`
  * and `__nv_bfloat16` 16-bit floating-point types.
  *
  * \par Floating-Point Special Cases
@@ -104,7 +104,7 @@ CUB_NAMESPACE_BEGIN
  *
  * \par Performance
  * \linear_performance{radix sort} The following chart illustrates DeviceRadixSort::SortKeys
- * performance across different CUDA architectures for uniform-random \p uint32 keys.
+ * performance across different MUSA architectures for uniform-random \p uint32 keys.
  * \plots_below
  *
  * \image html lsb_radix_sort_int32_keys.png
@@ -137,7 +137,7 @@ struct DeviceRadixSort
      *
      * \par Performance
      * The following charts illustrate saturated sorting performance across different
-     * CUDA architectures for uniform-random <tt>uint32,uint32</tt> and
+     * MUSA architectures for uniform-random <tt>uint32,uint32</tt> and
      * <tt>uint64,uint64</tt> pairs, respectively.
      *
      * \image html lsb_radix_sort_int32_pairs.png
@@ -195,7 +195,7 @@ struct DeviceRadixSort
         NumItemsT           num_items,                              ///< [in] Number of items to sort
         int                 begin_bit           = 0,                ///< [in] <b>[optional]</b> The least-significant bit index (inclusive)  needed for key comparison
         int                 end_bit             = sizeof(KeyT) * 8, ///< [in] <b>[optional]</b> The most-significant bit index (exclusive) needed for key comparison (e.g., sizeof(unsigned int) * 8)
-        musaStream_t        stream              = 0,                ///< [in] <b>[optional]</b> CUDA stream to launch kernels within.  Default is stream<sub>0</sub>.
+        musaStream_t        stream              = 0,                ///< [in] <b>[optional]</b> MUSA stream to launch kernels within.  Default is stream<sub>0</sub>.
         bool                debug_synchronous   = false)            ///< [in] <b>[optional]</b> Whether or not to synchronize the stream after every kernel launch to check for errors.  Also causes launch configurations to be printed to the console.  Default is \p false.
     {
         // Unsigned integer type for global offsets.
@@ -249,7 +249,7 @@ struct DeviceRadixSort
      *
      * \par Performance
      * The following charts illustrate saturated sorting performance across different
-     * CUDA architectures for uniform-random <tt>uint32,uint32</tt> and
+     * MUSA architectures for uniform-random <tt>uint32,uint32</tt> and
      * <tt>uint64,uint64</tt> pairs, respectively.
      *
      * \image html lsb_radix_sort_int32_pairs.png
@@ -307,7 +307,7 @@ struct DeviceRadixSort
         NumItemsT               num_items,                              ///< [in] Number of items to sort
         int                     begin_bit           = 0,                ///< [in] <b>[optional]</b> The least-significant bit index (inclusive)  needed for key comparison
         int                     end_bit             = sizeof(KeyT) * 8, ///< [in] <b>[optional]</b> The most-significant bit index (exclusive) needed for key comparison (e.g., sizeof(unsigned int) * 8)
-        musaStream_t            stream              = 0,                ///< [in] <b>[optional]</b> CUDA stream to launch kernels within.  Default is stream<sub>0</sub>.
+        musaStream_t            stream              = 0,                ///< [in] <b>[optional]</b> MUSA stream to launch kernels within.  Default is stream<sub>0</sub>.
         bool                    debug_synchronous   = false)            ///< [in] <b>[optional]</b> Whether or not to synchronize the stream after every kernel launch to check for errors.  Also causes launch configurations to be printed to the console.  Default is \p false.
     {
         // Unsigned integer type for global offsets.
@@ -401,7 +401,7 @@ struct DeviceRadixSort
         NumItemsT           num_items,                              ///< [in] Number of items to sort
         int                 begin_bit           = 0,                ///< [in] <b>[optional]</b> The least-significant bit index (inclusive)  needed for key comparison
         int                 end_bit             = sizeof(KeyT) * 8, ///< [in] <b>[optional]</b> The most-significant bit index (exclusive) needed for key comparison (e.g., sizeof(unsigned int) * 8)
-        musaStream_t        stream              = 0,                ///< [in] <b>[optional]</b> CUDA stream to launch kernels within.  Default is stream<sub>0</sub>.
+        musaStream_t        stream              = 0,                ///< [in] <b>[optional]</b> MUSA stream to launch kernels within.  Default is stream<sub>0</sub>.
         bool                debug_synchronous   = false)            ///< [in] <b>[optional]</b> Whether or not to synchronize the stream after every kernel launch to check for errors.  Also causes launch configurations to be printed to the console.  Default is \p false.
     {
         // Unsigned integer type for global offsets.
@@ -508,7 +508,7 @@ struct DeviceRadixSort
         NumItemsT               num_items,                              ///< [in] Number of items to sort
         int                     begin_bit           = 0,                ///< [in] <b>[optional]</b> The least-significant bit index (inclusive)  needed for key comparison
         int                     end_bit             = sizeof(KeyT) * 8, ///< [in] <b>[optional]</b> The most-significant bit index (exclusive) needed for key comparison (e.g., sizeof(unsigned int) * 8)
-        musaStream_t            stream              = 0,                ///< [in] <b>[optional]</b> CUDA stream to launch kernels within.  Default is stream<sub>0</sub>.
+        musaStream_t            stream              = 0,                ///< [in] <b>[optional]</b> MUSA stream to launch kernels within.  Default is stream<sub>0</sub>.
         bool                    debug_synchronous   = false)            ///< [in] <b>[optional]</b> Whether or not to synchronize the stream after every kernel launch to check for errors.  Also causes launch configurations to be printed to the console.  Default is \p false.
     {
         // Unsigned integer type for global offsets.
@@ -554,7 +554,7 @@ struct DeviceRadixSort
      *
      * \par Performance
      * The following charts illustrate saturated sorting performance across different
-     * CUDA architectures for uniform-random \p uint32 and \p uint64 keys, respectively.
+     * MUSA architectures for uniform-random \p uint32 and \p uint64 keys, respectively.
      *
      * \image html lsb_radix_sort_int32_keys.png
      * \image html lsb_radix_sort_int64_keys.png
@@ -601,7 +601,7 @@ struct DeviceRadixSort
         NumItemsT           num_items,                              ///< [in] Number of items to sort
         int                 begin_bit           = 0,                ///< [in] <b>[optional]</b> The least-significant bit index (inclusive)  needed for key comparison
         int                 end_bit             = sizeof(KeyT) * 8, ///< [in] <b>[optional]</b> The most-significant bit index (exclusive) needed for key comparison (e.g., sizeof(unsigned int) * 8)
-        musaStream_t        stream              = 0,                ///< [in] <b>[optional]</b> CUDA stream to launch kernels within.  Default is stream<sub>0</sub>.
+        musaStream_t        stream              = 0,                ///< [in] <b>[optional]</b> MUSA stream to launch kernels within.  Default is stream<sub>0</sub>.
         bool                debug_synchronous   = false)            ///< [in] <b>[optional]</b> Whether or not to synchronize the stream after every kernel launch to check for errors.  Also causes launch configurations to be printed to the console.  Default is \p false.
     {
         // Unsigned integer type for global offsets.
@@ -652,7 +652,7 @@ struct DeviceRadixSort
      *
      * \par Performance
      * The following charts illustrate saturated sorting performance across different
-     * CUDA architectures for uniform-random \p uint32 and \p uint64 keys, respectively.
+     * MUSA architectures for uniform-random \p uint32 and \p uint64 keys, respectively.
      *
      * \image html lsb_radix_sort_int32_keys.png
      * \image html lsb_radix_sort_int64_keys.png
@@ -700,7 +700,7 @@ struct DeviceRadixSort
         NumItemsT           num_items,                              ///< [in] Number of items to sort
         int                 begin_bit           = 0,                ///< [in] <b>[optional]</b> The least-significant bit index (inclusive)  needed for key comparison
         int                 end_bit             = sizeof(KeyT) * 8, ///< [in] <b>[optional]</b> The most-significant bit index (exclusive) needed for key comparison (e.g., sizeof(unsigned int) * 8)
-        musaStream_t        stream              = 0,                ///< [in] <b>[optional]</b> CUDA stream to launch kernels within.  Default is stream<sub>0</sub>.
+        musaStream_t        stream              = 0,                ///< [in] <b>[optional]</b> MUSA stream to launch kernels within.  Default is stream<sub>0</sub>.
         bool                debug_synchronous   = false)            ///< [in] <b>[optional]</b> Whether or not to synchronize the stream after every kernel launch to check for errors.  Also causes launch configurations to be printed to the console.  Default is \p false.
     {
         // Unsigned integer type for global offsets.
@@ -786,7 +786,7 @@ struct DeviceRadixSort
         NumItemsT           num_items,                              ///< [in] Number of items to sort
         int                 begin_bit           = 0,                ///< [in] <b>[optional]</b> The least-significant bit index (inclusive)  needed for key comparison
         int                 end_bit             = sizeof(KeyT) * 8, ///< [in] <b>[optional]</b> The most-significant bit index (exclusive) needed for key comparison (e.g., sizeof(unsigned int) * 8)
-        musaStream_t        stream              = 0,                ///< [in] <b>[optional]</b> CUDA stream to launch kernels within.  Default is stream<sub>0</sub>.
+        musaStream_t        stream              = 0,                ///< [in] <b>[optional]</b> MUSA stream to launch kernels within.  Default is stream<sub>0</sub>.
         bool                debug_synchronous   = false)            ///< [in] <b>[optional]</b> Whether or not to synchronize the stream after every kernel launch to check for errors.  Also causes launch configurations to be printed to the console.  Default is \p false.
     {
         // Unsigned integer type for global offsets.
@@ -880,7 +880,7 @@ struct DeviceRadixSort
         NumItemsT           num_items,                              ///< [in] Number of items to sort
         int                 begin_bit           = 0,                ///< [in] <b>[optional]</b> The least-significant bit index (inclusive)  needed for key comparison
         int                 end_bit             = sizeof(KeyT) * 8, ///< [in] <b>[optional]</b> The most-significant bit index (exclusive) needed for key comparison (e.g., sizeof(unsigned int) * 8)
-        musaStream_t        stream              = 0,                ///< [in] <b>[optional]</b> CUDA stream to launch kernels within.  Default is stream<sub>0</sub>.
+        musaStream_t        stream              = 0,                ///< [in] <b>[optional]</b> MUSA stream to launch kernels within.  Default is stream<sub>0</sub>.
         bool                debug_synchronous   = false)            ///< [in] <b>[optional]</b> Whether or not to synchronize the stream after every kernel launch to check for errors.  Also causes launch configurations to be printed to the console.  Default is \p false.
     {
         // Unsigned integer type for global offsets.

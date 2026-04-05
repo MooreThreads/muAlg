@@ -43,10 +43,10 @@
 #if defined(__MUSACC_VER_MAJOR__) || defined(CUB_MUSA_ARCH)
     #include <musa_fp16.h>
     #include <musa_bf16.h>
-#elif (__CUDACC_VER_MAJOR__ >= 9 || CUDA_VERSION >= 9000) && !_NVHPC_CUDA
+#elif (__MUSACC_VER_MAJOR__ >= 9 || MUSA_VERSION >= 9000) && !_NVHPC_MUSA
     #include <musa_fp16.h>
 #endif
-#if !defined(__MUSACC_VER_MAJOR__) && !defined(CUB_MUSA_ARCH) && (__CUDACC_VER_MAJOR__ >= 11 || CUDA_VERSION >= 11000) && !_NVHPC_CUDA
+#if !defined(__MUSACC_VER_MAJOR__) && !defined(CUB_MUSA_ARCH) && (__MUSACC_VER_MAJOR__ >= 11 || MUSA_VERSION >= 11000) && !_NVHPC_MUSA
     #include <musa_bf16.h>
 #endif
 
@@ -347,7 +347,7 @@ struct AlignBytes
 
     enum
     {
-        /// The "true CUDA" alignment of T in bytes
+        /// The "true MUSA" alignment of T in bytes
         ALIGN_BYTES = sizeof(Pad) - sizeof(T)
     };
 
@@ -502,14 +502,14 @@ template <typename T> struct UnitWord<const volatile T> : UnitWord<T> {};
  ******************************************************************************/
 
 /**
- * \brief Exposes a member typedef \p Type that names the corresponding CUDA vector type if one exists.  Otherwise \p Type refers to the CubVector structure itself, which will wrap the corresponding \p x, \p y, etc. vector fields.
+ * \brief Exposes a member typedef \p Type that names the corresponding MUSA vector type if one exists.  Otherwise \p Type refers to the CubVector structure itself, which will wrap the corresponding \p x, \p y, etc. vector fields.
  */
 template <typename T, int vec_elements> struct CubVector;
 
 
 enum
 {
-    /// The maximum number of elements in CUDA vector types
+    /// The maximum number of elements in MUSA vector types
     MAX_VEC_ELEMENTS = 4,
 };
 
@@ -652,7 +652,7 @@ struct CubVector<T, 4>
 
 
 
-// Expand CUDA vector types for built-in primitives
+// Expand MUSA vector types for built-in primitives
 // clang-format off
 CUB_DEFINE_VECTOR_TYPE(char,               char)
 CUB_DEFINE_VECTOR_TYPE(signed char,        char)

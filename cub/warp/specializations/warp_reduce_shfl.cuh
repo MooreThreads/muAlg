@@ -28,7 +28,7 @@
 
 /**
  * \file
- * cub::WarpReduceShfl provides SHFL-based variants of parallel reduction of items partitioned across a CUDA thread warp.
+ * cub::WarpReduceShfl provides SHFL-based variants of parallel reduction of items partitioned across a MUSA thread warp.
  */
 
 #pragma once
@@ -44,7 +44,7 @@ CUB_NAMESPACE_BEGIN
 
 
 /**
- * \brief WarpReduceShfl provides SHFL-based variants of parallel reduction of items partitioned across a CUDA thread warp.
+ * \brief WarpReduceShfl provides SHFL-based variants of parallel reduction of items partitioned across a MUSA thread warp.
  *
  * LOGICAL_WARP_THREADS must be a power-of-two
  */

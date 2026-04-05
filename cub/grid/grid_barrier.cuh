@@ -28,7 +28,7 @@
 
 /**
  * \file
- * cub::GridBarrier implements a software global barrier among thread blocks within a CUDA grid
+ * cub::GridBarrier implements a software global barrier among thread blocks within a MUSA grid
  */
 
 #pragma once
@@ -47,7 +47,7 @@ CUB_NAMESPACE_BEGIN
 
 
 /**
- * \brief GridBarrier implements a software global barrier among thread blocks within a CUDA grid
+ * \brief GridBarrier implements a software global barrier among thread blocks within a MUSA grid
  */
 class GridBarrier
 {

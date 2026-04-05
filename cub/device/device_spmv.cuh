@@ -135,7 +135,7 @@ struct DeviceSpmv
         int                 num_rows,                           ///< [in] number of rows of matrix <b>A</b>.
         int                 num_cols,                           ///< [in] number of columns of matrix <b>A</b>.
         int                 num_nonzeros,                       ///< [in] number of nonzero elements of matrix <b>A</b>.
-        musaStream_t        stream                  = 0,        ///< [in] <b>[optional]</b> CUDA stream to launch kernels within.  Default is stream<sub>0</sub>.
+        musaStream_t        stream                  = 0,        ///< [in] <b>[optional]</b> MUSA stream to launch kernels within.  Default is stream<sub>0</sub>.
         bool                debug_synchronous       = false)    ///< [in] <b>[optional]</b> Whether or not to synchronize the stream after every kernel launch to check for errors.  May cause significant slowdown.  Default is \p false.
     {
         SpmvParams<ValueT, int> spmv_params;

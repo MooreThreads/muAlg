@@ -28,7 +28,7 @@
 /**
  * @file
  * The cub::WarpExchange class provides [<em>collective</em>](index.html#sec0)
- * methods for rearranging data partitioned across a CUDA warp.
+ * methods for rearranging data partitioned across a MUSA warp.
  */
 
 #pragma once
@@ -43,7 +43,7 @@ CUB_NAMESPACE_BEGIN
 
 /**
  * @brief The WarpExchange class provides [<em>collective</em>](index.html#sec0)
- *        methods for rearranging data partitioned across a CUDA warp.
+ *        methods for rearranging data partitioned across a MUSA warp.
  * @ingroup WarpModule
  *
  * @tparam T
@@ -55,7 +55,7 @@ CUB_NAMESPACE_BEGIN
  * @tparam LOGICAL_WARP_THREADS
  *   <b>[optional]</b> The number of threads per "logical" warp (may be less
  *   than the number of hardware warp threads). Default is the warp size of the
- *   targeted CUDA compute-capability (e.g., 32 threads for SM86). Must be a
+ *   targeted MUSA compute-capability (e.g., 32 threads for SM86). Must be a
  *   power of two.
  *
  * @tparam PTX_ARCH

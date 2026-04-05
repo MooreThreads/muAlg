@@ -27,7 +27,7 @@
 
 /**
  * \file
- * cub::AgentUniqueByKey implements a stateful abstraction of CUDA thread blocks for participating in device-wide unique-by-key.
+ * cub::AgentUniqueByKey implements a stateful abstraction of MUSA thread blocks for participating in device-wide unique-by-key.
  */
 
 #pragma once
@@ -77,7 +77,7 @@ struct AgentUniqueByKeyPolicy
 
 
 /**
- * \brief AgentUniqueByKey implements a stateful abstraction of CUDA thread blocks for participating in device-wide unique-by-key
+ * \brief AgentUniqueByKey implements a stateful abstraction of MUSA thread blocks for participating in device-wide unique-by-key
  */
 template <
     typename AgentUniqueByKeyPolicyT,           ///< Parameterized AgentUniqueByKeyPolicy tuning policy type

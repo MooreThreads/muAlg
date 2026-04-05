@@ -152,7 +152,7 @@ struct DeviceUniqueByKeyPolicy
     /// MaxPolicy for MUSA
     using MaxPolicy = Policy310;
 
-#else // CUDA
+#else // MUSA
 
     // SM350
     struct Policy350 : ChainedPolicy<350, Policy350, Policy350> {
@@ -187,7 +187,7 @@ struct DeviceUniqueByKeyPolicy
                             cub::BLOCK_SCAN_WARP_SCANS>;
     };
 
-    /// MaxPolicy for CUDA
+    /// MaxPolicy for MUSA
     using MaxPolicy = Policy520;
 
 #endif // __MUSACC_VER_MAJOR__
@@ -238,7 +238,7 @@ struct DispatchUniqueByKey: SelectedPolicy
     NumSelectedIteratorT    d_num_selected_out;         ///< [out] Pointer to the total number of items selected (i.e., length of \p d_keys_out or \p d_values_out)
     EqualityOpT             equality_op;                ///< [in] Equality operator
     OffsetT                 num_items;                  ///< [in] Total number of input items (i.e., length of \p d_keys_in or \p d_values_in)
-    musaStream_t            stream;                     ///< [in] <b>[optional]</b> CUDA stream to launch kernels within.  Default is stream<sub>0</sub>.
+    musaStream_t            stream;                     ///< [in] <b>[optional]</b> MUSA stream to launch kernels within.  Default is stream<sub>0</sub>.
     bool                    debug_synchronous;
 
     CUB_RUNTIME_FUNCTION __forceinline__
@@ -252,7 +252,7 @@ struct DispatchUniqueByKey: SelectedPolicy
         NumSelectedIteratorT    d_num_selected_out,     ///< [out] Pointer to the total number of items selected (i.e., length of \p d_keys_out or \p d_values_out)
         EqualityOpT             equality_op,            ///< [in] Equality operator
         OffsetT                 num_items,              ///< [in] Total number of input items (i.e., length of \p d_keys_in or \p d_values_in)
-        musaStream_t            stream,                 ///< [in] <b>[optional]</b> CUDA stream to launch kernels within.  Default is stream<sub>0</sub>.
+        musaStream_t            stream,                 ///< [in] <b>[optional]</b> MUSA stream to launch kernels within.  Default is stream<sub>0</sub>.
         bool                    debug_synchronous
     ):
         d_temp_storage(d_temp_storage),
@@ -341,7 +341,7 @@ struct DispatchUniqueByKey: SelectedPolicy
             if (debug_synchronous) _CubLog("Invoking init_kernel<<<%d, %d, 0, %lld>>>()\n", init_grid_size, INIT_KERNEL_THREADS, (long long) stream);
 
             // Invoke init_kernel to initialize tile descriptors
-            THRUST_NS_QUALIFIER::cuda_cub::launcher::triple_chevron(
+            THRUST_NS_QUALIFIER::musa_cub::launcher::triple_chevron(
                 init_grid_size, INIT_KERNEL_THREADS, 0, stream
             ).doit(init_kernel, tile_state, num_tiles, d_num_selected_out);
 
@@ -388,7 +388,7 @@ struct DispatchUniqueByKey: SelectedPolicy
             }
 
             // Invoke select_if_kernel
-            THRUST_NS_QUALIFIER::cuda_cub::launcher::triple_chevron(
+            THRUST_NS_QUALIFIER::musa_cub::launcher::triple_chevron(
                 scan_grid_size, Policy::BLOCK_THREADS, 0, stream
             ).doit(scan_kernel,
                    d_keys_in,
@@ -449,7 +449,7 @@ struct DispatchUniqueByKey: SelectedPolicy
         NumSelectedIteratorT    d_num_selected_out,     ///< [out] Pointer to the total number of items selected (i.e., length of \p d_keys_out or \p d_values_out)
         EqualityOpT             equality_op,            ///< [in] Equality operator
         OffsetT                 num_items,              ///< [in] Total number of input items (i.e., the length of \p d_in)
-        musaStream_t            stream,                 ///< [in] <b>[optional]</b> CUDA stream to launch kernels within.  Default is stream<sub>0</sub>.
+        musaStream_t            stream,                 ///< [in] <b>[optional]</b> MUSA stream to launch kernels within.  Default is stream<sub>0</sub>.
         bool                    debug_synchronous)      ///< [in] <b>[optional]</b> Whether or not to synchronize the stream after every kernel launch to check for errors.  Also causes launch configurations to be printed to the console.  Default is \p false.
     {
         using MaxPolicyT = typename DispatchUniqueByKey::MaxPolicy;

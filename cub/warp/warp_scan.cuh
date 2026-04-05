@@ -28,7 +28,7 @@
 
 /**
  * \file
- * The cub::WarpScan class provides [<em>collective</em>](index.html#sec0) methods for computing a parallel prefix scan of items partitioned across a CUDA thread warp.
+ * The cub::WarpScan class provides [<em>collective</em>](index.html#sec0) methods for computing a parallel prefix scan of items partitioned across a MUSA thread warp.
  */
 
 #pragma once
@@ -47,10 +47,10 @@ CUB_NAMESPACE_BEGIN
  */
 
 /**
- * \brief The WarpScan class provides [<em>collective</em>](index.html#sec0) methods for computing a parallel prefix scan of items partitioned across a CUDA thread warp.  ![](warp_scan_logo.png)
+ * \brief The WarpScan class provides [<em>collective</em>](index.html#sec0) methods for computing a parallel prefix scan of items partitioned across a MUSA thread warp.  ![](warp_scan_logo.png)
  *
  * \tparam T                        The scan input/output element type
- * \tparam LOGICAL_WARP_THREADS     <b>[optional]</b> The number of threads per "logical" warp (may be less than the number of hardware warp threads).  Default is the warp size associated with the CUDA Compute Capability targeted by the compiler (e.g., 32 threads for SM20).
+ * \tparam LOGICAL_WARP_THREADS     <b>[optional]</b> The number of threads per "logical" warp (may be less than the number of hardware warp threads).  Default is the warp size associated with the MUSA Compute Capability targeted by the compiler (e.g., 32 threads for SM20).
  * \tparam PTX_ARCH                 <b>[optional]</b> \ptxversion
  *
  * \par Overview

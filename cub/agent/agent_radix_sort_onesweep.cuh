@@ -27,7 +27,7 @@
 
 /**
  * \file
- * agent_radix_sort_onesweep.cuh implements a stateful abstraction of CUDA
+ * agent_radix_sort_onesweep.cuh implements a stateful abstraction of MUSA
  * thread blocks for participating in the device one-sweep radix sort kernel.
  */
 

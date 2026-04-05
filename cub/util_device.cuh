@@ -28,7 +28,7 @@
 
 /**
  * \file
- * Properties of a given CUDA device and the corresponding PTX bundle
+ * Properties of a given MUSA device and the corresponding PTX bundle
  */
 
 #pragma once
@@ -119,13 +119,13 @@ __global__ void EmptyKernel(void) { }
  */
 CUB_RUNTIME_FUNCTION inline int CurrentDevice()
 {
-#if defined(CUB_RUNTIME_ENABLED) // Host code or device code with the CUDA runtime.
+#if defined(CUB_RUNTIME_ENABLED) // Host code or device code with the MUSA runtime.
 
     int device = -1;
     if (CubDebug(musaGetDevice(&device))) return -1;
     return device;
 
-#else // Device code without the CUDA runtime.
+#else // Device code without the MUSA runtime.
 
     return -1;
 
@@ -158,22 +158,22 @@ public:
 };
 
 /**
- * \brief Returns the number of CUDA devices available or -1 if an error
+ * \brief Returns the number of MUSA devices available or -1 if an error
  *        occurred.
  */
 CUB_RUNTIME_FUNCTION inline int DeviceCountUncached()
 {
-#if defined(CUB_RUNTIME_ENABLED) // Host code or device code with the CUDA runtime.
+#if defined(CUB_RUNTIME_ENABLED) // Host code or device code with the MUSA runtime.
 
     int count = -1;
     if (CubDebug(musaGetDeviceCount(&count)))
-        // CUDA makes no guarantees about the state of the output parameter if
+        // MUSA makes no guarantees about the state of the output parameter if
         // `cudaGetDeviceCount` fails; in practice, they don't, but out of
         // paranoia we'll reset `count` to `-1`.
         count = -1;
     return count;
 
-#else // Device code without the CUDA runtime.
+#else // Device code without the MUSA runtime.
 
     return -1;
 
@@ -211,7 +211,7 @@ __host__ inline int DeviceCountCachedValue()
 #endif
 
 /**
- * \brief Returns the number of CUDA devices available.
+ * \brief Returns the number of MUSA devices available.
  *
  * \note This function may cache the result internally.
  *
@@ -242,7 +242,7 @@ CUB_RUNTIME_FUNCTION inline int DeviceCount()
 #if CUB_CPP_DIALECT >= 2011 // C++11 and later.
 
 /**
- * \brief Per-device cache for a CUDA attribute value; the attribute is queried
+ * \brief Per-device cache for a MUSA attribute value; the attribute is queried
  *        and stored for each device upon construction.
  */
 struct PerDeviceAttributeCache
@@ -318,7 +318,7 @@ public:
                 // decide whether or not errors are hard errors.
                 payload.error = std::forward<Invocable>(f)(payload.attribute);
                 if (payload.error)
-                    // Clear the global CUDA error state which may have been
+                    // Clear the global MUSA error state which may have been
                     // set by the last call. Otherwise, errors may "leak" to
                     // unrelated kernel launches.
                     musaGetLastError();
@@ -493,7 +493,7 @@ CUB_RUNTIME_FUNCTION inline musaError_t PtxVersion(int& ptx_version)
  */
 CUB_RUNTIME_FUNCTION inline musaError_t SmVersionUncached(int& sm_version, int device = CurrentDevice())
 {
-#if defined(CUB_RUNTIME_ENABLED) // Host code or device code with the CUDA runtime.
+#if defined(CUB_RUNTIME_ENABLED) // Host code or device code with the MUSA runtime.
 
     musaError_t error = musaSuccess;
     do
@@ -507,12 +507,12 @@ CUB_RUNTIME_FUNCTION inline musaError_t SmVersionUncached(int& sm_version, int d
 
     return error;
 
-#else // Device code without the CUDA runtime.
+#else // Device code without the MUSA runtime.
 
     (void)sm_version;
     (void)device;
 
-    // CUDA API calls are not supported from this device.
+    // MUSA API calls are not supported from this device.
     return CubDebug(musaErrorInvalidConfiguration);
 
 #endif
@@ -567,13 +567,13 @@ CUB_RUNTIME_FUNCTION inline musaError_t SyncStream(musaStream_t stream)
         #endif
     } else {
         #if CUB_INCLUDE_DEVICE_CODE
-            #if defined(CUB_RUNTIME_ENABLED) // Device code with the CUDA runtime.
+            #if defined(CUB_RUNTIME_ENABLED) // Device code with the MUSA runtime.
                 (void)stream;
                 // Device can't yet sync on a specific stream
                 result = CubDebug(cub::detail::device_synchronize());
-            #else // Device code without the CUDA runtime.
+            #else // Device code without the MUSA runtime.
                 (void)stream;
-                // CUDA API calls are not supported from this device.
+                // MUSA API calls are not supported from this device.
                 result = CubDebug(musaErrorInvalidConfiguration);
             #endif
         #endif
@@ -628,7 +628,7 @@ musaError_t MaxSmOccupancy(
     (void)kernel_ptr;
     (void)max_sm_occupancy;
 
-    // CUDA API calls not supported from this device
+    // MUSA API calls not supported from this device
     return CubDebug(musaErrorInvalidConfiguration);
 
 #else

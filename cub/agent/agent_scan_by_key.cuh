@@ -27,7 +27,7 @@
 
 /**
  * \file
- * AgentScanByKey implements a stateful abstraction of CUDA thread blocks for participating in device-wide prefix scan by key.
+ * AgentScanByKey implements a stateful abstraction of MUSA thread blocks for participating in device-wide prefix scan by key.
  */
 
 #pragma once
@@ -81,7 +81,7 @@ struct AgentScanByKeyPolicy
  ******************************************************************************/
 
 /**
- * \brief AgentScanByKey implements a stateful abstraction of CUDA thread blocks for participating in device-wide prefix scan by key.
+ * \brief AgentScanByKey implements a stateful abstraction of MUSA thread blocks for participating in device-wide prefix scan by key.
  */
 template <
     typename AgentScanByKeyPolicyT,       ///< Parameterized AgentScanPolicyT tuning policy type

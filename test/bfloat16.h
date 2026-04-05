@@ -29,7 +29,7 @@
 
 /**
  * \file
- * Utilities for interacting with the opaque CUDA __nv_bfloat16 type
+ * Utilities for interacting with the opaque MUSA __nv_bfloat16 type
  */
 
 #include <stdint.h>

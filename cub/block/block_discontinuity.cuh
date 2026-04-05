@@ -28,7 +28,7 @@
 
 /**
  * \file
- * The cub::BlockDiscontinuity class provides [<em>collective</em>](index.html#sec0) methods for flagging discontinuities within an ordered set of items partitioned across a CUDA thread block.
+ * The cub::BlockDiscontinuity class provides [<em>collective</em>](index.html#sec0) methods for flagging discontinuities within an ordered set of items partitioned across a MUSA thread block.
  */
 
 #pragma once
@@ -40,7 +40,7 @@
 CUB_NAMESPACE_BEGIN
 
 /**
- * \brief The BlockDiscontinuity class provides [<em>collective</em>](index.html#sec0) methods for flagging discontinuities within an ordered set of items partitioned across a CUDA thread block. ![](discont_logo.png)
+ * \brief The BlockDiscontinuity class provides [<em>collective</em>](index.html#sec0) methods for flagging discontinuities within an ordered set of items partitioned across a MUSA thread block. ![](discont_logo.png)
  * \ingroup BlockModule
  *
  * \tparam T                The data type to be flagged.

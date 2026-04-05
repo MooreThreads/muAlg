@@ -28,7 +28,7 @@
 
 /**
  * \file
- * The cub::WarpReduce class provides [<em>collective</em>](index.html#sec0) methods for computing a parallel reduction of items partitioned across a CUDA thread warp.
+ * The cub::WarpReduce class provides [<em>collective</em>](index.html#sec0) methods for computing a parallel reduction of items partitioned across a MUSA thread warp.
  */
 
 #pragma once
@@ -48,10 +48,10 @@ CUB_NAMESPACE_BEGIN
  */
 
 /**
- * \brief The WarpReduce class provides [<em>collective</em>](index.html#sec0) methods for computing a parallel reduction of items partitioned across a CUDA thread warp. ![](warp_reduce_logo.png)
+ * \brief The WarpReduce class provides [<em>collective</em>](index.html#sec0) methods for computing a parallel reduction of items partitioned across a MUSA thread warp. ![](warp_reduce_logo.png)
  *
  * \tparam T                        The reduction input/output element type
- * \tparam LOGICAL_WARP_THREADS     <b>[optional]</b> The number of threads per "logical" warp (may be less than the number of hardware warp threads).  Default is the warp size of the targeted CUDA compute-capability (e.g., 32 threads for SM20).
+ * \tparam LOGICAL_WARP_THREADS     <b>[optional]</b> The number of threads per "logical" warp (may be less than the number of hardware warp threads).  Default is the warp size of the targeted MUSA compute-capability (e.g., 32 threads for SM20).
  * \tparam PTX_ARCH                 <b>[optional]</b> \ptxversion
  *
  * \par Overview

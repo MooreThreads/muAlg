@@ -59,7 +59,7 @@ CUB_NAMESPACE_BEGIN
 /**
  * \brief If \p CUB_STDERR is defined and \p error is not \p cudaSuccess, the corresponding error message is printed to \p stderr (or \p stdout in device code) along with the supplied source context.
  *
- * \return The CUDA error.
+ * \return The MUSA error.
  */
 __host__ __device__ __forceinline__ musaError_t Debug(
     musaError_t     error,
@@ -70,7 +70,7 @@ __host__ __device__ __forceinline__ musaError_t Debug(
     (void)line;
 
 #ifdef CUB_RUNTIME_ENABLED
-    // Clear the global CUDA error state which may have been set by the last
+    // Clear the global MUSA error state which may have been set by the last
     // call. Otherwise, errors may "leak" to unrelated kernel launches.
     musaGetLastError();
 #endif

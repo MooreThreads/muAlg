@@ -32,7 +32,7 @@
 #include <cub/util_namespace.cuh>
 #include <cub/agent/agent_merge_sort.cuh>
 
-#include <thrust/system/cuda/detail/core/triple_chevron_launch.h>
+#include <thrust/system/musa/detail/core/triple_chevron_launch.h>
 #include <thrust/detail/integer_math.h>
 
 CUB_NAMESPACE_BEGIN
@@ -82,8 +82,8 @@ DeviceMergeSortBlockSortKernel(bool ping,
 
   AgentBlockSortT agent(ping,
                         storage,
-                        THRUST_NS_QUALIFIER::cuda_cub::core::make_load_iterator(ActivePolicyT(), keys_in),
-                        THRUST_NS_QUALIFIER::cuda_cub::core::make_load_iterator(ActivePolicyT(), items_in),
+                        THRUST_NS_QUALIFIER::musa_cub::core::make_load_iterator(ActivePolicyT(), keys_in),
+                        THRUST_NS_QUALIFIER::musa_cub::core::make_load_iterator(ActivePolicyT(), items_in),
                         keys_count,
                         keys_out,
                         items_out,
@@ -167,10 +167,10 @@ DeviceMergeSortMergeKernel(bool ping,
   AgentMergeT agent(
     ping,
     storage,
-    THRUST_NS_QUALIFIER::cuda_cub::core::make_load_iterator(ActivePolicyT(), keys_ping),
-    THRUST_NS_QUALIFIER::cuda_cub::core::make_load_iterator(ActivePolicyT(), items_ping),
-    THRUST_NS_QUALIFIER::cuda_cub::core::make_load_iterator(ActivePolicyT(), keys_pong),
-    THRUST_NS_QUALIFIER::cuda_cub::core::make_load_iterator(ActivePolicyT(), items_pong),
+    THRUST_NS_QUALIFIER::musa_cub::core::make_load_iterator(ActivePolicyT(), keys_ping),
+    THRUST_NS_QUALIFIER::musa_cub::core::make_load_iterator(ActivePolicyT(), items_ping),
+    THRUST_NS_QUALIFIER::musa_cub::core::make_load_iterator(ActivePolicyT(), keys_pong),
+    THRUST_NS_QUALIFIER::musa_cub::core::make_load_iterator(ActivePolicyT(), items_pong),
     keys_count,
     keys_pong,
     items_pong,
@@ -233,7 +233,7 @@ struct DeviceMergeSortPolicy
   /// MaxPolicy for MUSA
   using MaxPolicy = Policy310;
 
-#else // CUDA
+#else // MUSA
 
   struct Policy350 : ChainedPolicy<350, Policy350, Policy350>
   {
@@ -246,7 +246,7 @@ struct DeviceMergeSortPolicy
   };
 
 // NVBug 3384810
-#if defined(_NVHPC_CUDA)
+#if defined(_NVHPC_MUSA)
   using Policy520 = Policy350;
 #else
   struct Policy520 : ChainedPolicy<520, Policy520, Policy350>
@@ -271,7 +271,7 @@ struct DeviceMergeSortPolicy
   };
 
 
-  /// MaxPolicy for CUDA
+  /// MaxPolicy for MUSA
   using MaxPolicy = Policy600;
 
 #endif // __MUSACC_VER_MAJOR__
@@ -354,7 +354,7 @@ struct BlockSortLauncher
     constexpr bool use_vshmem = (AgentFitsIntoDefaultShmemSize == false) &&
                                 UseVShmem;
 
-    THRUST_NS_QUALIFIER::cuda_cub::launcher::triple_chevron(
+    THRUST_NS_QUALIFIER::musa_cub::launcher::triple_chevron(
       num_tiles,
       ActivePolicyT::MergeSortPolicy::BLOCK_THREADS,
       use_vshmem ? 0 : block_sort_shmem_size,
@@ -451,7 +451,7 @@ struct MergeLauncher
     constexpr bool use_vshmem = (AgentFitsIntoDefaultShmemSize == false) &&
                                 UseVShmem;
 
-    THRUST_NS_QUALIFIER::cuda_cub::launcher::triple_chevron(
+    THRUST_NS_QUALIFIER::musa_cub::launcher::triple_chevron(
       num_tiles,
       ActivePolicyT::MergeSortPolicy::BLOCK_THREADS,
       use_vshmem ? 0 : merge_shmem_size,
@@ -520,7 +520,7 @@ struct DispatchMergeSort : SelectedPolicy
   /// ordered before the second
   CompareOpT compare_op;
 
-  /// CUDA stream to launch kernels within. Default is stream<sub>0</sub>.
+  /// MUSA stream to launch kernels within. Default is stream<sub>0</sub>.
   musaStream_t stream;
 
   /// Whether or not to synchronize the stream after every kernel launch to
@@ -791,7 +791,7 @@ struct DispatchMergeSort : SelectedPolicy
         OffsetT target_merged_tiles_number = OffsetT(2) << pass;
 
         // Partition
-        THRUST_NS_QUALIFIER::cuda_cub::launcher::triple_chevron(
+        THRUST_NS_QUALIFIER::musa_cub::launcher::triple_chevron(
           partition_grid_size,
           threads_per_partition_block,
           0,

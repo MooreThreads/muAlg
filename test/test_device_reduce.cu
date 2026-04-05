@@ -30,7 +30,7 @@
  * Test of DeviceReduce utilities
  ******************************************************************************/
 
-// Ensure printing of CUDA runtime errors to console
+// Ensure printing of MUSA runtime errors to console
 #define CUB_STDERR
 
 #include <cub/util_allocator.cuh>
@@ -518,7 +518,7 @@ musaError_t Dispatch(
 
 
 //---------------------------------------------------------------------
-// CUDA nested-parallelism test kernel
+// MUSA nested-parallelism test kernel
 //---------------------------------------------------------------------
 
 /**

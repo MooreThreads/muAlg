@@ -189,7 +189,7 @@ struct DeviceMergeSort
    *   ordered before the second
    *
    * @param[in] stream
-   *   **[optional]** CUDA stream to launch kernels within. Default is
+   *   **[optional]** MUSA stream to launch kernels within. Default is
    *   stream<sub>0</sub>.
    *
    * @param[in] debug_synchronous
@@ -338,7 +338,7 @@ struct DeviceMergeSort
    *   ordered before the second
    *
    * @param[in] stream
-   *   **[optional]** CUDA stream to launch kernels within. Default is
+   *   **[optional]** MUSA stream to launch kernels within. Default is
    *   stream<sub>0</sub>.
    *
    * @param[in] debug_synchronous
@@ -463,7 +463,7 @@ struct DeviceMergeSort
    *   ordered before the second
    *
    * @param[in] stream
-   *   **[optional]** CUDA stream to launch kernels within. Default is
+   *   **[optional]** MUSA stream to launch kernels within. Default is
    *   stream<sub>0</sub>.
    *
    * @param[in] debug_synchronous
@@ -595,7 +595,7 @@ struct DeviceMergeSort
    *   ordered before the second
    *
    * @param[in] stream
-   *   **[optional]** CUDA stream to launch kernels within. Default is
+   *   **[optional]** MUSA stream to launch kernels within. Default is
    *   stream<sub>0</sub>.
    *
    * @param[in] debug_synchronous
@@ -725,7 +725,7 @@ struct DeviceMergeSort
    *   ordered before the second
    *
    * @param[in] stream
-   *   **[optional]** CUDA stream to launch kernels within. Default is
+   *   **[optional]** MUSA stream to launch kernels within. Default is
    *   stream<sub>0</sub>.
    *
    * @param[in] debug_synchronous
@@ -839,7 +839,7 @@ struct DeviceMergeSort
    *   ordered before the second
    *
    * @param[in] stream
-   *   **[optional]** CUDA stream to launch kernels within. Default is
+   *   **[optional]** MUSA stream to launch kernels within. Default is
    *   stream<sub>0</sub>.
    *
    * @param[in] debug_synchronous

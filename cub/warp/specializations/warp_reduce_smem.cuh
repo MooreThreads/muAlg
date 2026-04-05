@@ -28,7 +28,7 @@
 
 /**
  * \file
- * cub::WarpReduceSmem provides smem-based variants of parallel reduction of items partitioned across a CUDA thread warp.
+ * cub::WarpReduceSmem provides smem-based variants of parallel reduction of items partitioned across a MUSA thread warp.
  */
 
 #pragma once
@@ -42,7 +42,7 @@
 CUB_NAMESPACE_BEGIN
 
 /**
- * \brief WarpReduceSmem provides smem-based variants of parallel reduction of items partitioned across a CUDA thread warp.
+ * \brief WarpReduceSmem provides smem-based variants of parallel reduction of items partitioned across a MUSA thread warp.
  */
 template <
     typename    T,                      ///< Data type being reduced

@@ -30,7 +30,7 @@
  * Test evaluation for caching allocator of device memory
  ******************************************************************************/
 
-// Ensure printing of CUDA runtime errors to console
+// Ensure printing of MUSA runtime errors to console
 #define CUB_STDERR
 
 #include <stdio.h>
@@ -380,7 +380,7 @@ int main(int argc, char** argv)
     CubDebugExit(allocator.DeviceFree(d_1024MB));
     cub::EmptyKernel<void><<<1, 32>>>();
 
-    // CUDA
+    // MUSA
     cpu_timer.Start();
     for (int i = 0; i < timing_iterations; ++i)
     {
@@ -420,7 +420,7 @@ int main(int argc, char** argv)
     gpu_timer.Stop();
     float cuda_empty_elapsed_millis = gpu_timer.ElapsedMillis();
 
-    // CUDA
+    // MUSA
     gpu_timer.Start();
     for (int i = 0; i < timing_iterations; ++i)
     {

@@ -28,7 +28,7 @@
 
 /**
  * \file
- * cub::WarpScanSmem provides smem-based variants of parallel prefix scan of items partitioned across a CUDA thread warp.
+ * cub::WarpScanSmem provides smem-based variants of parallel prefix scan of items partitioned across a MUSA thread warp.
  */
 
 #pragma once
@@ -42,7 +42,7 @@
 CUB_NAMESPACE_BEGIN
 
 /**
- * \brief WarpScanSmem provides smem-based variants of parallel prefix scan of items partitioned across a CUDA thread warp.
+ * \brief WarpScanSmem provides smem-based variants of parallel prefix scan of items partitioned across a MUSA thread warp.
  */
 template <
     typename    T,                      ///< Data type being scanned
