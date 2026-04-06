@@ -115,14 +115,16 @@ __global__ void WarpMergeSortTestKernel(unsigned int valid_segments,
 
   DataType thread_data[ItemsPerThread];
 
+  const unsigned int linear_tid    = warp_sort.get_linear_tid();
   const unsigned int thread_offset = ThreadsInWarp * ItemsPerThread * segment_id
-                                   + warp_sort.get_linear_tid() * ItemsPerThread;
+                                   + linear_tid * ItemsPerThread;
   const unsigned int valid_items = segment_sizes[segment_id];
 
   for (unsigned int item = 0; item < ItemsPerThread; item++)
   {
     const unsigned int idx = thread_offset + item;
-    thread_data[item] = item < valid_items ? data[idx] : DataType();
+    const unsigned int linear_item = linear_tid * ItemsPerThread + item;
+    thread_data[item] = linear_item < valid_items ? data[idx] : DataType();
 
   }
   WARP_SYNC(warp_sort.get_member_mask());
@@ -131,11 +133,11 @@ __global__ void WarpMergeSortTestKernel(unsigned int valid_segments,
   // Therefore the following value should be greater than any that
   // is present in the input data.
   const DataType oob_default =
-    static_cast<std::uint64_t>(ThreadsInBlock * ItemsPerThread + 1);
+    static_cast<std::uint64_t>(ThreadsInWarp * ItemsPerThread + 1);
 
   if (Stable)
   {
-    if (valid_items == ThreadsInBlock * ItemsPerThread)
+    if (valid_items == ThreadsInWarp * ItemsPerThread)
     {
       warp_sort.StableSort(
         thread_data,
@@ -152,7 +154,7 @@ __global__ void WarpMergeSortTestKernel(unsigned int valid_segments,
   }
   else
   {
-    if (valid_items == ThreadsInBlock * ItemsPerThread)
+    if (valid_items == ThreadsInWarp * ItemsPerThread)
     {
       warp_sort.Sort(
         thread_data,
@@ -171,8 +173,9 @@ __global__ void WarpMergeSortTestKernel(unsigned int valid_segments,
   for (unsigned int item = 0; item < ItemsPerThread; item++)
   {
     const unsigned int idx = thread_offset + item;
+    const unsigned int linear_item = linear_tid * ItemsPerThread + item;
 
-    if (item >= valid_items)
+    if (linear_item >= valid_items)
       break;
 
     data[idx] = thread_data[item];
@@ -230,16 +233,19 @@ __global__ void WarpMergeSortTestKernel(unsigned int valid_segments,
   KeyType thread_keys[ItemsPerThread];
   ValueType thread_values[ItemsPerThread];
 
+  const unsigned int linear_tid =
+    warp_sort.get_linear_tid();
   const unsigned int thread_offset =
     ThreadsInWarp * ItemsPerThread * segment_id +
-    warp_sort.get_linear_tid() * ItemsPerThread;
+    linear_tid * ItemsPerThread;
   const unsigned int valid_items = segment_sizes[segment_id];
 
   for (unsigned int item = 0; item < ItemsPerThread; item++)
   {
     const unsigned int idx = thread_offset + item;
-    thread_keys[item]      = item < valid_items ? keys[idx] : KeyType();
-    thread_values[item]    = item < valid_items ? values[idx] : ValueType();
+    const unsigned int linear_item = linear_tid * ItemsPerThread + item;
+    thread_keys[item]      = linear_item < valid_items ? keys[idx] : KeyType();
+    thread_values[item]    = linear_item < valid_items ? values[idx] : ValueType();
   }
   WARP_SYNC(warp_sort.get_member_mask());
 
@@ -247,11 +253,11 @@ __global__ void WarpMergeSortTestKernel(unsigned int valid_segments,
   // Therefore the following value should be greater than any that
   // is present in the input data.
   const KeyType oob_default =
-    static_cast<std::uint64_t>(ThreadsInBlock * ItemsPerThread + 1);
+    static_cast<std::uint64_t>(ThreadsInWarp * ItemsPerThread + 1);
 
   if (Stable)
   {
-    if (valid_items == ThreadsInBlock * ItemsPerThread)
+    if (valid_items == ThreadsInWarp * ItemsPerThread)
     {
       warp_sort.StableSort(thread_keys, thread_values, CustomLess());
     }
@@ -266,7 +272,7 @@ __global__ void WarpMergeSortTestKernel(unsigned int valid_segments,
   }
   else
   {
-    if (valid_items == ThreadsInBlock * ItemsPerThread)
+    if (valid_items == ThreadsInWarp * ItemsPerThread)
     {
       warp_sort.Sort(thread_keys, thread_values, CustomLess());
     }
@@ -283,8 +289,9 @@ __global__ void WarpMergeSortTestKernel(unsigned int valid_segments,
   for (unsigned int item = 0; item < ItemsPerThread; item++)
   {
     const unsigned int idx = thread_offset + item;
+    const unsigned int linear_item = linear_tid * ItemsPerThread + item;
 
-    if (item >= valid_items)
+    if (linear_item >= valid_items)
       break;
 
     keys[idx] = thread_keys[item];
@@ -387,7 +394,6 @@ void Test(unsigned int valid_segments,
                                                          d_data,
                                                          h_data,
                                                          h_segment_sizes);
-
   AssertTrue(check);
 }
 
@@ -473,10 +479,10 @@ void Test(thrust::default_random_engine &rng)
   constexpr unsigned int max_segments = ThreadsInBlock / ThreadsInWarp;
   constexpr unsigned int max_segment_size = ThreadsInWarp * ItemsPerThread;
 
-  thrust::device_vector<unsigned int> h_segment_sizes_set(max_segment_size);
-  cub_sequence(h_segment_sizes_set.begin(), h_segment_sizes_set.end());
+  thrust::host_vector<unsigned int> h_segment_sizes_set(max_segment_size);
+  thrust::sequence(h_segment_sizes_set.begin(), h_segment_sizes_set.end());
 
-  thrust::device_vector<unsigned int> h_segment_sizes;
+  thrust::host_vector<unsigned int> h_segment_sizes;
   for (unsigned int segment_id = 0; segment_id < max_segments; segment_id++)
   {
     h_segment_sizes.insert(h_segment_sizes.end(),

@@ -95,6 +95,11 @@ if(MUSA_ARCH_LIST STREQUAL "mp_22")
   message(STATUS "Excluding test_warp_exchange.cu for mp_22 architecture (compiler backend limitation)")
 endif()
 
+option(CUB_IGNORE_NO_THRUST_TESTS
+  "Force the original thrust-backed tests even when *_no_thrust variants exist."
+  OFF
+)
+
 ## cub_add_test
 #
 # Add a test executable and register it with ctest.
@@ -155,16 +160,21 @@ foreach (test_src IN LISTS test_srcs)
     set(name_suffix "")
   endif()
 
-  if(NOT name_suffix STREQUAL "_no_thrust")
+  if(name_suffix STREQUAL "_no_thrust")
+    if(CUB_IGNORE_NO_THRUST_TESTS)
+      message(STATUS "Skipping legacy no-thrust source ${test_src}")
+      continue()
+    endif()
+
+    # This is a _no_thrust file, strip the suffix for test name
+    string(SUBSTRING "${test_name}" 0 ${suffix_start} test_name)
+  elseif(NOT CUB_IGNORE_NO_THRUST_TESTS)
     # This is not a _no_thrust file, check if one exists
     set(no_thrust_src "test_${test_name}_no_thrust.cu")
     if(EXISTS "${CMAKE_CURRENT_LIST_DIR}/${no_thrust_src}")
       message(STATUS "Skipping ${test_src}, using no-thrust version instead")
       continue()
     endif()
-  else()
-    # This is a _no_thrust file, strip the suffix for test name
-    string(SUBSTRING "${test_name}" 0 ${suffix_start} test_name)
   endif()
 
   cub_get_test_params("${test_src}" variant_labels variant_defs)

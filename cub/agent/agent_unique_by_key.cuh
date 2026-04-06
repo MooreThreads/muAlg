@@ -242,32 +242,22 @@ struct AgentUniqueByKey
         T (&items)[ITEMS_PER_THREAD],
         OffsetT (&selection_flags)[ITEMS_PER_THREAD],
         OffsetT (&selection_indices)[ITEMS_PER_THREAD],
-        int  /*num_tile_items*/,
-        int  num_tile_selections,
-        OffsetT num_selections_prefix,
+        int  num_tile_items,
+        int  /*num_tile_selections*/,
+        OffsetT /*num_selections_prefix*/,
         OffsetT /*num_selections*/)
     {
+        (void)tag;
+
         #pragma unroll
         for (int ITEM = 0; ITEM < ITEMS_PER_THREAD; ++ITEM)
         {
-            int local_scatter_offset = selection_indices[ITEM] -
-                                       num_selections_prefix;
-            if (selection_flags[ITEM])
+            int item_idx = (threadIdx.x * ITEMS_PER_THREAD) + ITEM;
+            if ((item_idx < num_tile_items) && selection_flags[ITEM])
             {
-                GetShared(tag)[local_scatter_offset] = items[ITEM];
+                items_out[selection_indices[ITEM]] = items[ITEM];
             }
         }
-
-        CTA_SYNC();
-
-        for (int item = threadIdx.x;
-             item < num_tile_selections;
-             item += BLOCK_THREADS)
-        {
-            items_out[num_selections_prefix + item] = GetShared(tag)[item];
-        }
-
-        CTA_SYNC();
     }
 
 
@@ -560,7 +550,8 @@ struct AgentUniqueByKey
                                                        tile_state);
             if (threadIdx.x == 0)                                                               
             {
-                *d_num_selected_out = num_selections;
+                cub::detail::maybe_store_output(d_num_selected_out,
+                                                num_selections);
             }
         }
     }

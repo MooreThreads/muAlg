@@ -2190,6 +2190,18 @@ struct HugeDataType
     }
   }
 
+  __device__ __host__ HugeDataType& operator=(const HugeDataType& rhs)
+  {
+    if (this != &rhs)
+    {
+      for (int i = 0; i < ELEMENTS_PER_OBJECT; i++)
+      {
+        data[i] = rhs.data[i];
+      }
+    }
+    return *this;
+  }
+
   explicit __device__ __host__ HugeDataType(int val)
   {
     for (int i = 0; i < ELEMENTS_PER_OBJECT; i++)

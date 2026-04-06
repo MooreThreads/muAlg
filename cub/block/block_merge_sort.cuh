@@ -75,8 +75,11 @@ __device__ __forceinline__ OffsetT MergePath(KeyIteratorT keys1,
   return keys1_begin;
 }
 
-template <typename KeyT, typename CompareOp, int ITEMS_PER_THREAD>
-__device__ __forceinline__ void SerialMerge(KeyT *keys_shared,
+template <typename KeyT,
+          typename KeyIteratorT,
+          typename CompareOp,
+          int ITEMS_PER_THREAD>
+__device__ __forceinline__ void SerialMerge(KeyIteratorT keys_shared,
                                             int keys1_beg,
                                             int keys2_beg,
                                             int keys1_count,
@@ -177,6 +180,11 @@ class BlockMergeSortStrategy
 private:
 
   static constexpr int ITEMS_PER_TILE = ITEMS_PER_THREAD * NUM_THREADS;
+  using KeyStorageT =
+    cub::detail::conditional_t<std::is_arithmetic<KeyT>::value &&
+                                 (sizeof(KeyT) < sizeof(int)),
+                               int,
+                               KeyT>;
 
   // Whether or not there are values to be trucked along with keys
   static constexpr bool KEYS_ONLY = std::is_same<ValueT, NullType>::value;
@@ -184,7 +192,7 @@ private:
   /// Shared memory type required by this thread block
   union _TempStorage
   {
-    KeyT keys_shared[ITEMS_PER_TILE + 1];
+    KeyStorageT keys_shared[ITEMS_PER_TILE + 1];
     ValueT items_shared[ITEMS_PER_TILE + 1];
   }; // union TempStorage
 

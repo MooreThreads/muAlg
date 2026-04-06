@@ -81,7 +81,7 @@ __global__ void DeviceCompactInitKernel(
 
     // Initialize d_num_selected_out
     if ((blockIdx.x == 0) && (threadIdx.x == 0))
-        *d_num_selected_out = 0;
+        cub::detail::maybe_store_output(d_num_selected_out, 0);
 }
 
 

@@ -230,12 +230,15 @@ function(cub_build_target_list)
   # Some of the iterators and unittests depend on thrust. We should break the
   # cyclical dependency by migrating CUB's Thrust bits into Thrust.
   find_package(Thrust ${CUB_VERSION} EXACT CONFIG
-    HINTS "../../" # Check if we are in thrust/dependencies/cub
+    HINTS
+      "../../" # Check if we are in thrust/dependencies/cub
+      "${CUB_SOURCE_DIR}/../thrust"
+      "${CUB_SOURCE_DIR}/../thrust/thrust/cmake"
   )
 
   if (Thrust_FOUND)
     thrust_set_CUB_target(CUB::CUB)
-    thrust_create_target(cub.thrust HOST CPP DEVICE CUDA)
+    thrust_create_target(cub.thrust HOST CPP DEVICE MUSA)
   else()
     message(STATUS
       "Thrust was not found. Set CMake variable 'Thrust_DIR' to the "

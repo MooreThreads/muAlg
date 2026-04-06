@@ -38,6 +38,9 @@
 #include <iterator>
 #include <limits>
 #include <type_traits>
+#include <utility>
+
+#include <thrust/iterator/detail/any_assign.h>
 
 // MUSA: fp16 and bf16 are always available
 #if defined(__MUSACC_VER_MAJOR__) || defined(CUB_MUSA_ARCH)
@@ -94,6 +97,23 @@ using non_void_value_t =
   cub::detail::conditional_t<std::is_same<value_t<IteratorT>, void>::value,
                              FallbackT,
                              value_t<IteratorT>>;
+
+
+template <typename IteratorT>
+using is_discard_iterator_output =
+  std::is_same<value_t<IteratorT>, THRUST_NS_QUALIFIER::detail::any_assign>;
+
+
+template <typename IteratorT, typename ValueT>
+__host__ __device__ __forceinline__ void maybe_store_output(
+  IteratorT iterator,
+  ValueT&& value)
+{
+  if constexpr (!is_discard_iterator_output<IteratorT>::value)
+  {
+    *iterator = std::forward<ValueT>(value);
+  }
+}
 
 } // namespace detail
 
