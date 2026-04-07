@@ -100,7 +100,7 @@ git submodule update --init module_version
 
 cd /home/wenjingke/thrust_alg/muAlg
 
-Thrust_DIR=/usr/local/musa/lib64/cmake/thrust \
+Thrust_DIR=/usr/local/musa/lib/cmake/thrust \
 ./build_cub.sh
 ```
 

@@ -38,7 +38,7 @@ find_library(MUSA_LIBRARY
     PATHS /usr/local/musa/lib
     ENV MUSA_PATH
     ENV MUSA_LIB_PATH
-    PATH_SUFFIXES lib lib64
+    PATH_SUFFIXES lib
 )
 
 if(NOT MUSA_LIBRARY)
