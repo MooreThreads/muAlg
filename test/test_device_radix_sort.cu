@@ -68,8 +68,7 @@ using namespace cub;
 
 bool                    g_verbose                       = false;
 int                     g_timing_iterations             = 0;
-// MUSA: Skip large size tests (>4GB) that trigger address space limitations
-std::size_t             g_smallest_pre_sorted_num_items = (std::size_t(1) << 30);  // 1GB instead of 4GB
+std::size_t             g_smallest_pre_sorted_num_items = (std::size_t(1) << 32) - 42;
 CachingDeviceAllocator  g_allocator(true);
 
 // Dispatch types
@@ -1415,7 +1414,6 @@ void TestSizes(KeyT* h_keys,
     if (pre_sorted)
     {
         // run a specific list of sizes, up to max_items
-        // MUSA: Skip large size tests (>4GB) that trigger address space limitations
         std::size_t sizes[] = {g_smallest_pre_sorted_num_items};
         for (std::size_t num_items : sizes)
         {
@@ -1486,8 +1484,7 @@ void TestGen(
     if (WITH_PRE_SORTED)
     {
         // Presorting is only used for testing large input arrays.
-        // MUSA: Use smaller size to avoid address space limitations
-        const std::size_t large_num_items = std::size_t(1) << 30;  // 1GB instead of 4GB
+        const std::size_t large_num_items = g_smallest_pre_sorted_num_items;
 
         // A conservative check for memory, as we don't know ValueT or whether
         // the overwrite is allowed until later.

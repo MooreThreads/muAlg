@@ -38,6 +38,8 @@
 #include <cub/detail/choose_offset.cuh>
 #include <cub/device/dispatch/dispatch_radix_sort.cuh>
 
+#include <limits>
+
 CUB_NAMESPACE_BEGIN
 
 /**
@@ -112,6 +114,64 @@ CUB_NAMESPACE_BEGIN
  */
 struct DeviceRadixSort
 {
+private:
+    template <bool IS_DESCENDING, typename KeyT, typename ValueT, typename NumItemsT>
+    CUB_RUNTIME_FUNCTION static musaError_t DispatchPairs(
+        void                    *d_temp_storage,
+        size_t                  &temp_storage_bytes,
+        DoubleBuffer<KeyT>      &d_keys,
+        DoubleBuffer<ValueT>    &d_values,
+        NumItemsT               num_items,
+        int                     begin_bit,
+        int                     end_bit,
+        bool                    is_overwrite_okay,
+        musaStream_t            stream,
+        bool                    debug_synchronous)
+    {
+#if defined(__MUSACC__)
+        if constexpr (sizeof(NumItemsT) <= 4)
+        {
+            // MUSA miscomputes large 32-bit device offsets once element indices
+            // cross INT_MAX, so route these cases through the 64-bit offset path.
+            const unsigned long long num_items_ull =
+              static_cast<unsigned long long>(num_items);
+            const unsigned long long musa_large_index_limit =
+              static_cast<unsigned long long>(std::numeric_limits<int>::max());
+            if (num_items_ull > musa_large_index_limit)
+            {
+                return DispatchRadixSort<IS_DESCENDING,
+                                         KeyT,
+                                         ValueT,
+                                         unsigned long long>::Dispatch(
+                  d_temp_storage,
+                  temp_storage_bytes,
+                  d_keys,
+                  d_values,
+                  num_items_ull,
+                  begin_bit,
+                  end_bit,
+                  is_overwrite_okay,
+                  stream,
+                  debug_synchronous);
+            }
+        }
+#endif
+        using OffsetT = typename detail::ChooseOffsetT<NumItemsT>::Type;
+        return DispatchRadixSort<IS_DESCENDING, KeyT, ValueT, OffsetT>::Dispatch(
+          d_temp_storage,
+          temp_storage_bytes,
+          d_keys,
+          d_values,
+          static_cast<OffsetT>(num_items),
+          begin_bit,
+          end_bit,
+          is_overwrite_okay,
+          stream,
+          debug_synchronous);
+    }
+
+public:
+
 
     /******************************************************************//**
      * \name KeyT-value pairs
@@ -198,9 +258,6 @@ struct DeviceRadixSort
         musaStream_t        stream              = 0,                ///< [in] <b>[optional]</b> MUSA stream to launch kernels within.  Default is stream<sub>0</sub>.
         bool                debug_synchronous   = false)            ///< [in] <b>[optional]</b> Whether or not to synchronize the stream after every kernel launch to check for errors.  Also causes launch configurations to be printed to the console.  Default is \p false.
     {
-        // Unsigned integer type for global offsets.
-        using OffsetT = typename detail::ChooseOffsetT<NumItemsT>::Type;
-        
         // We cast away const-ness, but will *not* write to these arrays.
         // `DispatchRadixSort::Dispatch` will allocate temporary storage and
         // create a new double-buffer internally when the `is_overwrite_ok` flag
@@ -209,12 +266,12 @@ struct DeviceRadixSort
         DoubleBuffer<KeyT>       d_keys(const_cast<KeyT*>(d_keys_in), d_keys_out);
         DoubleBuffer<ValueT>     d_values(const_cast<ValueT*>(d_values_in), d_values_out);
 
-        return DispatchRadixSort<false, KeyT, ValueT, OffsetT>::Dispatch(
+        return DispatchPairs<false>(
             d_temp_storage,
             temp_storage_bytes,
             d_keys,
             d_values,
-            static_cast<OffsetT>(num_items),
+            num_items,
             begin_bit,
             end_bit,
             is_overwrite_okay,
@@ -310,12 +367,9 @@ struct DeviceRadixSort
         musaStream_t            stream              = 0,                ///< [in] <b>[optional]</b> MUSA stream to launch kernels within.  Default is stream<sub>0</sub>.
         bool                    debug_synchronous   = false)            ///< [in] <b>[optional]</b> Whether or not to synchronize the stream after every kernel launch to check for errors.  Also causes launch configurations to be printed to the console.  Default is \p false.
     {
-        // Unsigned integer type for global offsets.
-        using OffsetT = typename detail::ChooseOffsetT<NumItemsT>::Type;
-
         constexpr bool is_overwrite_okay = true;
 
-        return DispatchRadixSort<false, KeyT, ValueT, OffsetT>::Dispatch(
+        return DispatchPairs<false>(
             d_temp_storage,
             temp_storage_bytes,
             d_keys,
@@ -404,9 +458,6 @@ struct DeviceRadixSort
         musaStream_t        stream              = 0,                ///< [in] <b>[optional]</b> MUSA stream to launch kernels within.  Default is stream<sub>0</sub>.
         bool                debug_synchronous   = false)            ///< [in] <b>[optional]</b> Whether or not to synchronize the stream after every kernel launch to check for errors.  Also causes launch configurations to be printed to the console.  Default is \p false.
     {
-        // Unsigned integer type for global offsets.
-        using OffsetT = typename detail::ChooseOffsetT<NumItemsT>::Type;
-
         // We cast away const-ness, but will *not* write to these arrays.
         // `DispatchRadixSort::Dispatch` will allocate temporary storage and
         // create a new double-buffer internally when the `is_overwrite_ok` flag
@@ -415,7 +466,7 @@ struct DeviceRadixSort
         DoubleBuffer<KeyT>       d_keys(const_cast<KeyT*>(d_keys_in), d_keys_out);
         DoubleBuffer<ValueT>     d_values(const_cast<ValueT*>(d_values_in), d_values_out);
 
-        return DispatchRadixSort<true, KeyT, ValueT, OffsetT>::Dispatch(
+        return DispatchPairs<true>(
             d_temp_storage,
             temp_storage_bytes,
             d_keys,
@@ -511,12 +562,9 @@ struct DeviceRadixSort
         musaStream_t            stream              = 0,                ///< [in] <b>[optional]</b> MUSA stream to launch kernels within.  Default is stream<sub>0</sub>.
         bool                    debug_synchronous   = false)            ///< [in] <b>[optional]</b> Whether or not to synchronize the stream after every kernel launch to check for errors.  Also causes launch configurations to be printed to the console.  Default is \p false.
     {
-        // Unsigned integer type for global offsets.
-        using OffsetT = typename detail::ChooseOffsetT<NumItemsT>::Type;
-
         constexpr bool is_overwrite_okay = true;
 
-        return DispatchRadixSort<true, KeyT, ValueT, OffsetT>::Dispatch(
+        return DispatchPairs<true>(
             d_temp_storage,
             temp_storage_bytes,
             d_keys,
@@ -604,9 +652,6 @@ struct DeviceRadixSort
         musaStream_t        stream              = 0,                ///< [in] <b>[optional]</b> MUSA stream to launch kernels within.  Default is stream<sub>0</sub>.
         bool                debug_synchronous   = false)            ///< [in] <b>[optional]</b> Whether or not to synchronize the stream after every kernel launch to check for errors.  Also causes launch configurations to be printed to the console.  Default is \p false.
     {
-        // Unsigned integer type for global offsets.
-        using OffsetT = typename detail::ChooseOffsetT<NumItemsT>::Type;
-
         // We cast away const-ness, but will *not* write to these arrays.
         // `DispatchRadixSort::Dispatch` will allocate temporary storage and
         // create a new double-buffer internally when the `is_overwrite_ok` flag
@@ -616,12 +661,12 @@ struct DeviceRadixSort
         // Null value type
         DoubleBuffer<NullType>  d_values;
 
-        return DispatchRadixSort<false, KeyT, NullType, OffsetT>::Dispatch(
+        return DispatchPairs<false>(
             d_temp_storage,
             temp_storage_bytes,
             d_keys,
             d_values,
-            static_cast<OffsetT>(num_items),
+            num_items,
             begin_bit,
             end_bit,
             is_overwrite_okay,
@@ -703,15 +748,12 @@ struct DeviceRadixSort
         musaStream_t        stream              = 0,                ///< [in] <b>[optional]</b> MUSA stream to launch kernels within.  Default is stream<sub>0</sub>.
         bool                debug_synchronous   = false)            ///< [in] <b>[optional]</b> Whether or not to synchronize the stream after every kernel launch to check for errors.  Also causes launch configurations to be printed to the console.  Default is \p false.
     {
-        // Unsigned integer type for global offsets.
-        using OffsetT = typename detail::ChooseOffsetT<NumItemsT>::Type;
-
         constexpr bool is_overwrite_okay = true;
 
         // Null value type
         DoubleBuffer<NullType> d_values;
 
-        return DispatchRadixSort<false, KeyT, NullType, OffsetT>::Dispatch(
+        return DispatchPairs<false>(
             d_temp_storage,
             temp_storage_bytes,
             d_keys,
@@ -789,9 +831,6 @@ struct DeviceRadixSort
         musaStream_t        stream              = 0,                ///< [in] <b>[optional]</b> MUSA stream to launch kernels within.  Default is stream<sub>0</sub>.
         bool                debug_synchronous   = false)            ///< [in] <b>[optional]</b> Whether or not to synchronize the stream after every kernel launch to check for errors.  Also causes launch configurations to be printed to the console.  Default is \p false.
     {
-        // Unsigned integer type for global offsets.
-        using OffsetT = typename detail::ChooseOffsetT<NumItemsT>::Type;
-
         // We cast away const-ness, but will *not* write to these arrays.
         // `DispatchRadixSort::Dispatch` will allocate temporary storage and
         // create a new double-buffer internally when the `is_overwrite_ok` flag
@@ -800,7 +839,7 @@ struct DeviceRadixSort
         DoubleBuffer<KeyT>      d_keys(const_cast<KeyT*>(d_keys_in), d_keys_out);
         DoubleBuffer<NullType>  d_values;
 
-        return DispatchRadixSort<true, KeyT, NullType, OffsetT>::Dispatch(
+        return DispatchPairs<true>(
             d_temp_storage,
             temp_storage_bytes,
             d_keys,
@@ -883,15 +922,12 @@ struct DeviceRadixSort
         musaStream_t        stream              = 0,                ///< [in] <b>[optional]</b> MUSA stream to launch kernels within.  Default is stream<sub>0</sub>.
         bool                debug_synchronous   = false)            ///< [in] <b>[optional]</b> Whether or not to synchronize the stream after every kernel launch to check for errors.  Also causes launch configurations to be printed to the console.  Default is \p false.
     {
-        // Unsigned integer type for global offsets.
-        using OffsetT = typename detail::ChooseOffsetT<NumItemsT>::Type;
-
         constexpr bool is_overwrite_okay = true;
 
         // Null value type
         DoubleBuffer<NullType> d_values;
 
-        return DispatchRadixSort<true, KeyT, NullType, OffsetT>::Dispatch(
+        return DispatchPairs<true>(
             d_temp_storage,
             temp_storage_bytes,
             d_keys,
@@ -915,5 +951,3 @@ struct DeviceRadixSort
  */
 
 CUB_NAMESPACE_END
-
-

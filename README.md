@@ -30,7 +30,7 @@
 | `-g, --gpus DEVICES` | 设置 MUSA_VISIBLE_DEVICES | 所有 GPU 可见 |
 | `-a, --arch ARCH` | MUSA 目标架构 | `mp_31` |
 | `-n, --no-clean` | 不删除 build 目录（增量编译） | 否 |
-| `-E, --exclude RE` | 排除匹配正则表达式的测试 | `grid_barrier\|namespace_wrapped` |
+| `-E, --exclude RE` | 排除匹配正则表达式的测试 | `grid_barrier` |
 | `-h, --help` | 显示帮助信息 | - |
 
 ### 架构选择
