@@ -120,7 +120,8 @@ __host__ __device__ __forceinline__ musaError_t Debug(
                      blockIdx.z, blockIdx.y, blockIdx.x, \
                      threadIdx.z, threadIdx.y, threadIdx.x, __VA_ARGS__) \
             : printf(format, __VA_ARGS__));
-    #elif !(defined(__clang__) && defined(__CUDA__))
+    // MUSA clang may be invoked with -U__CUDA__; keep it on the clang workaround path.
+    #elif !(defined(__clang__) && (defined(__CUDA__) || defined(__MUSACC__) || defined(__MUSACC_VER_MAJOR__)))
         #if (CUB_PTX_ARCH == 0)
             #define _CubLog(format, ...) printf(format,__VA_ARGS__);
         #elif (CUB_PTX_ARCH >= 200)
