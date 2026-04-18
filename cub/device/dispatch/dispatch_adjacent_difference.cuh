@@ -76,10 +76,11 @@ DeviceAdjacentDifferenceDifferenceKernel(InputIteratorT input,
   using ActivePolicyT = 
     typename ChainedPolicyT::ActivePolicy::AdjacentDifferencePolicy;
 
-  // It is OK to introspect the return type or parameter types of the 
-  // `operator()` function of `__device__` extended lambda within device code.
-  // For MUSA compatibility, prefer result_type member if available.
-  using OutputT = detail::adjacent_difference_output_t<DifferenceOpT, InputT>;
+  // Prefer a concrete output value type when one is available. This avoids
+  // device-lambda result introspection on MUSA while preserving write-only
+  // iterators whose value_type is void or unavailable.
+  using OutputT = detail::non_void_iterator_value_t<
+    OutputIteratorT, detail::adjacent_difference_output_t<DifferenceOpT, InputT>>;
 
   using Agent = AgentDifference<ActivePolicyT,
                                 InputIteratorT,

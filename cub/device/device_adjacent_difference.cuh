@@ -207,8 +207,9 @@ public:
    *   is a model of <a href="https://en.cppreference.com/w/cpp/iterator/output_iterator">Output Iterator</a>.
    *
    * @tparam DifferenceOpT
-   *   Its `result_type` is convertible to a type in `OutputIteratorT`'s set of
-   *   `value_types`.
+   *   When invoked with two values from `InputIteratorT`, its result is
+   *   convertible to a type in `OutputIteratorT`'s set of `value_types`.
+   *   A `result_type` member is optional.
    *
    * @tparam NumItemsT **[inferred]** Type of num_items
    *
@@ -329,8 +330,9 @@ public:
    *   `RandomAccessIteratorT`'s set of `value_types`.
    *
    * @tparam DifferenceOpT
-   *   Its `result_type` is convertible to a type in `RandomAccessIteratorT`'s
-   *   set of `value_types`.
+   *   When invoked with two values from `RandomAccessIteratorT`, its result is
+   *   convertible to a type in `RandomAccessIteratorT`'s set of `value_types`.
+   *   A `result_type` member is optional.
    *
    * @tparam NumItemsT **[inferred]** Type of num_items
    *
@@ -456,8 +458,9 @@ public:
    *   is a model of <a href="https://en.cppreference.com/w/cpp/iterator/output_iterator">Output Iterator</a>.
    *
    * @tparam DifferenceOpT
-   *   Its `result_type` is convertible to a type in `RandomAccessIteratorT`'s
-   *   set of `value_types`.
+   *   When invoked with two values from `RandomAccessIteratorT`, its result is
+   *   convertible to a type in `RandomAccessIteratorT`'s set of `value_types`.
+   *   A `result_type` member is optional.
    *
    * @tparam NumItemsT **[inferred]** Type of num_items
    *
@@ -568,8 +571,9 @@ public:
    *   `RandomAccessIteratorT`'s set of `value_types`.
    *
    * @tparam DifferenceOpT
-   *   Its `result_type` is convertible to a type in `RandomAccessIteratorT`'s
-   *   set of `value_types`.
+   *   When invoked with two values from `RandomAccessIteratorT`, its result is
+   *   convertible to a type in `RandomAccessIteratorT`'s set of `value_types`.
+   *   A `result_type` member is optional.
    *
    * @tparam NumItemsT **[inferred]** Type of num_items
    *

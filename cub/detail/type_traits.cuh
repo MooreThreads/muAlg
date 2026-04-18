@@ -35,6 +35,7 @@
 #include "../util_cpp_dialect.cuh"
 #include "../util_namespace.cuh"
 
+#include <iterator>
 #include <type_traits>
 
 // MUSA compiler may not have std::void_t in some configurations
@@ -68,6 +69,27 @@ struct has_result_type : std::false_type {};
 
 template <typename T>
 struct has_result_type<T, std::void_t<typename T::result_type>> : std::true_type {};
+
+template <typename IteratorT, typename = void>
+struct iterator_value_impl
+{
+  using type = void;
+};
+
+template <typename IteratorT>
+struct iterator_value_impl<IteratorT, std::void_t<typename std::iterator_traits<IteratorT>::value_type>>
+{
+  using type = typename std::iterator_traits<IteratorT>::value_type;
+};
+
+template <typename IteratorT>
+using iterator_value_t = typename iterator_value_impl<IteratorT>::type;
+
+template <typename IteratorT, typename FallbackT>
+using non_void_iterator_value_t =
+  typename std::conditional<std::is_same<iterator_value_t<IteratorT>, void>::value,
+                            FallbackT,
+                            iterator_value_t<IteratorT>>::type;
 
 template <typename Invokable, typename... Args>
 struct invoke_result_impl
