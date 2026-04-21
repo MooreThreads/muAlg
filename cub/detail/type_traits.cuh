@@ -123,6 +123,32 @@ struct adjacent_difference_output_impl<Invokable, InputT, false>
 template <typename Invokable, typename InputT>
 using adjacent_difference_output_t = typename adjacent_difference_output_impl<Invokable, InputT>::type;
 
+template <typename OutputIteratorT,
+          typename Invokable,
+          typename InputT,
+          bool = std::is_same<iterator_value_t<OutputIteratorT>, void>::value>
+struct adjacent_difference_output_select_impl
+{
+  using type = iterator_value_t<OutputIteratorT>;
+};
+
+template <typename OutputIteratorT,
+          typename Invokable,
+          typename InputT>
+struct adjacent_difference_output_select_impl<OutputIteratorT,
+                                              Invokable,
+                                              InputT,
+                                              true>
+{
+  using type = adjacent_difference_output_t<Invokable, InputT>;
+};
+
+template <typename OutputIteratorT, typename Invokable, typename InputT>
+using adjacent_difference_output_select_t =
+  typename adjacent_difference_output_select_impl<OutputIteratorT,
+                                                  Invokable,
+                                                  InputT>::type;
+
 
 } // namespace detail
 CUB_NAMESPACE_END

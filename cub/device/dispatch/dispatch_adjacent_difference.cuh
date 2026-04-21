@@ -78,9 +78,11 @@ DeviceAdjacentDifferenceDifferenceKernel(InputIteratorT input,
 
   // Prefer a concrete output value type when one is available. This avoids
   // device-lambda result introspection on MUSA while preserving write-only
-  // iterators whose value_type is void or unavailable.
-  using OutputT = detail::non_void_iterator_value_t<
-    OutputIteratorT, detail::adjacent_difference_output_t<DifferenceOpT, InputT>>;
+  // iterators whose value_type is void or unavailable. The selection must be
+  // lazy: eager alias arguments still instantiate the lambda fallback on MUSA.
+  using OutputT = detail::adjacent_difference_output_select_t<OutputIteratorT,
+                                                              DifferenceOpT,
+                                                              InputT>;
 
   using Agent = AgentDifference<ActivePolicyT,
                                 InputIteratorT,

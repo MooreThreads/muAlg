@@ -135,6 +135,50 @@ void TestDeviceLambdaWithoutResultType()
   }
 }
 
+void TestCapturedDeviceLambdaWithoutResultType()
+{
+  thrust::device_vector<int> rows_flat(6);
+  rows_flat[0] = 1;
+  rows_flat[1] = 2;
+  rows_flat[2] = 1;
+  rows_flat[3] = 2;
+  rows_flat[4] = 3;
+  rows_flat[5] = 4;
+
+  thrust::device_vector<int> output(3, -1);
+  auto row_ids = thrust::make_counting_iterator<long>(0);
+
+  const int *rows_ptr = thrust::raw_pointer_cast(rows_flat.data());
+  const int row_width = 2;
+
+  auto difference_op = [=] __device__(long lhs_row, long rhs_row) {
+    for (int column = 0; column < row_width; ++column)
+    {
+      const int lhs = rows_ptr[lhs_row * row_width + column];
+      const int rhs = rows_ptr[rhs_row * row_width + column];
+      if (lhs != rhs)
+      {
+        return 1;
+      }
+    }
+
+    return 0;
+  };
+
+  RunSubtractLeftCopy(row_ids, output.begin(), difference_op, 3);
+
+  thrust::host_vector<int> expected(3);
+  expected[0] = 0;
+  expected[1] = 0;
+  expected[2] = 1;
+
+  AssertEquals(output.size(), expected.size());
+  for (std::size_t i = 0; i < expected.size(); ++i)
+  {
+    AssertEquals(output[i], expected[i]);
+  }
+}
+
 void TestWriteOnlyOutputIteratorFallback()
 {
   thrust::device_vector<bool> all_differences_correct(1, true);
@@ -152,6 +196,7 @@ int main(int argc, char **argv)
   CubDebugExit(args.DeviceInit());
 
   TestDeviceLambdaWithoutResultType();
+  TestCapturedDeviceLambdaWithoutResultType();
   TestWriteOnlyOutputIteratorFallback();
 
   return 0;
