@@ -641,6 +641,7 @@ struct AgentSpmv
 
         CoordinateT tile_start_coord     = temp_storage.tile_coords[0];
         CoordinateT tile_end_coord       = temp_storage.tile_coords[1];
+        const int tile_num_rows          = tile_end_coord.x - tile_start_coord.x;
 
         // Consume multi-segment tile
         KeyValuePairT tile_carry = ConsumeTile(
@@ -655,6 +656,14 @@ struct AgentSpmv
             if (HAS_ALPHA)
             {
                 tile_carry.value *= spmv_params.alpha;
+            }
+
+            if ((num_merge_tiles == 1) &&
+                (tile_carry.key >= 0) &&
+                (tile_carry.key < tile_num_rows))
+            {
+                spmv_params.d_vector_y[tile_start_coord.x + tile_carry.key] =
+                  tile_carry.value;
             }
 
             tile_carry.key += tile_start_coord.x;
@@ -681,4 +690,3 @@ struct AgentSpmv
 
 
 CUB_NAMESPACE_END
-

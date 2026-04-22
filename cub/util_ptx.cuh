@@ -494,7 +494,8 @@ __device__ __forceinline__ unsigned int LaneMaskLt()
 // MUSA: 使用位运算计算 lane mask (小于等于当前 lane)
 __device__ __forceinline__ unsigned int LaneMaskLe()
 {
-    return (1u << (__get_laneid() % 32 + 1)) - 1;
+    const unsigned int lane = LaneId();
+    return LaneMaskLt() | (1u << lane);
 }
 
 /**
@@ -503,7 +504,7 @@ __device__ __forceinline__ unsigned int LaneMaskLe()
 // MUSA: 使用位运算计算 lane mask (大于当前 lane)
 __device__ __forceinline__ unsigned int LaneMaskGt()
 {
-    return ~((1u << (__get_laneid() % 32 + 1)) - 1);
+    return ~LaneMaskLe();
 }
 
 /**
@@ -512,7 +513,7 @@ __device__ __forceinline__ unsigned int LaneMaskGt()
 // MUSA: 使用位运算计算 lane mask (大于等于当前 lane)
 __device__ __forceinline__ unsigned int LaneMaskGe()
 {
-    return ~((1u << (__get_laneid() % 32)) - 1);
+    return ~LaneMaskLt();
 }
 
 /** @} */       // end group UtilPtx

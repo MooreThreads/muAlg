@@ -175,7 +175,7 @@ struct csr_matrix
         << num_elems << " (" << fill_ratio << ")\n";
   }
 
-  friend class csr_matrix<ValueT, !HostStorage>;
+  friend struct csr_matrix<ValueT, !HostStorage>;
 
 private:
   template <typename VecValueT>

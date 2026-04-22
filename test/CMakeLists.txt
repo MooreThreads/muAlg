@@ -80,12 +80,6 @@ file(GLOB test_srcs
   test_*.cu
 )
 
-# Exclude device_spmv from test build (has no_thrust version but still fails)
-# TODO: Re-enable after investigating the root cause of failures
-# The failures appear to be related to segment_fixup_kernel producing incorrect results
-list(REMOVE_ITEM test_srcs "test_device_spmv.cu")
-list(REMOVE_ITEM test_srcs "test_device_spmv_no_thrust.cu")
-
 # Exclude test_warp_exchange for mp_22 architecture due to compiler backend bug
 # Error: "Cannot select: v6i32,ch = load<(load (s192)..." - non-power-of-2 vector load
 # Note: This only affects mp_22, mp_31 works correctly

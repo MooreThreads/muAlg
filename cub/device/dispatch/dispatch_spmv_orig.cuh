@@ -506,11 +506,22 @@ struct DispatchSpmv
               return musaErrorInvalidValue;
             }
 
-            if (spmv_params.num_rows == 0 || spmv_params.num_cols == 0)
-            { // Empty problem, no-op.
+            if (spmv_params.num_rows == 0 || spmv_params.num_cols == 0 ||
+                spmv_params.num_nonzeros == 0)
+            { // Empty problem or zero-filled matrix: output is all zeros.
                 if (d_temp_storage == NULL)
                 {
                     temp_storage_bytes = 1;
+                }
+                else if (spmv_params.num_rows > 0)
+                {
+                    const size_t num_bytes =
+                      static_cast<size_t>(spmv_params.num_rows) * sizeof(ValueT);
+                    if (CubDebug(error =
+                                   musaMemset(spmv_params.d_vector_y, 0, num_bytes)))
+                    {
+                      break;
+                    }
                 }
 
                 break;
@@ -744,5 +755,3 @@ struct DispatchSpmv
 
 
 CUB_NAMESPACE_END
-
-
