@@ -1,0 +1,13 @@
+default:
+  image: sh-harbor.mthreads.com/public/ubuntu:22.04
+  tags:
+    - k8s007-sh-farm
+ 
+stages:
+  - build
+ 
+Hello_SWCI:
+  stage: build
+  script:
+    - echo "Hello, SWCI!"
+    - sleep 1
