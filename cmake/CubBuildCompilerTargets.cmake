@@ -100,6 +100,14 @@ function(cub_build_compiler_targets)
       "-Wno-sometimes-uninitialized"
       "-Wno-deprecated-declarations"
     )
+    if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang" AND
+        CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL 20)
+      list(APPEND cxx_compile_options
+        "-Wno-deprecated-builtins"
+        "-Wno-deprecated-volatile"
+        "-Wno-deprecated-anon-enum-enum-conversion"
+      )
+    endif()
     message(STATUS "MUSA compiler detected: Suppressing selected warnings")
   endif()
 

@@ -11,8 +11,8 @@ endif()
 set( CMAKE_INSTALL_PREFIX "/usr/local/musa" CACHE PATH
     "Install path prefix, prepended onto install directories" )
 set ( VERSION_STRING "1.17.2" )
-# CXX is only needed for AppendOptionIfAvailable.
-project(CUB VERSION ${VERSION_STRING})
+# CXX is selected after SimpleMUSA configures the mcc compiler.
+project(CUB VERSION ${VERSION_STRING} LANGUAGES NONE)
 # MUSA Configuration
 include(cmake/SimpleMUSA.cmake)
 
@@ -29,7 +29,9 @@ foreach(arch IN LISTS MUSA_ARCH_LIST)
     string(APPEND MUSA_ARCH_FLAGS "--offload-arch=${arch} ")
 endforeach()
 string(STRIP "${MUSA_ARCH_FLAGS}" MUSA_ARCH_FLAGS)
-set(MUSA_MCC_FLAGS ${MUSA_ARCH_FLAGS} -std=c++17)
+set(CUB_MUSA_CPP_STANDARD "17" CACHE STRING "C++ standard used for MUSA builds")
+set_property(CACHE CUB_MUSA_CPP_STANDARD PROPERTY STRINGS 11 14 17 20)
+set(MUSA_MCC_FLAGS ${MUSA_ARCH_FLAGS} -std=c++${CUB_MUSA_CPP_STANDARD})
 
 # Determine CUB_MUSA_ARCH for host code Policy selection
 # When compiling for a single architecture, use that architecture's version number
@@ -88,14 +90,23 @@ if (NOT DEFINED CMAKE_INSTALL_PREFIX)
   set(CMAKE_INSTALL_PREFIX "/usr/local/musa" CACHE PATH "Installation prefix" FORCE)
 endif()
 
-# Require C++17 for std::invoke_result_t support
-set(CMAKE_CXX_STANDARD 17)
+# Require the configured C++ dialect for generated CUB targets.
+set(CMAKE_CXX_STANDARD ${CUB_MUSA_CPP_STANDARD})
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
-# Enable C++17 dialect for MUSA (use std::invoke_result_t instead of std::result_of)
-set(CUB_ENABLE_DIALECT_CPP17 ON CACHE BOOL "Enable C++17 dialect" FORCE)
-set(CUB_ENABLE_DIALECT_CPP14 OFF CACHE BOOL "Disable C++14 dialect" FORCE)
+# Enable a single MUSA dialect by default.
+foreach(dialect IN ITEMS 11 14 17 20)
+  set(enable_dialect OFF)
+  if ("${dialect}" EQUAL "${CUB_MUSA_CPP_STANDARD}")
+    set(enable_dialect ON)
+  endif()
+  set(CUB_ENABLE_DIALECT_CPP${dialect}
+    ${enable_dialect}
+    CACHE BOOL "Enable C++${dialect} dialect"
+    FORCE
+  )
+endforeach()
 
 # Thrust has its own copy of CUB install rules to handle packaging usecases
 # where we want to install CUB headers but aren't actually building anything.
