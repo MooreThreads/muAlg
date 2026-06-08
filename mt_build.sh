@@ -34,6 +34,12 @@ needs_arg() {
 }
 
 run_install() {
+    if [ "$UID" -ne "0" ] && [ -e "${INSTALL_PREFIX}" ] && [ ! -w "${INSTALL_PREFIX}" ]; then
+        sudo rm -vf "${INSTALL_PREFIX}/bin/CUB_version"
+    else
+        rm -vf "${INSTALL_PREFIX}/bin/CUB_version"
+    fi
+
     mkdir -p "${BUILD_DIR}"
     pushd "${BUILD_DIR}" >/dev/null
     cmake \
@@ -52,15 +58,17 @@ run_install() {
 }
 
 run_uninstall() {
-    if [ "$UID" -ne "0" ]; then
+    if [ "$UID" -ne "0" ] && [ -e "${INSTALL_PREFIX}" ] && [ ! -w "${INSTALL_PREFIX}" ]; then
         sudo rm -vrf "${INSTALL_PREFIX}/include/cub"
         sudo rm -vrf "${INSTALL_PREFIX}/lib/cmake/cub"
         sudo rm -vrf "${INSTALL_PREFIX}/lib64/cmake/cub"
+        sudo rm -vf "${INSTALL_PREFIX}/bin/muAlg_version"
         sudo rm -vf "${INSTALL_PREFIX}/bin/CUB_version"
     else
         rm -vrf "${INSTALL_PREFIX}/include/cub"
         rm -vrf "${INSTALL_PREFIX}/lib/cmake/cub"
         rm -vrf "${INSTALL_PREFIX}/lib64/cmake/cub"
+        rm -vf "${INSTALL_PREFIX}/bin/muAlg_version"
         rm -vf "${INSTALL_PREFIX}/bin/CUB_version"
     fi
 }
